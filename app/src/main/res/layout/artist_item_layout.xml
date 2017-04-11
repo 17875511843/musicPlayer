@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackgroundBorderless"
+    tools:targetApi="lollipop">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        tools:targetApi="lollipop">
+
+        <ImageView
+            android:id="@+id/artist_iv_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:padding="10dp" />
+
+        <TextView
+            android:layout_toEndOf="@+id/artist_iv_image"
+            android:id="@+id/artist_tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="3dp"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            android:paddingBottom="5dp"
+            android:paddingTop="10dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+    </RelativeLayout>
+
+</FrameLayout>

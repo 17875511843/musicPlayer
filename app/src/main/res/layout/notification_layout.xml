@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="130dp">
+    <ImageView
+        android:id="@+id/noti_background"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:scaleType="centerCrop"
+        />
+    <ImageButton
+        android:layout_alignParentTop="true"
+        android:id="@+id/noti_album_art"
+        android:scaleType="fitXY"
+        android:clickable="true"
+        android:background="@color/transparent_color"
+        android:layout_width="130dp"
+        android:layout_height="130dp" />
+
+    <RelativeLayout
+        android:paddingBottom="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/noti_album_art"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_toStartOf="@+id/noti_play_pause"
+            android:id="@+id/noti_last"
+            android:layout_marginEnd="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/previous"
+            android:background="@color/transparent_color"/>
+
+        <ImageButton
+            android:layout_toEndOf="@+id/noti_play_pause"
+            android:layout_marginStart="40dp"
+            android:id="@+id/noti_next"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/next"
+            android:scaleType="centerCrop"
+            android:background="#00000000"/>
+
+        <ImageButton
+            android:id="@+id/noti_play_pause"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:scaleType="centerCrop"
+            android:background="@color/transparent_color"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+    <ImageButton
+        android:layout_margin="10dp"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/noti_clear"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/noti_clear"
+        android:background="@color/transparent_color"
+        />
+
+    <RelativeLayout
+        android:layout_marginStart="15dp"
+        android:orientation="vertical"
+        android:layout_toEndOf="@+id/noti_album_art"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/noti_clear">
+        <TextView
+            android:paddingTop="10dp"
+            android:layout_alignParentTop="true"
+            android:id="@+id/noti_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            />
+        <TextView
+            android:paddingTop="10dp"
+            android:layout_below="@+id/noti_title"
+            android:id="@+id/noti_others"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>

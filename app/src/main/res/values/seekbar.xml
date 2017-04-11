@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="seekBar_bg_color">#9c9c9c</color>
+    <color name="seekBar_progress_color">#bdbdbd</color>
+</resources>

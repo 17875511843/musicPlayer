@@ -1,0 +1,52 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorAccent">@color/material_gray</item>
+        <item name="colorPrimaryDark">@color/material_gray_dark</item>
+        <item name="colorPrimary">@color/material_gray</item>
+
+        <item name="android:windowTranslucentNavigation" >false</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="actionModeBackground">@color/material_gray</item>
+        <item name="colorControlActivated">@color/material_gray_dark</item>
+
+        <item name="colorControlNormal">@color/listView_bg_color</item>
+
+
+    </style>
+
+
+    <style name="SleepTimerTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowBackground">@color/transparent_color</item><!-- 背景透明 -->
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowIsFloating">true</item>
+        //dialog会自适应
+    </style>
+
+    <style name="IntroTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorAccent">@color/material_gray</item>
+        <item name="colorPrimaryDark">@color/material_gray_dark</item>
+        <item name="colorPrimary">@color/material_gray</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation" >false</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+    </style>
+
+</resources>

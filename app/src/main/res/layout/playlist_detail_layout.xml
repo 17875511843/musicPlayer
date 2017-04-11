@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/shuffle_playlist"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/material_gray">
+
+        <ImageView
+            android:id="@+id/shuffle_playlist_icon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/shuffle_white"
+            android:clickable="true"/>
+        <TextView
+            android:id="@+id/create_new"
+            android:layout_toEndOf="@+id/shuffle_playlist_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="@string/shuffle_all"
+            android:textColor="@color/listView_bg_color"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            />
+    </RelativeLayout>
+    <com.yydcdut.sdlv.SlideAndDragListView
+        android:id="@+id/playlist_detail_listView"
+        android:layout_below="@id/shuffle_playlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/listView_bg_color">
+    </com.yydcdut.sdlv.SlideAndDragListView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/shuffle_playlist"
+        android:foreground="@drawable/bottom_shadow" />
+</RelativeLayout>

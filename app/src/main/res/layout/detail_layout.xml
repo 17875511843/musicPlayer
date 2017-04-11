@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        tools:targetApi="lollipop">
+
+        <ImageView
+            android:id="@+id/detail_album_art"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:padding="10dp" />
+
+        <RelativeLayout
+            android:layout_toStartOf="@+id/detail_item_menu"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_toEndOf="@+id/detail_album_art">
+
+            <TextView
+                android:id="@+id/detail_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="3dp"
+                android:ellipsize="marquee"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:paddingBottom="5dp"
+                android:paddingTop="10dp"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/detail_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/detail_title"
+                android:layout_marginStart="3dp"
+                android:ellipsize="marquee"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:textColor="@color/black" />
+
+        </RelativeLayout>
+        <ImageView
+            android:id="@+id/detail_item_menu"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="27dp"
+            android:layout_marginBottom="27dp"
+            android:layout_marginEnd="8dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@drawable/list_menu"/>
+    </RelativeLayout>
+</FrameLayout>
