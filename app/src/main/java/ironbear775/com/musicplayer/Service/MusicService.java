@@ -396,7 +396,6 @@ public class MusicService extends Service {
                                         msg.obj = MusicUtils.messageGood;
                                         notification.createNotification(getBaseContext(), id,
                                                 MusicService.musicList, msg);
-                                        Log.d("TAG", "GOOD");
                                     } else {
                                         swatch = palette.getMutedSwatch();
                                         if (swatch != null) {
@@ -406,12 +405,10 @@ public class MusicService extends Service {
                                             msg.obj = MusicUtils.messageGood;
                                             notification.createNotification(getBaseContext(), id,
                                                     MusicService.musicList, msg);
-                                            Log.d("TAG", "GOOD1");
                                         } else {
                                             msg.obj = MusicUtils.messageBad;
                                             notification.createNotification(getBaseContext(), id,
                                                     MusicService.musicList, msg);
-                                            Log.d("TAG", "BAD");
                                         }
                                     }
                                 }
@@ -421,7 +418,6 @@ public class MusicService extends Service {
                         @Override
                         public void onLoadFailed(Exception e, Drawable errorDrawable) {
                             super.onLoadFailed(e, errorDrawable);
-                            Log.d("TAG", "FAILED");
                             msg.obj = MusicUtils.messageNull;
                             notification.createNotification(getBaseContext(), id,
                                     MusicService.musicList, msg);

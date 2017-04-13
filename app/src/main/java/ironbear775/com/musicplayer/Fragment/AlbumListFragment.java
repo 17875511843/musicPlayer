@@ -153,7 +153,7 @@ public class AlbumListFragment extends android.app.Fragment {
                 music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                 music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
 
-                if (music.getDuration() >= 2000) {
+                if (music.getDuration() >= 20000 && !music.getUri().contains(".wmv")) {
                     albumMusicList.add(music);
                 }
             } while (cursor.moveToNext());

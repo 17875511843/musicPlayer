@@ -56,7 +56,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
-        getActivity().registerReceiver(clickableReceiver,filter);
+        getActivity().registerReceiver(clickableReceiver, filter);
 
         musicList.clear();
         readMusic(getActivity());
@@ -65,7 +65,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
 
         initView();
 
-        if (MusicUtils.launchPage==5) {
+        if (MusicUtils.launchPage == 5) {
             if (MusicService.mediaPlayer.isPlaying()) {
                 MusicList.footTitle.setText(MusicService.music.getTitle());
                 MusicList.footArtist.setText(MusicService.music.getArtist());
@@ -114,8 +114,8 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
             public void onItemClick(View view, int position) {
                 if (MusicList.actionMode != null) {
                     //多选状态
-                    if (position!=0){
-                        musicUtils.addOrRemoveItem(position,positionSet,musicAdapter,true);
+                    if (position != 0) {
+                        musicUtils.addOrRemoveItem(position, positionSet, musicAdapter, true);
                     }
                 } else {
                     setClickAction(position);
@@ -124,7 +124,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
 
             @Override
             public void onItemLongClick(View view, int position) {
-                if (position>0) {
+                if (position > 0) {
                     if (MusicList.actionMode == null) {
                         Intent intent = new Intent("ActionModeChanged");
                         getActivity().sendBroadcast(intent);
@@ -150,13 +150,13 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         } else {
             position = position - 1;
 
-            musicUtils.startMusic(position,musicList, progress);
+            musicUtils.startMusic(position, musicList, progress);
 
             MusicList.footTitle.setText(musicList.get(position).getTitle());
             MusicList.footArtist.setText(musicList.get(position).getArtist());
             MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
 
-            musicUtils.getFootAlbumArt(position,musicList);
+            musicUtils.getFootAlbumArt(position, musicList);
 
             pos = position;
         }
@@ -175,7 +175,6 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         if (cursor != null) {
             if (cursor.moveToLast()) {
                 do {
-
                     Music music = new Music();
                     music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
                     music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
@@ -183,13 +182,13 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
 
                     music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                             , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                    music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                     music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
                     music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                    music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                     music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                     music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
 
-                    if (music.getDuration() >= 20000) {
+                    if (music.getDuration() >= 20000 && !music.getUri().contains(".wmv")) {
                         musicList.add(music);
                     }
                 } while (cursor.moveToPrevious());
@@ -201,7 +200,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()){
+            switch (intent.getAction()) {
                 case "SetClickable_True":
                     musicAdapter.setClickable(true);
                     break;
