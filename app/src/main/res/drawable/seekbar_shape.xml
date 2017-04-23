@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/seekbar_background">
-        <color android:color="@color/seekBar_bg_color">
-        </color>
+
+    <item android:id="@android:id/background">
+        <shape>
+            <solid android:color="@color/seekBar_bg_color" />
+        </shape>
     </item>
-    <item android:id="@+id/seekbar_progress">
+    <item android:id="@android:id/secondaryProgress">
         <clip>
-            <color android:color="@color/seekBar_progress_color">
-            </color>
+            <shape>
+                <solid android:color="@color/seekBar_bg_color" />
+            </shape>
+        </clip>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <solid android:color="@color/seekBar_progress_color" />
+            </shape>
         </clip>
     </item>
 </layer-list>

@@ -51,8 +51,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
     @NonNull
     @Override
     public String getSectionName(int position) {
-        if (position >= 1) {
-            return mList.get(position - 1).getTitle().substring(0, 1).toUpperCase(Locale.ENGLISH);
+        if (position >= 0) {
+            return mList.get(position ).getTitle().substring(0, 1).toUpperCase(Locale.ENGLISH);
         }else
             return "#";
     }
@@ -83,10 +83,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
         if (mHeaderView == null) {
             return TYPE_NORMAL;
         }
-        if (position == 0) {
+        /*if (position == 0) {
             //第一个item应该加载Header
             return TYPE_HEADER;
-        }
+        }*/
         return TYPE_NORMAL;
     }
 
@@ -109,11 +109,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
 
     @Override
     public void onBindViewHolder(final MusicViewHolder holder, final int position) {
-        if (position > 0) {
+        if (position >= 0) {
             holder.setData(position);
         }
         if (mOnItemClickListener != null) {
-
 
             final int layoutPosition = holder.getLayoutPosition();
             holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -148,6 +147,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         switch (MusicList.Mod){
                                             case 1:
                                                 listPositionSet = MusicListFragment.positionSet;
+                                                Log.d("dsadas",listPositionSet+"");
                                                 break;
                                             case 5:
                                                 listPositionSet = MusicRecentAddedFragment.positionSet;
@@ -158,10 +158,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         dialog.show();
                                         break;
                                     case R.id.menu_delete:
-                                        Log.d("tag",mList.get(position-1).getUri());
                                         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
                                         alertDialog.setTitle(R.string.delete_alert_title);
-                                        alertDialog.setMessage(mList.get(position-1).getTitle());
+                                        alertDialog.setMessage(mList.get(position).getTitle());
                                         alertDialog.setCancelable(true);
                                         alertDialog.setNegativeButton(R.string.delete_cancel, new DialogInterface.OnClickListener() {
                                             @Override
@@ -172,7 +171,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         alertDialog.setPositiveButton(R.string.delete_confrim, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                String uri = mList.get(position-1).getUri();
+                                                String uri = mList.get(position).getUri();
                                                 mContext.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                                         MediaStore.Audio.Media.DATA + "=?",
                                                         new String[]{uri});
@@ -182,10 +181,10 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                                         Intent intent = new Intent("notifyDataSetChanged");
                                                         switch (MusicList.Mod){
                                                             case 1:
-                                                                MusicListFragment.musicList.remove(position-1);
+                                                                MusicListFragment.musicList.remove(position);
                                                                 break;
                                                             case 5:
-                                                                MusicRecentAddedFragment.musicList.remove(position-1);
+                                                                MusicRecentAddedFragment.musicList.remove(position);
                                                                 break;
                                                         }
                                                         mContext.sendBroadcast(intent);
@@ -203,7 +202,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         alertDialog.show();
                                         break;
                                     case R.id.menu_detail:
-                                        DetailDialog detailDialog = new DetailDialog(mContext,mList,position-1);
+                                        DetailDialog detailDialog = new DetailDialog(mContext,mList,position);
                                         detailDialog.show();
                                         break;
                                 }
@@ -213,17 +212,15 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                         popupMenu.show();
                     }
                 });
-                //这里加载数据的时候要注意，是从position-1开始，因为position==0已经被header占用了
-                holder.tv_title.setText(mList.get(position-1 ).getTitle());
-                holder.tv_others.setText(mList.get(position-1 ).getArtist());
-                String albumArtUri = mList.get(position-1 ).getAlbumArtUri();
+                holder.tv_title.setText(mList.get(position).getTitle());
+                holder.tv_others.setText(mList.get(position).getArtist());
+                String albumArtUri = mList.get(position).getAlbumArtUri();
 
                 Glide.with(mContext)
                         .load(albumArtUri)
                         .placeholder(R.drawable.default_album_art)
                         .into(holder.iv);
             }
-        } else if (getItemViewType(position) == TYPE_HEADER) {
         }
     }
 
@@ -260,6 +257,7 @@ class MusicViewHolder extends RecyclerView.ViewHolder   {
                 break;
             case 5:
                 positionSet = MusicRecentAddedFragment.positionSet;
+                break;
         }
         if (positionSet.contains(position)){
             itemView.setBackgroundResource(R.color.items_selected_bg_color);

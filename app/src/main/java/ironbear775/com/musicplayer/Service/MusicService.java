@@ -17,12 +17,17 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
+import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -97,6 +102,7 @@ public class MusicService extends Service {
                     initMusic(musicPosition, progress);
                     MusicUtils.saveInfoService(getApplicationContext());
                     playOrPause();
+
                 }
                 break;
             case "PreMusic":
@@ -234,6 +240,22 @@ public class MusicService extends Service {
             }
         });
         MusicUtils.saveInfoService(getApplicationContext());
+        if (MusicService.mediaPlayer.isPlaying()) {
+            try {
+                Mp3File file = new Mp3File(MusicService.music.getUri());
+                if (file.hasId3v2Tag()) {
+                    if (file.getId3v2Tag().getLyrics() != null) {
+                        MusicList.lyricButton.setVisibility(View.VISIBLE);
+                    }else {
+                        MusicList.lyricButton.setVisibility(View.GONE);
+                        MusicList.lyricView.setVisibility(View.GONE);
+                    }
+                }
+
+            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void nextMusic() {
@@ -257,11 +279,13 @@ public class MusicService extends Service {
                     musicPosition = 0;
                 } else if (musicPosition == musicList.size() - 1) {
                     musicPosition = 0;
-                } else {
+                } else
                     musicPosition++;
-                }
             } else if (isSingleOrCycle == 2) {
-                musicPosition++;
+                if (musicPosition == musicList.size() - 1) {
+                    musicPosition = 0;
+                } else
+                    musicPosition++;
             }
             initMusic(musicPosition, 0);
             mediaPlayer.start();
@@ -293,6 +317,24 @@ public class MusicService extends Service {
         Intent intent = new Intent("sendPosition");
         intent.putExtra("position", musicPosition);
         sendBroadcast(intent);
+        if (MusicService.mediaPlayer.isPlaying()) {
+            try {
+                Mp3File file = new Mp3File(MusicService.music.getUri());
+                if (file.hasId3v2Tag()) {
+                    if (file.getId3v2Tag().getLyrics() != null) {
+                        MusicList.lyricButton.setVisibility(View.VISIBLE);
+                    }else {
+                        MusicList.lyricButton.setVisibility(View.GONE);
+
+                    }
+                }
+                if (MusicList.lyricView.getVisibility() == View.VISIBLE) {
+                    MusicList.lyricView.setVisibility(View.GONE);
+                }
+            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void preMusic() {
@@ -304,17 +346,18 @@ public class MusicService extends Service {
                 if (i > 1) {
                     i--;
                     musicPosition = last[i];
-                } else {
+                } else
                     musicPosition = last[i];
-                }
             } else if (isSingleOrCycle == 1 || isSingleOrCycle == 3) {
                 if (musicPosition == 0) {
                     musicPosition = musicList.size() - 1;
-                } else {
+                } else
                     musicPosition--;
-                }
             } else if (isSingleOrCycle == 2) {
-                musicPosition++;
+                if (musicPosition == 0) {
+                    musicPosition = musicList.size() - 1;
+                } else
+                    musicPosition--;
             }
             initMusic(musicPosition, 0);
             mediaPlayer.start();
@@ -345,6 +388,24 @@ public class MusicService extends Service {
         Intent intent = new Intent("sendPosition");
         intent.putExtra("position", musicPosition);
         sendBroadcast(intent);
+        if (MusicService.mediaPlayer.isPlaying()) {
+            try {
+                Mp3File file = new Mp3File(MusicService.music.getUri());
+                if (file.hasId3v2Tag()) {
+                    if (file.getId3v2Tag().getLyrics() != null) {
+                        MusicList.lyricButton.setVisibility(View.VISIBLE);
+                    }else {
+                        MusicList.lyricButton.setVisibility(View.GONE);
+
+                    }
+                }
+                if (MusicList.lyricView.getVisibility() == View.VISIBLE) {
+                    MusicList.lyricView.setVisibility(View.GONE);
+                }
+            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private int createRandom() {

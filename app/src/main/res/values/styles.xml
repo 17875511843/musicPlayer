@@ -7,6 +7,7 @@
         <item name="colorPrimaryDark">@color/material_gray_dark</item>
         <item name="colorPrimary">@color/material_gray</item>
 
+        <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowTranslucentNavigation" >false</item>
 
         <item name="windowActionBar">false</item>
@@ -19,9 +20,7 @@
 
         <item name="colorControlNormal">@color/listView_bg_color</item>
 
-
     </style>
-
 
     <style name="SleepTimerTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowFrame">@null</item>

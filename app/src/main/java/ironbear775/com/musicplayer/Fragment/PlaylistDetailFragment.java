@@ -2,31 +2,37 @@ package ironbear775.com.musicplayer.Fragment;
 
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.yydcdut.sdlv.DragListView;
-import com.yydcdut.sdlv.Menu;
-import com.yydcdut.sdlv.MenuItem;
-import com.yydcdut.sdlv.SlideAndDragListView;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 
+import github.nisrulz.recyclerviewhelper.RVHItemTouchHelperCallback;
 import ironbear775.com.musicplayer.Activity.MusicList;
-import ironbear775.com.musicplayer.Adapter.PlaylistDetailAdapter;
+import ironbear775.com.musicplayer.Adapter.PlaylistDetaiNewlAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
@@ -36,20 +42,20 @@ import ironbear775.com.musicplayer.Util.PlaylistDbHelper;
  * Created by ironbear on 2017/2/4.
  */
 
-public class PlaylistDetailFragment extends Fragment implements View.OnClickListener {
+public class PlaylistDetailFragment extends Fragment {
 
-    public static final ArrayList<Music> musicList = new ArrayList<>();
+    public static ArrayList<Music> musicList = new ArrayList<>();
     public static int count = 0;
     public static int pos = 0;
     public static boolean isChange = false;
     public static String name;
-    private SlideAndDragListView<Music> listView;
     private RelativeLayout shuffleLayout;
-    private PlaylistDetailAdapter adapter;
     private PlaylistDbHelper dbHelper;
     private SQLiteDatabase database;
     private boolean isClickable = true;
     private MusicUtils musicUtils;
+    private Toolbar toolbar;
+    private PlaylistDetaiNewlAdapter adapter;
 
     @Nullable
     @Override
@@ -58,107 +64,130 @@ public class PlaylistDetailFragment extends Fragment implements View.OnClickList
         name = getArguments().getString("name");
         musicList.clear();
 
+        findView(view);
+
+        setHasOptionsMenu(true);
+
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+
+        MusicList.toolbar.setVisibility(View.GONE);
+        toolbar.setTitle(getArguments().getString("title"));
+        toolbar.setTitleTextColor(Color.WHITE);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
+        filter.addAction("playlist delete item");
+        filter.addAction("playlist swap item");
+
         getActivity().registerReceiver(clickableReceiver,filter);
 
         readList();
 
         musicUtils = new MusicUtils(getActivity());
 
-        findView(view);
+        shuffleLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(musicList.size() > 0) {
+                    count = 1;
+                    MusicListFragment.count = 0;
+                    AlbumDetailFragment.count = 0;
+                    MusicRecentAddedFragment.count = 0;
+                    ArtistDetailFragment.count = 0;
+                    musicUtils.shufflePlay(musicList);
+                }
+            }
+        });
         return view;
     }
 
     private void findView(View view) {
+        toolbar = (Toolbar) view.findViewById(R.id.playlist_toolbar);
         shuffleLayout = (RelativeLayout) view.findViewById(R.id.shuffle_playlist);
-        listView = (SlideAndDragListView<Music>) view.findViewById(R.id.playlist_detail_listView);
-        adapter = new PlaylistDetailAdapter(getActivity(), R.layout.playlist_detail_item_layout, musicList);
-        final Menu menu = new Menu(false, false, adapter.getItemViewType(0));
-        menu.addItem(new MenuItem.Builder()
-                .setWidth(200)
-                .setBackground(new ColorDrawable(Color.RED))
-                .setText(getResources().getString(R.string.delete))
-                .setDirection(MenuItem.DIRECTION_RIGHT)
+        FastScrollRecyclerView listView = (FastScrollRecyclerView) view.findViewById(R.id.playlist_detail_listView);
+        adapter = new PlaylistDetaiNewlAdapter(getActivity().getApplicationContext(), musicList,name);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        listView.setLayoutManager(layoutManager);
+
+        listView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
+                .color(Color.parseColor("#22616161"))
+                .sizeResId(R.dimen.divider)
+                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
                 .build());
-        listView.setMenu(menu);
         listView.setAdapter(adapter);
-        shuffleLayout.setOnClickListener(this);
-        listView.setOnListItemClickListener(new SlideAndDragListView.OnListItemClickListener() {
+        listView.hasFixedSize();
+
+        adapter.setOnItemClickListener(new PlaylistDetaiNewlAdapter.OnItemClickListener() {
             @Override
-            public void onListItemClick(View v, int position) {
+            public void onItemClick(View view, int position) {
                 setClickAction(position);
             }
         });
-        listView.setOnListItemLongClickListener(new SlideAndDragListView.OnListItemLongClickListener() {
-            @Override
-            public void onListItemLongClick(View view, int position) {
-                listView.setOnDragListener(new DragListView.OnDragListener() {
-                    int oldPosition;
 
-                    @Override
-                    public void onDragViewStart(int position) {
-                        oldPosition = position;
-                    }
-
-                    @Override
-                    public void onDragViewMoving(int position) {
-
-                    }
-
-                    @Override
-                    public void onDragViewDown(int position) {
-                        if (oldPosition != position)
-                            isChange = true;
-                    }
-                }, musicList);
-            }
-        });
+        ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(adapter,true,false,true);
+        ItemTouchHelper helper  = new ItemTouchHelper(callback);
+        helper.attachToRecyclerView(listView);
+    }
 
 
-        listView.setOnMenuItemClickListener(new SlideAndDragListView.OnMenuItemClickListener() {
-            @Override
-            public int onMenuItemClick(View v, final int itemPosition, int buttonPosition, int direction) {
-                switch (direction) {
-                    case MenuItem.DIRECTION_RIGHT:
-                        switch (buttonPosition) {
-                            case 0:
-                                final Music music = musicList.get(itemPosition);
-                                String db = "";
-                                musicList.remove(itemPosition);
-                                adapter.notifyDataSetChanged();
-                                Snackbar.make(getView(), R.string.delete_from_list, Snackbar.LENGTH_SHORT)
-                                        .setDuration(1000)
-                                        .show();
-                                dbHelper = new PlaylistDbHelper(getActivity(), name + ".db", db);
-                                database = dbHelper.getWritableDatabase();
-                                database.delete(name, "title = ?", new String[]{music.getTitle()});
-                                database.close();
-                                dbHelper.close();
-                                return Menu.ITEM_SCROLL_BACK;
-                        }
-                        break;
-                    default:
-                        return Menu.ITEM_NOTHING;
-                }
-                return Menu.ITEM_NOTHING;
-            }
-        });
+    @Override
+    public void onCreateOptionsMenu(android.view.Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.shuffle_playlist:
-                count = 1;
-                MusicListFragment.count = 0;
-                AlbumDetailFragment.count = 0;
-                MusicRecentAddedFragment.count = 0;
-                ArtistDetailFragment.count = 0;
-                musicUtils.shufflePlay(musicList);
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (isChange) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            PlaylistDbHelper dbHelper = new PlaylistDbHelper(getActivity(),
+                                    PlaylistDetailFragment.name + ".db", "");
+                            SQLiteDatabase database = dbHelper.getWritableDatabase();
+                            database.delete(PlaylistDetailFragment.name, null, null);
+                            for (int i = 0; i < PlaylistDetailFragment.musicList.size(); i++) {
+                                ContentValues values = new ContentValues();
+
+                                values.put("title", PlaylistDetailFragment.musicList.get(i).getTitle());
+                                values.put("artist", PlaylistDetailFragment.musicList.get(i).getArtist());
+                                values.put("albumArtUri", PlaylistDetailFragment.musicList.get(i).getAlbumArtUri());
+                                values.put("album", PlaylistDetailFragment.musicList.get(i).getAlbum());
+                                values.put("uri", PlaylistDetailFragment.musicList.get(i).getUri());
+                                database.insert(PlaylistDetailFragment.name, null, values);
+                            }
+                            database.close();
+                            PlaylistDetailFragment.isChange = false;
+                        }
+                    }).start();
+                }
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.hide(this);
+                transaction.setCustomAnimations(
+                        R.animator.fragment_slide_right_enter,
+                        R.animator.fragment_slide_right_exit,
+                        R.animator.fragment_slide_left_enter,
+                        R.animator.fragment_slide_left_exit
+
+                );
+                transaction.show(MusicList.playlistFragment);
+                transaction.commit();
+                getActivity().getWindow().setStatusBarColor(0);
+                MusicList.toolbar.setBackgroundColor(0);
+                MusicList.toolbar.setVisibility(View.VISIBLE);
+                MusicList.toolbar.setTitle(R.string.toolbar_title_playlist);
                 break;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setClickAction(int position) {
@@ -215,6 +244,10 @@ public class PlaylistDetailFragment extends Fragment implements View.OnClickList
                 case "SetClickable_False":
                     isClickable = false;
                     shuffleLayout.setClickable(false);
+                    break;
+                case "playlist swap item":
+                    musicList = intent.getParcelableArrayListExtra("new list");
+                    isChange = true;
                     break;
             }
         }

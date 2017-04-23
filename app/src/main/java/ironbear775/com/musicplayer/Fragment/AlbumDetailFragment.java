@@ -1,20 +1,26 @@
 package ironbear775.com.musicplayer.Fragment;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
@@ -32,17 +38,21 @@ import ironbear775.com.musicplayer.Adapter.AlbumDetailAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.SquareImageView;
 
 /**
  * Created by ironbear on 2017/1/25.
  */
 
 public class AlbumDetailFragment extends Fragment {
+    public static int pos = 0;
     public static int count = 0;
     public static final Set<Integer> positionSet = new HashSet<>();
     public static ArrayList<Music> musicList = new ArrayList<>();
+    private Toolbar toolbar;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
     private RelativeLayout playAll;
-    private ImageView albumArt;
+    private SquareImageView albumArt;
     private AlbumDetailAdapter albumAdapter;
     private MusicUtils musicUtils;
 
@@ -50,11 +60,28 @@ public class AlbumDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.album_detail_layout, container, false);
+
         musicList = getArguments().getParcelableArrayList("musicList");
+        String album = getArguments().getString("album");
+        setHasOptionsMenu(true);
+
+        findView(view);
 
         musicUtils = new MusicUtils(getActivity());
 
-        MusicList.toolbar.setTitle(getArguments().getString("album"));
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        toolbar.setTitle(album);
+
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+        collapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
+        collapsingToolbarLayout.setExpandedTitleColor(Color.WHITE);
+
+        MusicList.toolbar.setVisibility(View.GONE);
+        //MusicList.toolbar.setTitle(getArguments().getString("album"));
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
@@ -62,7 +89,7 @@ public class AlbumDetailFragment extends Fragment {
         filter.addAction("notifyDataSetChanged");
         getActivity().registerReceiver(clickableReceiver, filter);
 
-        findView(view);
+
 
         Glide.with(getActivity())
                 .load(musicList.get(0).getAlbumArtUri())
@@ -76,10 +103,18 @@ public class AlbumDetailFragment extends Fragment {
                                 Palette.Swatch swatch = palette.getVibrantSwatch();
                                 if (swatch != null) {
                                     playAll.setBackgroundColor(swatch.getRgb());
+                                    ColorDrawable colorDrawable = new ColorDrawable(swatch.getRgb());
+                                    collapsingToolbarLayout.setContentScrim(colorDrawable);
+                                    MusicList.toolbar.setBackgroundColor(swatch.getRgb());
+                                    getActivity().getWindow().setStatusBarColor(swatch.getRgb());
                                 } else {
                                     swatch = palette.getMutedSwatch();
                                     if (swatch != null) {
                                         playAll.setBackgroundColor(swatch.getRgb());
+                                        ColorDrawable colorDrawable = new ColorDrawable(swatch.getRgb());
+                                        collapsingToolbarLayout.setContentScrim(colorDrawable);
+                                        MusicList.toolbar.setBackgroundColor(swatch.getRgb());
+                                        getActivity().getWindow().setStatusBarColor(swatch.getRgb());
                                     }
                                 }
                             }
@@ -96,18 +131,51 @@ public class AlbumDetailFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent in = new Intent("notifyDataSetChanged");
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+
+                if (MusicList.actionMode != null) {
+                    MusicList.actionMode = null;
+                    AlbumDetailFragment.positionSet.clear();
+                    getActivity().getWindow().setStatusBarColor(0);
+                    MusicList.toolbar.setBackgroundColor(0);
+                    getActivity().sendBroadcast(in);
+                } else {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    transaction.hide(this);
+                    transaction.setCustomAnimations(
+                            R.animator.fragment_slide_right_enter,
+                            R.animator.fragment_slide_right_exit,
+                            R.animator.fragment_slide_left_enter,
+                            R.animator.fragment_slide_left_exit
+
+                    );
+                    transaction.show(MusicList.albumFragment);
+                    transaction.commit();
+                    getActivity().getWindow().setStatusBarColor(0);
+                    MusicList.toolbar.setBackgroundColor(0);
+                    MusicList.toolbar.setVisibility(View.VISIBLE);
+                    MusicList.toolbar.setTitle(R.string.toolbar_title_album);
+                }
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void findView(View view) {
+        toolbar = (Toolbar) view.findViewById(R.id.album_toolbar);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar);
         playAll = (RelativeLayout) view.findViewById(R.id.album_play_all);
-        albumArt = (ImageView) view.findViewById(R.id.album_detail_art);
+        albumArt = (SquareImageView) view.findViewById(R.id.album_detail_art);
         FastScrollRecyclerView albumListView = (FastScrollRecyclerView) view.findViewById(R.id.album_detail_list);
         albumListView.setHasFixedSize(true);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity()) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         albumListView.setLayoutManager(linearLayoutManager);
 
         albumListView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
@@ -123,7 +191,7 @@ public class AlbumDetailFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 if (MusicList.actionMode != null) {
                     //多选状态
-                    musicUtils.addOrRemoveItem(position,positionSet,albumAdapter,false);
+                    musicUtils.addOrRemoveItem(position,positionSet,albumAdapter);
                 } else {
                     setClickAction(position);
                 }
@@ -168,7 +236,7 @@ public class AlbumDetailFragment extends Fragment {
         MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
 
         musicUtils.getFootAlbumArt(position,musicList);
-
+        pos = position;
     }
 
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {

@@ -52,13 +52,22 @@
             android:src="@drawable/slidedwon" />
 
         <ImageView
+            android:id="@+id/lyric"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/lyric"/>
+        <ImageView
             android:id="@+id/blank"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="10dp"/>
 
         <TextView
             android:id="@+id/title"
@@ -67,6 +76,7 @@
             android:layout_centerInParent="true"
             android:layout_toEndOf="@+id/slideDown"
             android:layout_toStartOf="@+id/blank"
+            android:layout_centerHorizontal="true"
             android:clickable="false"
             android:ellipsize="end"
             android:gravity="center"
@@ -74,7 +84,7 @@
             android:paddingBottom="6dp"
             android:paddingTop="6dp"
             android:textSize="30sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -128,6 +138,8 @@
                 android:textSize="15sp" />
         </RelativeLayout>
 
+
+
         <ironbear775.com.musicplayer.Util.SquareImageView
             android:id="@+id/album_art"
             android:layout_width="match_parent"
@@ -137,6 +149,15 @@
             android:background="#424242"
             android:clickable="false"
             android:scaleType="centerCrop" />
+
+        <ironbear775.com.musicplayer.Util.LyricView
+            android:id="@+id/lyric_view"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:visibility="gone"
+            android:background="#44000000"/>
 
     </RelativeLayout>
 
@@ -215,10 +236,10 @@
         android:id="@+id/music_track"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/left_shadow"
-        android:layout_toStartOf="@+id/right_shadow"
-        android:orientation="horizontal">
+        android:layout_toStartOf="@+id/right_shadow">
 
         <RelativeLayout
             android:id="@+id/current_lo"
@@ -241,16 +262,19 @@
         <SeekBar
             android:id="@+id/music_progress"
             android:layout_width="match_parent"
-            android:layout_height="25dp"
+            android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/current_lo"
             android:layout_toStartOf="@+id/duration_lo"
             android:maxHeight="25dp"
             android:minHeight="25dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
             android:paddingEnd="0dp"
             android:paddingStart="0dp"
             android:progressDrawable="@drawable/seekbar_shape"
-            android:thumb="@drawable/progress"
-            android:thumbOffset="0dp" />
+            android:thumb="@drawable/seekbar_thumb"
+            android:thumbOffset="0dp"
+             />
 
         <RelativeLayout
             android:id="@+id/duration_lo"

@@ -178,10 +178,34 @@
 
 
             <TextView
-                android:id="@+id/download"
+                android:id="@+id/filter"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/lockscreen_album_art"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:gravity="center_vertical"
+                android:text="@string/filter"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/filter_text"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/filter"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:gravity="center_vertical"
+                android:textSize="15sp"
+                android:background="?android:attr/selectableItemBackground"
+                />
+
+            <TextView
+                android:id="@+id/download"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/filter_text"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
                 android:gravity="center_vertical"

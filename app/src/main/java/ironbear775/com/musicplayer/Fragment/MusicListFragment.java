@@ -12,12 +12,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -46,6 +51,8 @@ public class MusicListFragment extends android.app.Fragment {
     private MusicAdapter musicAdapter;
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView musicView;
     private MusicUtils musicUtils;
+    private Toolbar toolbar;
+    private RelativeLayout shuffle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,8 +62,22 @@ public class MusicListFragment extends android.app.Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_layout, container, false);
+        View view = inflater.inflate(R.layout.shuffle_item_layout, container, false);
         findView(view);
+
+        setHasOptionsMenu(true);
+
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+
+        MusicList.toolbar.setVisibility(View.GONE);
+        toolbar.setTitle(R.string.toolbar_title_music_player);
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
@@ -67,14 +88,13 @@ public class MusicListFragment extends android.app.Fragment {
         musicList.clear();
 
         readMusic(getActivity());
-        Log.d("SIZE", musicList.size()+"");
 
         musicUtils = new MusicUtils(getActivity());
 
         initView();
         pos = MusicUtils.pos;
 
-        if (MusicUtils.launchPage==1) {
+        if (MusicUtils.launchPage == 1) {
             if (MusicList.flag == 1 && MusicService.mediaPlayer.isPlaying()) {
                 MusicList.footTitle.setText(MusicService.music.getTitle());
                 MusicList.footArtist.setText(MusicService.music.getArtist());
@@ -114,7 +134,22 @@ public class MusicListFragment extends android.app.Fragment {
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                MusicList.slideDrawer.openDrawer();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
     private void initView() {
+
         musicView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         musicView.setLayoutManager(layoutManager);
@@ -124,9 +159,7 @@ public class MusicListFragment extends android.app.Fragment {
                 .sizeResId(R.dimen.divider)
                 .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
                 .build());
-        View headerView = LayoutInflater.from(getActivity()).inflate(R.layout.shuffle, musicView, false);
         musicAdapter = new MusicAdapter(getActivity(), musicList);
-        musicAdapter.setHeaderView(headerView);
         musicView.setAdapter(musicAdapter);
 
         musicAdapter.setOnItemClickListener(new MusicAdapter.OnItemClickListener() {
@@ -134,9 +167,7 @@ public class MusicListFragment extends android.app.Fragment {
             public void onItemClick(View view, int position) {
                 if (MusicList.actionMode != null) {
                     //多选状态
-                    if (position!=0){
-                        musicUtils.addOrRemoveItem(position,positionSet,musicAdapter,true);
-                    }
+                    musicUtils.addOrRemoveItem(position, positionSet, musicAdapter);
                 } else {
                     setClickAction(position);
                 }
@@ -144,15 +175,19 @@ public class MusicListFragment extends android.app.Fragment {
 
             @Override
             public void onItemLongClick(View view, int position) {
-                if (position > 0) {
-                    if (MusicList.actionMode == null) {
-                        Intent intent = new Intent("ActionModeChanged");
-                        getActivity().sendBroadcast(intent);
-                    }
+                if (MusicList.actionMode == null) {
+                    Intent intent = new Intent("ActionModeChanged");
+                    getActivity().sendBroadcast(intent);
                 }
             }
         });
 
+        shuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                musicUtils.shufflePlay(musicList);
+            }
+        });
     }
 
     private void setClickAction(int position) {
@@ -165,24 +200,20 @@ public class MusicListFragment extends android.app.Fragment {
         ArtistDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
 
-        if (position == 0) {
-            musicUtils.shufflePlay(musicList);
-        } else {
-            position = position - 1;
+        musicUtils.startMusic(position, musicList, progress);
 
-            musicUtils.startMusic(position,musicList, progress);
+        MusicList.footTitle.setText(musicList.get(position).getTitle());
+        MusicList.footArtist.setText(musicList.get(position).getArtist());
+        MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
 
-            MusicList.footTitle.setText(musicList.get(position).getTitle());
-            MusicList.footArtist.setText(musicList.get(position).getArtist());
-            MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
+        musicUtils.getFootAlbumArt(position, musicList);
 
-            musicUtils.getFootAlbumArt(position,musicList);
-
-            pos = position;
-        }
+        pos = position;
     }
 
     private void findView(View view) {
+        shuffle = (RelativeLayout) view.findViewById(R.id.shuffle);
+        toolbar = (Toolbar) view.findViewById(R.id.music_toolbar);
         musicView = (FastScrollRecyclerView) view.findViewById(R.id.music_list);
     }
 
@@ -195,23 +226,26 @@ public class MusicListFragment extends android.app.Fragment {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    Music music = new Music();
+                    if (cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC) == 17) {
+                        Music music = new Music();
 
-                    music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                    music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-                    music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 
-                    music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                            , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                    music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                    music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                    music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                    music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                    music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
 
-                    if (music.getDuration() >= 20000 && !music.getUri().contains(".wmv")) {
-                        musicList.add(music);
+                        if (!music.getUri().contains(".wmv")) {
+                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                                musicList.add(music);
+                        }
                     }
                 } while (cursor.moveToNext());
                 cursor.close();

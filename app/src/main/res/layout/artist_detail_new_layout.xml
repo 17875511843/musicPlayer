@@ -9,19 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginEnd="64dp"
-            app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ironbear775.com.musicplayer.Util.SquareImageView
-
-                android:id="@+id/album_detail_art"
+                android:id="@+id/artist_detail_iv"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:fitsSystemWindows="true"
@@ -31,7 +29,7 @@
                 app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
                 />
             <android.support.v7.widget.Toolbar
-                android:id="@+id/album_toolbar"
+                android:id="@+id/artist_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin">
@@ -39,14 +37,15 @@
             </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.CollapsingToolbarLayout>
+
         <RelativeLayout
-            android:id="@+id/album_play_all"
+            android:id="@+id/artist_play_all"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?android:attr/selectableItemBackground">
 
             <ImageView
-                android:id="@+id/album_cycle"
+                android:id="@+id/artist_cycle"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_centerVertical="true"
@@ -64,7 +63,7 @@
                 android:layout_marginBottom="10dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="10dp"
-                android:layout_toEndOf="@+id/album_cycle"
+                android:layout_toEndOf="@+id/artist_cycle"
                 android:gravity="center_vertical"
                 android:text="@string/play_all"
                 android:textColor="@color/listView_bg_color"
@@ -74,10 +73,9 @@
     </android.support.design.widget.AppBarLayout>
 
     <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-        android:id="@+id/album_detail_list"
+        android:id="@+id/artist_detail_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/listView_bg_color"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
 </android.support.design.widget.CoordinatorLayout>

@@ -27,7 +27,7 @@
         android:layout_below="@+id/dialog"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?android:attr/selectableItemBackgroundBorderless">
+        android:background="?android:attr/selectableItemBackground">
         <ImageView
             android:id="@+id/dialog_create_cancel"
             android:layout_alignParentStart="true"

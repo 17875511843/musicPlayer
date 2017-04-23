@@ -2,22 +2,29 @@ package ironbear775.com.musicplayer.Fragment;
 
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.amulyakhare.textdrawable.TextDrawable;
@@ -25,6 +32,7 @@ import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.io.File;
@@ -37,6 +45,7 @@ import ironbear775.com.musicplayer.Adapter.AlbumDetailAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.SquareImageView;
 
 /**
  * Created by ironbear on 2017/1/26.
@@ -47,23 +56,43 @@ public class ArtistDetailFragment extends Fragment {
     public static int count = 0;
     public static final Set<Integer> positionSet = new HashSet<>();
     public static int pos = 0;
+    private Toolbar toolbar;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
     private AlbumDetailAdapter songAdapter;
-    private ImageView artistImage;
+    private SquareImageView artistImage;
     private RelativeLayout playAll;
     private MusicUtils musicUtils;
     private File appDir;
+    private String artist;
+    private TextDrawable drawable;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.artist_detail_layout, container, false);
+        View view = inflater.inflate(R.layout.artist_detail_new_layout, container, false);
 
         musicList = getArguments().getParcelableArrayList("musicList");
-        String artist = getArguments().getString("artist");
+        artist = getArguments().getString("artist");
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
         String folder = "MusicPlayer";
         appDir = new File(path, folder);
 
-        MusicList.toolbar.setTitle(artist);
+        setHasOptionsMenu(true);
+        findView(view);
+
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        toolbar.setTitle(artist);
+
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+        collapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
+        collapsingToolbarLayout.setExpandedTitleColor(Color.WHITE);
+
+        MusicList.toolbar.setVisibility(View.GONE);
+        // MusicList.toolbar.setTitle(artist);
 
         musicUtils = new MusicUtils(getActivity());
 
@@ -73,20 +102,19 @@ public class ArtistDetailFragment extends Fragment {
         filter.addAction("notifyDataSetChanged");
         getActivity().registerReceiver(clickableReceiver, filter);
 
-        findView(view);
         ColorGenerator generator = ColorGenerator.MATERIAL;
         int color = generator.getRandomColor();
 
         String newKeyWord;
         if (artist != null && artist.contains("/")) {
             newKeyWord = artist.replace("/", "_");
-        }else {
+        } else {
             newKeyWord = artist;
         }
 
         final File file = new File(appDir, newKeyWord);
 
-        TextDrawable drawable = TextDrawable.builder()
+        drawable = TextDrawable.builder()
                 .beginConfig()
                 .fontSize(120)
                 .endConfig()
@@ -106,10 +134,16 @@ public class ArtistDetailFragment extends Fragment {
                                     Palette.Swatch swatch = palette.getVibrantSwatch();
                                     if (swatch != null) {
                                         playAll.setBackgroundColor(swatch.getRgb());
+                                        ColorDrawable colorDrawable = new ColorDrawable(swatch.getRgb());
+                                        collapsingToolbarLayout.setContentScrim(colorDrawable);
+                                        getActivity().getWindow().setStatusBarColor(swatch.getRgb());
                                     } else {
                                         swatch = palette.getMutedSwatch();
                                         if (swatch != null) {
                                             playAll.setBackgroundColor(swatch.getRgb());
+                                            ColorDrawable colorDrawable = new ColorDrawable(swatch.getRgb());
+                                            collapsingToolbarLayout.setContentScrim(colorDrawable);
+                                            getActivity().getWindow().setStatusBarColor(swatch.getRgb());
                                         }
                                     }
                                 }
@@ -124,23 +158,72 @@ public class ArtistDetailFragment extends Fragment {
                     .placeholder(drawable)
                     .into(artistImage);
         } else {
-            artistImage.setImageDrawable(drawable);
+            Glide.with(this)
+                    .load(musicList.get(0).getAlbumArtUri())
+                    .asBitmap()
+                    .fitCenter()
+                    .placeholder(drawable)
+                    .into(artistImage);
         }
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_artist, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent in = new Intent("notifyDataSetChanged");
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+
+                if (MusicList.actionMode != null) {
+                    MusicList.actionMode = null;
+                    ArtistDetailFragment.positionSet.clear();
+                    getActivity().getWindow().setStatusBarColor(0);
+                    MusicList.toolbar.setBackgroundColor(0);
+                    getActivity().sendBroadcast(in);
+                } else {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    transaction.hide(this);
+                    transaction.setCustomAnimations(
+                            R.animator.fragment_slide_right_enter,
+                            R.animator.fragment_slide_right_exit,
+                            R.animator.fragment_slide_left_enter,
+                            R.animator.fragment_slide_left_exit
+
+                    );
+                    transaction.show(MusicList.artistFragment);
+                    transaction.commit();
+
+                    getActivity().getWindow().setStatusBarColor(0);
+                    MusicList.toolbar.setBackgroundColor(0);
+                    MusicList.toolbar.setVisibility(View.VISIBLE);
+                    MusicList.toolbar.setTitle(R.string.toolbar_title_artist);
+                }
+                break;
+            case R.id.re_download_artist:
+                MusicUtils.updateArtist(artistImage, getActivity().getApplicationContext(), artist, drawable, getActivity());
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void findView(View view) {
+        toolbar = (Toolbar) view.findViewById(R.id.artist_toolbar);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar);
         playAll = (RelativeLayout) view.findViewById(R.id.artist_play_all);
-        artistImage = (ImageView) view.findViewById(R.id.artist_detail_iv);
-        RecyclerView songListView = (RecyclerView) view.findViewById(R.id.artist_detail_list);
+        artistImage = (SquareImageView) view.findViewById(R.id.artist_detail_iv);
+        FastScrollRecyclerView songListView = (FastScrollRecyclerView) view.findViewById(R.id.artist_detail_list);
         songListView.setHasFixedSize(true);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity()) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
+        artistImage.setTag(R.id.artist_url, artist);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 
         songListView.setLayoutManager(linearLayoutManager);
         songListView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
@@ -156,7 +239,7 @@ public class ArtistDetailFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 if (MusicList.actionMode != null) {
                     //多选状态
-                    musicUtils.addOrRemoveItem(position,positionSet,songAdapter,false);
+                    musicUtils.addOrRemoveItem(position, positionSet, songAdapter);
                 } else {
                     setClickAction(position);
                 }
@@ -192,11 +275,11 @@ public class ArtistDetailFragment extends Fragment {
         AlbumDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
         count = 1;
-        musicUtils.startMusic(position,musicList,0);
+        musicUtils.startMusic(position, musicList, 0);
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());
         MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-        musicUtils.getFootAlbumArt(position,musicList);
+        musicUtils.getFootAlbumArt(position, musicList);
 
         pos = position;
     }

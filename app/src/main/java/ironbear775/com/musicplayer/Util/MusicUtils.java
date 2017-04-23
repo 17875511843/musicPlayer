@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
-import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ImageView;
@@ -53,7 +52,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class MusicUtils {
 
-    private static Activity activity;
+    private Activity activity;
     private static String apiKey = "0c26dc3c5612fd63122ccf5bf11f78f9";
     private static String path = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
 
@@ -67,16 +66,18 @@ public class MusicUtils {
     private static Request.Builder requestBuilder;
     public static boolean enableDownload = true;
     public static boolean enableDefaultCover = false;
-    public static boolean enableColorNotification = false;
+    public static boolean enableColorNotification = true;
     public static boolean enableLockscreenNotification = true;
+    public static int filterNum = 0; // 0,1,2,3,4,5,6 0,15s,20s,30s,40s,50s,60s
     public static int launchPage = 1;//1,2,3,4,5 music,artist,album,playlist,recent
     public static int pos = 1;
     public static String messageGood = "good";
     public static String messageBad = "error";
     public static String messageNull = "null";
+    public static int[] time = {0,15000,20000,30000,40000,50000,60000};
 
-    public MusicUtils(Activity activity) {
-        MusicUtils.activity = activity;
+    public MusicUtils(Activity newActivity) {
+        activity = newActivity;
         client = new OkHttpClient();
         requestBuilder = null;
     }
@@ -145,17 +146,11 @@ public class MusicUtils {
     }
 
     public void addOrRemoveItem(int position, Set<Integer> positionSet,
-                                RecyclerView.Adapter adapter, boolean haveHeader) {
+                                RecyclerView.Adapter adapter) {
         if (positionSet.contains(position)) {
             positionSet.remove(position);
         } else {
-            if (haveHeader) {
-                if (position != 0) {
-                    positionSet.add(position);
-                }
-            } else {
-                positionSet.add(position);
-            }
+            positionSet.add(position);
         }
         if (positionSet.size() == 0) {
             MusicList.actionMode.finish();
@@ -164,9 +159,10 @@ public class MusicUtils {
             String locale = Locale.getDefault().toString();
             if (locale.equals("zh_CN")) {
                 MusicList.actionMode.setTitle(activity.getResources().getString(R.string.selected) +
-                        positionSet.size());
+                        " "+ positionSet.size());
             } else {
-                MusicList.actionMode.setTitle(positionSet.size() + activity.getResources().getString(R.string.selected));
+                MusicList.actionMode.setTitle(positionSet.size() +
+                        " "+ activity.getResources().getString(R.string.selected));
             }
             //更新列表界面，否则无法显示已选的item
             adapter.notifyItemChanged(position);
@@ -194,14 +190,6 @@ public class MusicUtils {
 
         editor.apply();
         editor.commit();
-    }
-
-    public static Palette.Swatch checkMutedSwatch(Palette p) {
-        Palette.Swatch vibrant = p.getVibrantSwatch();
-        if (vibrant != null) {
-            return vibrant;
-        }
-        return null;
     }
 
     public static void artistImage(ImageView imageView, final Context context,
@@ -331,6 +319,26 @@ public class MusicUtils {
         }
     }
 
+    public static void updateArtist(ImageView imageView, final Context context,
+                              final String keyWord, final Drawable placeHolder,
+                              final Activity uiactivity){
+        appDir = new File(localPath, folder);
+
+        String newKeyWord;
+        if (keyWord.contains("/")) {
+            newKeyWord = keyWord.replace("/", "_");
+        } else {
+            newKeyWord = keyWord;
+        }
+
+        final File file = new File(appDir, newKeyWord);
+
+        if (file.exists()) {
+            file.delete();
+        }
+        artistImage(imageView,context,keyWord,placeHolder,uiactivity);
+    }
+
     public static void closeDownloadArtistImage() {
         client.dispatcher().cancelAll();
     }
@@ -382,12 +390,11 @@ public class MusicUtils {
     public static boolean haveWIFI(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
-
-        return activeNetInfo != null;
+        return activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
     public static boolean isImageGood(File file) {
-        BitmapFactory.Options options = null;
+        BitmapFactory.Options options;
         options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 

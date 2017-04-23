@@ -52,35 +52,49 @@ public class OpenSource extends Dialog {
                 + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/mikepenz/MaterialDrawer#license");
         openSource.add(3,item3);
 
-        OpenSourceItem item5 =new OpenSourceItem();
-        item5.setName("TextDrawable");
-        item5.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/amulyakhare/TextDrawable"
+        OpenSourceItem item4 =new OpenSourceItem();
+        item4.setName("TextDrawable");
+        item4.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/amulyakhare/TextDrawable"
                 + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/amulyakhare/TextDrawable/blob/master/LICENSE");
-        openSource.add(4,item5);
+        openSource.add(4,item4);
+
+        OpenSourceItem item5 =new OpenSourceItem();
+        item5.setName("RecyclerViewHelper");
+        item5.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/nisrulz/recyclerviewhelper"
+                + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/nisrulz/recyclerviewhelper/blob/develop/LICENSE.txt");
+        openSource.add(5,item5);
 
         OpenSourceItem item6 =new OpenSourceItem();
         item6.setName("RecyclerView-FlexibleDivider");
         item6.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/yqritc/RecyclerView-FlexibleDivider"
                 + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/yqritc/RecyclerView-FlexibleDivider/blob/master/LICENSE");
-        openSource.add(5,item6);
+        openSource.add(6,item6);
 
         OpenSourceItem item7 =new OpenSourceItem();
         item7.setName("SlideAndDragListView");
         item7.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/yydcdut/SlideAndDragListView"
                 + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/yydcdut/SlideAndDragListView/blob/master/LICENSE");
-        openSource.add(6,item7);
+        openSource.add(7,item7);
 
         OpenSourceItem item8 =new OpenSourceItem();
         item8.setName("AppIntro");
         item8.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/apl-devs/AppIntro"
                 + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/apl-devs/AppIntro/blob/master/LICENSE");
-        openSource.add(7,item8);
+        openSource.add(8,item8);
 
         OpenSourceItem item9 =new OpenSourceItem();
         item9.setName("OkHttp");
         item9.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/square/okhttp"
                 + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/square/okhttp/blob/master/LICENSE.txt");
-        openSource.add(8,item9);
+        openSource.add(9,item9);
+
+        OpenSourceItem item10 =new OpenSourceItem();
+        item10.setName("Mp3Agic");
+        item10.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/mpatric/mp3agic"
+                + "\n" + getContext().getResources().getString(R.string.license) + "https://github.com/mpatric/mp3agic/blob/master/mit-license.txt");
+        openSource.add(10,item10);
+
+
 
         ListView listView = (ListView) findViewById(R.id.open_source_iv);
 

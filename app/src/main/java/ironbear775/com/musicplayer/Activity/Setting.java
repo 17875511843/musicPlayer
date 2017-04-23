@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -28,15 +29,19 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  * Created by ironbear on 2017/3/28.
  */
 
-public class Setting extends BaseActivity implements Switch.OnCheckedChangeListener,View.OnClickListener{
+public class Setting extends BaseActivity implements Switch.OnCheckedChangeListener, View.OnClickListener {
     private Toolbar toolbar;
-
     private RadioGroup group;
+    private String[] time;
+    private TextView filter;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting_layout);
+
+        time = new String[]{"0s","15s", "20s", "30s", "40s", "50s", "60s"};
 
         findViews();
 
@@ -54,7 +59,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                switch (checkedId){
+                switch (checkedId) {
                     case R.id.page_music:
                         MusicUtils.launchPage = 1;
                         break;
@@ -80,7 +85,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home){
+        if (item.getItemId() == android.R.id.home) {
             finish();
         }
         return super.onOptionsItemSelected(item);
@@ -88,6 +93,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
     private void findViews() {
 
+        filter = (TextView) findViewById(R.id.filter_text);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         Switch defaultAlbumArt = (Switch) findViewById(R.id.use_default_cover);
         Switch colorNotification = (Switch) findViewById(R.id.color_notification);
@@ -104,8 +110,32 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
         TextView about = (TextView) findViewById(R.id.about);
 
+        filter.setTextColor(Color.BLACK);
+        switch (MusicUtils.filterNum) {
+            case 0:
+                filter.setText(getResources().getString(R.string.ignore) + " 0 " + getResources().getString(R.string.second));
+                break;
+            case 1:
+                filter.setText(getResources().getString(R.string.ignore) + " 15 " + getResources().getString(R.string.second));
+                break;
+            case 2:
+                filter.setText(getResources().getString(R.string.ignore) + " 20 " + getResources().getString(R.string.second));
+                break;
+            case 3:
+                filter.setText(getResources().getString(R.string.ignore) + " 30 " + getResources().getString(R.string.second));
+                break;
+            case 4:
+                filter.setText(getResources().getString(R.string.ignore) + " 40 " + getResources().getString(R.string.second));
+                break;
+            case 5:
+                filter.setText(getResources().getString(R.string.ignore) + " 50 " + getResources().getString(R.string.second));
+                break;
+            case 6:
+                filter.setText(getResources().getString(R.string.ignore) + " 60 " + getResources().getString(R.string.second));
+                break;
+        }
 
-        switch (MusicUtils.launchPage){
+        switch (MusicUtils.launchPage) {
             case 1:
                 musicButton.setChecked(true);
                 break;
@@ -133,7 +163,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         colorNotification.setOnCheckedChangeListener(this);
         lockscreenNotification.setOnCheckedChangeListener(this);
         downloadCover.setOnCheckedChangeListener(this);
-
+        filter.setOnClickListener(this);
         about.setOnClickListener(this);
     }
 
@@ -141,7 +171,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-        switch (buttonView.getId()){
+        switch (buttonView.getId()) {
             case R.id.use_default_cover:
                 MusicUtils.enableDefaultCover = isChecked;
                 editor.putBoolean("enableDefaultCover", MusicUtils.enableDefaultCover);
@@ -189,9 +219,57 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.about){
-            Intent intent = new Intent(this,About.class);
+        if (v.getId() == R.id.about) {
+            Intent intent = new Intent(this, About.class);
             startActivity(intent);
+        }
+        if (v.getId() == R.id.filter_text) {
+            AlertDialog.Builder filterDialog = new AlertDialog.Builder(this);
+            filterDialog.setTitle("Ignore");
+
+            filterDialog.setSingleChoiceItems(time, MusicUtils.filterNum, null);
+            filterDialog.setNegativeButton(R.string.delete_cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+            filterDialog.setPositiveButton(R.string.delete_confrim, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    MusicUtils.filterNum = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+
+                    SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                    editor.putInt("filterNum", MusicUtils.filterNum);
+                    editor.apply();
+                    switch (MusicUtils.filterNum) {
+                        case 0:
+                            filter.setText(getResources().getString(R.string.ignore) + " 0 " + getResources().getString(R.string.second));
+                            break;
+                        case 1:
+                            filter.setText(getResources().getString(R.string.ignore) + " 15 " + getResources().getString(R.string.second));
+                            break;
+                        case 2:
+                            filter.setText(getResources().getString(R.string.ignore) + " 20 " + getResources().getString(R.string.second));
+                            break;
+                        case 3:
+                            filter.setText(getResources().getString(R.string.ignore) + " 30 " + getResources().getString(R.string.second));
+                            break;
+                        case 4:
+                            filter.setText(getResources().getString(R.string.ignore) + " 40 " + getResources().getString(R.string.second));
+                            break;
+                        case 5:
+                            filter.setText(getResources().getString(R.string.ignore) + " 50 " + getResources().getString(R.string.second));
+                            break;
+                        case 6:
+                            filter.setText(getResources().getString(R.string.ignore) + " 60 " + getResources().getString(R.string.second));
+                            break;
+                    }
+                }
+            });
+
+            filterDialog.show();
+
         }
     }
 }

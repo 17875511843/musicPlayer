@@ -15,7 +15,7 @@
             android:id="@+id/detail_album_art"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:padding="10dp" />
+            android:padding="15dp" />
 
         <RelativeLayout
             android:layout_toStartOf="@+id/detail_item_menu"

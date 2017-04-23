@@ -117,7 +117,7 @@ public class ArtistListFragment extends Fragment {
                 public void onItemClick(View view, int position) {
                     if (MusicList.actionMode != null) {
                         //多选状态
-                        musicUtils.addOrRemoveItem(position, positionSet, artistAdapter, false);
+                        musicUtils.addOrRemoveItem(position, positionSet, artistAdapter);
                     } else {
                         setClickAction(position);
                     }
@@ -148,23 +148,25 @@ public class ArtistListFragment extends Fragment {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
+                    if (cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC) == 17) {
+                        Music music = new Music();
 
-                    Music music = new Music();
+                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 
-                    music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                    music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-                    music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                    music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                            , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                    music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                    music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                    music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                    music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                    music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-
-                    if (music.getDuration() >= 20000 && !music.getUri().contains(".wmv")) {
-                        songMusicList.add(music);
+                        if (!music.getUri().contains(".wmv")) {
+                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                                songMusicList.add(music);
+                        }
                     }
                 } while (cursor.moveToNext());
             }
@@ -250,7 +252,8 @@ public class ArtistListFragment extends Fragment {
                             musicAlbum.setUri(music.getUri());
                             musicAlbum.setAlbum(music.getAlbum());
                             musicAlbum.setArtist(music.getArtist());
-                            artistlist.add(musicAlbum);
+                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                                artistlist.add(musicAlbum);
                         }
                         music.setID(music1.getID());
                         music.setSize(music1.getSize());

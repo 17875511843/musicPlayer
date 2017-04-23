@@ -149,6 +149,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                     FragmentTransaction transaction = fragmentManager.beginTransaction();
                     Bundle bundle = new Bundle();
                     bundle.putString("name", table.toString());
+                    bundle.putString("title",name);
 
                     if (MusicList.playlistFragment != null) {
                         transaction.hide(MusicList.playlistFragment);

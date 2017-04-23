@@ -18,7 +18,7 @@ import ironbear775.com.musicplayer.R;
  * Created by ironbear on 2017/3/31.
  */
 
-public class OpenSourceAdapter extends ArrayAdapter {
+public class OpenSourceAdapter extends ArrayAdapter<OpenSourceItem> {
     private int resourceId;
 
     public OpenSourceAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<OpenSourceItem> objects) {
@@ -26,11 +26,10 @@ public class OpenSourceAdapter extends ArrayAdapter {
         resourceId = resource;
     }
 
-
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        OpenSourceItem item = (OpenSourceItem) getItem(position);
+        OpenSourceItem item = getItem(position);
 
         View view;
 
@@ -46,8 +45,10 @@ public class OpenSourceAdapter extends ArrayAdapter {
             view = convertView;
             viewHolder = (ViewHolder) view.getTag();
         }
-        viewHolder.name.setText(item.getName());
-        viewHolder.detail.setText(item.getDetail());
+        if (item != null) {
+            viewHolder.name.setText(item.getName());
+            viewHolder.detail.setText(item.getDetail());
+        }
         return view;
     }
 

@@ -67,4 +67,10 @@
     <string name="project_code">Project Code: </string>
     <string name="license">License: </string>
     <string name="download_text"><font size="15">Download artist cover</font>\nWifi only</string>
+    <string name="bitrate">Bitrate</string>
+    <string name="sampling_rate">Sampling rate</string>
+    <string name="update_artist">Update artist image</string>
+    <string name="filter">Filter</string>
+    <string name="ignore">Ignore than </string>
+    <string name="ignore_short_tracks">Ignore short tracks</string>
 </resources>

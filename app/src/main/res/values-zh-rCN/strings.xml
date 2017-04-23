@@ -67,4 +67,10 @@
     <string name="project_code">项目地址: </string>
     <string name="license">开源许可: </string>
     <string name="download_text"><font size="15">下载艺术家封面</font>\n仅通过无线下载</string>
+    <string name="bitrate">比特率</string>
+    <string name="sampling_rate">采样率</string>
+    <string name="update_artist">更新封面</string>
+    <string name="filter">过滤器</string>
+    <string name="ignore">过滤小于 </string>
+    <string name="ignore_short_tracks">过滤…</string>
 </resources>
