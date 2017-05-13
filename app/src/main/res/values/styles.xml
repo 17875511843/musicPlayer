@@ -22,6 +22,25 @@
 
     </style>
 
+    <style name="tagTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorAccent">@color/material_gray</item>
+        <item name="colorPrimaryDark">@color/material_gray_dark</item>
+        <item name="colorPrimary">@color/material_gray</item>
+
+
+
+
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="actionModeBackground">@color/material_gray</item>
+        <item name="colorControlActivated">@color/material_gray_dark</item>
+
+        <item name="colorControlNormal">@color/listView_bg_color</item>
+
+    </style>
+
+
     <style name="SleepTimerTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -48,4 +67,26 @@
 
     </style>
 
+    <style name="SearchEditText" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/material_gray_dark</item>
+        <item name="colorControlActivated">@color/material_gray_dark</item>
+    </style>
+
+
+    <style name="FilePickerTheme" parent="NNF_BaseTheme">
+        <item name="colorPrimary">@color/material_gray</item>
+        <item name="colorPrimaryDark">@color/material_gray_dark</item>
+        <item name="colorAccent">@color/material_gray</item>
+
+        <item name="nnf_list_item_divider">?android:attr/listDivider</item>
+        <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>
+
+
+    </style>
+
+    <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorPrimary">@color/material_gray</item>
+        <item name="colorPrimaryDark">@color/material_gray_dark</item>
+        <item name="colorAccent">@color/material_gray</item>
+    </style>
 </resources>

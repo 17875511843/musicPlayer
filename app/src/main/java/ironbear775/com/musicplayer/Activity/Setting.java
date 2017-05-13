@@ -99,6 +99,8 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         Switch colorNotification = (Switch) findViewById(R.id.color_notification);
         Switch lockscreenNotification = (Switch) findViewById(R.id.lockscreen_album_art);
         Switch downloadCover = (Switch) findViewById(R.id.download_cover);
+        Switch keepScreenOn = (Switch) findViewById(R.id.keep_screen_on);
+        Switch loadWebLyric = (Switch) findViewById(R.id.load_web_lyric);
 
         group = (RadioGroup) findViewById(R.id.page_group);
 
@@ -158,11 +160,16 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         colorNotification.setChecked(MusicUtils.enableColorNotification);
         lockscreenNotification.setChecked(MusicUtils.enableLockscreenNotification);
         downloadCover.setChecked(MusicUtils.enableDownload);
+        keepScreenOn.setChecked(MusicUtils.keepScreenOn);
+        loadWebLyric.setChecked(MusicUtils.loadWebLyric);
 
         defaultAlbumArt.setOnCheckedChangeListener(this);
         colorNotification.setOnCheckedChangeListener(this);
         lockscreenNotification.setOnCheckedChangeListener(this);
         downloadCover.setOnCheckedChangeListener(this);
+        keepScreenOn.setOnCheckedChangeListener(this);
+        loadWebLyric.setOnCheckedChangeListener(this);
+
         filter.setOnClickListener(this);
         about.setOnClickListener(this);
     }
@@ -211,6 +218,16 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 }
                 editor.putBoolean("enableDownload", MusicUtils.enableDownload);
 
+                editor.apply();
+                break;
+            case R.id.keep_screen_on:
+                MusicUtils.keepScreenOn = isChecked;
+                editor.putBoolean("keepScreenOn", MusicUtils.keepScreenOn);
+                editor.apply();
+                break;
+            case R.id.load_web_lyric:
+                MusicUtils.loadWebLyric = isChecked;
+                editor.putBoolean("loadWebLyric", MusicUtils.loadWebLyric);
                 editor.apply();
                 break;
         }

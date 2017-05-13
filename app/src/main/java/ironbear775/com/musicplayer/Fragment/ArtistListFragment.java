@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -83,7 +84,7 @@ public class ArtistListFragment extends Fragment {
                         .load(MusicService.music.getAlbumArtUri())
                         .asBitmap()
                         .centerCrop()
-                        .placeholder(R.drawable.default_album_art)
+                        .placeholder(R.drawable.default_album_art_land)
                         .into(MusicList.accountHeader.getHeaderBackgroundView());
             } else {
                 MusicListFragment.readMusic(getActivity());
@@ -135,7 +136,6 @@ public class ArtistListFragment extends Fragment {
     }
 
     private void setClickAction(int position) {
-
         count = 1;
         AlbumListFragment.count = 1;
         String artistTag = artistlist.get(position).getArtist();
@@ -145,32 +145,60 @@ public class ArtistListFragment extends Fragment {
                 null, MediaStore.Audio.Media.ARTIST + "=?",
                 new String[]{artistTag},
                 MediaStore.Audio.Media.TITLE);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    if (cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC) == 17) {
-                        Music music = new Music();
+        if (Build.MANUFACTURER.equals("Meizu")){
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    do {
+                            Music music = new Music();
 
-                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
+                            music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                            music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 
-                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                                    , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                            music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                            music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                            music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                            music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                        if (!music.getUri().contains(".wmv")) {
-                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                songMusicList.add(music);
-                        }
-                    }
-                } while (cursor.moveToNext());
+                            if (!music.getUri().contains(".wmv")) {
+                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                                    songMusicList.add(music);
+                            }
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
             }
-            cursor.close();
+        }else {
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        if (cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC) == 17) {
+                            Music music = new Music();
+
+                            music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                            music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
+
+                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                                    , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                            music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                            music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                            music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                            music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+
+                            if (!music.getUri().contains(".wmv")) {
+                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                                    songMusicList.add(music);
+                            }
+                        }
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+            }
         }
 
         FragmentManager fragmentManager = getFragmentManager();

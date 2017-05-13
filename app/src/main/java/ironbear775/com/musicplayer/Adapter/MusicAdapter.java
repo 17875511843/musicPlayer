@@ -3,6 +3,7 @@ package ironbear775.com.musicplayer.Adapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -27,6 +28,8 @@ import java.util.Locale;
 import java.util.Set;
 
 import ironbear775.com.musicplayer.Activity.MusicList;
+import ironbear775.com.musicplayer.Activity.SearchActivity;
+import ironbear775.com.musicplayer.Activity.TagEditActivty;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.MusicListFragment;
 import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
@@ -187,6 +190,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                                                 MusicRecentAddedFragment.musicList.remove(position);
                                                                 break;
                                                         }
+                                                        if (SearchActivity.musicList!=null && SearchActivity.musicList.size()>0){
+                                                            SearchActivity.musicList.remove(position);
+                                                        }
                                                         mContext.sendBroadcast(intent);
                                                         Snackbar.make(MusicList.PlayOrPause, R.string.success, Snackbar.LENGTH_SHORT)
                                                                 .setDuration(1000)
@@ -205,6 +211,11 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         DetailDialog detailDialog = new DetailDialog(mContext,mList,position);
                                         detailDialog.show();
                                         break;
+                                    case R.id.tag_edit:
+                                        Intent intent = new Intent(mContext, TagEditActivty.class);
+                                        intent.putExtra("music", (Parcelable) mList.get(position));
+                                        mContext.startActivity(intent);
+                                        break;
                                 }
                                 return false;
                             }
@@ -213,7 +224,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                     }
                 });
                 holder.tv_title.setText(mList.get(position).getTitle());
-                holder.tv_others.setText(mList.get(position).getArtist());
+                holder.tv_others.setText(mList.get(position).getArtist()+"-"+mList.get(position).getAlbum());
                 String albumArtUri = mList.get(position).getAlbumArtUri();
 
                 Glide.with(mContext)

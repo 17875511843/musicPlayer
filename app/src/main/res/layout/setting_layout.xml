@@ -55,12 +55,30 @@
                 android:textSize="15sp"
                 android:background="?android:attr/selectableItemBackground"
                 />
+            <ImageView
+                android:id="@+id/line"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/use_default_cover"
+                android:background="#22616161" />
+            <Switch
+                android:id="@+id/keep_screen_on"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/line"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:gravity="center_vertical"
+                android:text="@string/keep_screen_on"
+                android:textSize="15sp"
+                android:background="?android:attr/selectableItemBackground"
+                />
 
             <TextView
                 android:id="@+id/launch_page"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@+id/use_default_cover"
+                android:layout_below="@+id/keep_screen_on"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
                 android:gravity="center_vertical"
@@ -225,11 +243,30 @@
                 android:background="?android:attr/selectableItemBackground"
                 />
 
+            <ImageView
+                android:id="@+id/line2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/download_cover"
+                android:background="#22616161" />
+
+            <Switch
+                android:id="@+id/load_web_lyric"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/line2"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:gravity="center_vertical"
+                android:text="@string/load_web_lyric"
+                android:background="?android:attr/selectableItemBackground"
+                />
+
             <TextView
                 android:id="@+id/other"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@+id/download_cover"
+                android:layout_below="@+id/load_web_lyric"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
                 android:gravity="center_vertical"

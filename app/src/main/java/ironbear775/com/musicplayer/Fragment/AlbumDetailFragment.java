@@ -213,7 +213,7 @@ public class AlbumDetailFragment extends Fragment {
                 MusicRecentAddedFragment.count = 0;
                 ArtistDetailFragment.count = 0;
                 count = 1;
-
+                musicUtils = new MusicUtils(v.getContext());
                 musicUtils.playAll(musicList);
 
             }
@@ -229,6 +229,7 @@ public class AlbumDetailFragment extends Fragment {
         count = 1;
         int progress = 0;
 
+        musicUtils = new MusicUtils(getActivity());
         musicUtils.startMusic(position,musicList, progress);
 
         MusicList.footTitle.setText(musicList.get(position).getTitle());

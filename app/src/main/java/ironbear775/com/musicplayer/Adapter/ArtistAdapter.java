@@ -37,7 +37,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
     private boolean isClickable = true;
     private final int[] mColor;
     private Context mContext;
-    private File appDir;
+    private File dir;
 
     @NonNull
     @Override
@@ -67,8 +67,9 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
         this.mInflater = LayoutInflater.from(context);
 
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-        String folder = "MusicPlayer";
-        appDir = new File(path, folder);
+        String newFolder = "MusicPlayer/artist";
+        dir = new File(path,newFolder);
+
         ColorGenerator generator = ColorGenerator.MATERIAL;
         mColor = new int[mList.size()];
         for (int i = 0; i < mColor.length; i++) {
@@ -116,32 +117,31 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
         }else {
             newKeyWord = mList.get(position).getArtist();
         }
-        final File file = new File(appDir,newKeyWord);
+
+        File file1 = new File(dir,newKeyWord);
 
         if (MusicUtils.enableDownload) {
-            if (file.exists() && MusicUtils.isImageGood(file)) {
+            if (file1.exists() && MusicUtils.isImageGood(file1)){
                 Glide.with(mContext)
-                        .load(file)
+                        .load(file1)
                         .asBitmap()
                         .placeholder(drawable)
                         .into(holder.iv);
-            } else {
+            }else {
                 holder.iv.setImageDrawable(drawable);
                 if (MusicUtils.haveWIFI(mContext)) {
                     MusicUtils.artistImage(holder.iv, mContext, mList.get(position).getArtist(),
                             drawable, (Activity) mContext);
-
                 }
             }
         }else {
-            if (file.exists() && MusicUtils.isImageGood(file)) {
+            if (file1.exists() && MusicUtils.isImageGood(file1)){
                 Glide.with(mContext)
-                        .load(file)
+                        .load(file1)
                         .asBitmap()
-                        .centerCrop()
                         .placeholder(drawable)
                         .into(holder.iv);
-            } else {
+            }else {
                 holder.iv.setImageDrawable(drawable);
             }
         }

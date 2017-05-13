@@ -74,7 +74,7 @@ public class ArtistDetailFragment extends Fragment {
         musicList = getArguments().getParcelableArrayList("musicList");
         artist = getArguments().getString("artist");
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-        String folder = "MusicPlayer";
+        String folder = "MusicPlayer/artist";
         appDir = new File(path, folder);
 
         setHasOptionsMenu(true);
@@ -261,7 +261,7 @@ public class ArtistDetailFragment extends Fragment {
                 MusicRecentAddedFragment.count = 0;
                 AlbumDetailFragment.count = 0;
                 count = 1;
-
+                musicUtils = new MusicUtils(v.getContext());
                 musicUtils.playAll(musicList);
                 pos = 0;
             }
@@ -275,6 +275,7 @@ public class ArtistDetailFragment extends Fragment {
         AlbumDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
         count = 1;
+        musicUtils = new MusicUtils(getActivity());
         musicUtils.startMusic(position, musicList, 0);
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());

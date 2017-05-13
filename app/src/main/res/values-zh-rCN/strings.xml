@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">音乐播放器</string>
+    <string name="app_name">MusicPlayer</string>
     <string name="play_all">全部播放</string>
     <string name="permission_request">权限申请</string>
     <string name="permission_request_detail">为了获取您设备上的音乐，您需要授予权限</string>
@@ -53,7 +53,7 @@
     <string name="launch">启动</string>
     <string name="start_page">开始页</string>
     <string name="notification">通知</string>
-    <string name="color_notification"><font size="15">变色通知栏</font>\n实验性</string>
+    <string name="color_notification">变色通知栏</string>
     <string name="lock_screen_notification">显示锁屏通知</string>
     <string name="other">其他</string>
     <string name="about">关于</string>
@@ -73,4 +73,18 @@
     <string name="filter">过滤器</string>
     <string name="ignore">过滤小于 </string>
     <string name="ignore_short_tracks">过滤…</string>
+    <string name="no_lyric">未找到在线歌词</string>
+    <string name="searching_lyric">搜索中</string>
+    <string name="keep_screen_on">保持屏幕常亮</string>
+    <string name="lyric">歌词</string>
+    <string name="load_web_lyric"><font size="15">自动加载在线歌词</font>\n仅当未检测到内嵌歌词时</string>
+    <string name="search_input_hint">搜索歌曲,专辑，艺术家</string>
+    <string name="search_none">没有找到结果</string>
+    <string name="tag_editor">标签编辑器</string>
+    <string name="song_title">标题</string>
+    <string name="genre">音轨</string>
+    <string name="year">年份</string>
+    <string name="not_lyric_file">该文件不是歌词文件</string>
+
+
 </resources>

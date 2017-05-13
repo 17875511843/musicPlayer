@@ -53,7 +53,7 @@
     <string name="launch">Launch</string>
     <string name="start_page">Start Page</string>
     <string name="notification">Notification</string>
-    <string name="color_notification"><font size="15">Color Notification</font>\nExperiment</string>
+    <string name="color_notification">Color Notification</string>
     <string name="lock_screen_notification">Show Notification On Lockscreen</string>
     <string name="other">Other</string>
     <string name="about">About</string>
@@ -73,4 +73,16 @@
     <string name="filter">Filter</string>
     <string name="ignore">Ignore than </string>
     <string name="ignore_short_tracks">Ignore short tracks</string>
+    <string name="no_lyric">No lyric found on web</string>
+    <string name="searching_lyric">Searching</string>
+    <string name="keep_screen_on">Keep screen on</string>
+    <string name="lyric">Lyric</string>
+    <string name="load_web_lyric"><font size="15">Auto load web lyric</font>\nwhen embedded not found</string>\
+    <string name="search_input_hint">search song,album,artist</string>
+    <string name="search_none">no match result</string>
+    <string name="tag_editor">Tag editor</string>
+    <string name="song_title">Title</string>
+    <string name="genre">Track</string>
+    <string name="year">Year</string>
+    <string name="not_lyric_file">This file is not a lyric file</string>
 </resources>

@@ -90,7 +90,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                         .load(MusicService.music.getAlbumArtUri())
                         .asBitmap()
                         .centerCrop()
-                        .placeholder(R.drawable.default_album_art)
+                        .placeholder(R.drawable.default_album_art_land)
                         .into(MusicList.accountHeader.getHeaderBackgroundView());
             } else {
                 MusicListFragment.readMusic(getActivity());

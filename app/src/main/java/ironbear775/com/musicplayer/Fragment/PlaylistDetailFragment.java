@@ -198,7 +198,9 @@ public class PlaylistDetailFragment extends Fragment {
             AlbumDetailFragment.count = 0;
             ArtistDetailFragment.count = 0;
             count = 1;
-
+            if (isChange){
+                adapter.notifyDataSetChanged();
+            }
             musicUtils.startMusic(position,musicList, progress);
 
             MusicList.footTitle.setText(musicList.get(position).getTitle());
@@ -212,6 +214,7 @@ public class PlaylistDetailFragment extends Fragment {
     }
 
     private void readList() {
+
         Cursor cursor;
         String db = "";
         dbHelper = new PlaylistDbHelper(getActivity(), name + ".db", db);

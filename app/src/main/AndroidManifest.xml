@@ -1,11 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 
     package="ironbear775.com.musicplayer">
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,12 +20,15 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <service android:name=".Service.SleepService"/>
+        <service android:name=".Service.SleepService" />
 
         <activity
             android:name=".Activity.MusicList"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
+
+        </activity>
+        <activity android:name=".Activity.SearchActivity">
 
         </activity>
         <activity
@@ -32,11 +37,13 @@
             android:theme="@style/SleepTimerTheme">
 
         </activity>
-        <activity android:name=".Activity.Setting"
+        <activity
+            android:name=".Activity.Setting"
             android:launchMode="singleTask">
 
         </activity>
-        <activity android:name=".Activity.About"
+        <activity
+            android:name=".Activity.About"
             android:launchMode="singleTask">
 
         </activity>
@@ -46,7 +53,9 @@
                 <action android:name="sendPosition" />
             </intent-filter>
         </receiver>
-        <activity android:name=".Activity.MyIntroActivity"
+
+        <activity
+            android:name=".Activity.MyIntroActivity"
             android:theme="@style/IntroTheme">
 
         </activity>
@@ -57,6 +66,61 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".Activity.TagEditActivty"></activity>
+
+        <activity android:name=".Activity.OpenActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/SleepTimerTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="file" android:pathPattern=".*mp3" android:mimeType="audio/mpeg" />
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name=".Service.MediaButtonReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/nnf_provider_paths" />
+        </provider>
+        <activity
+            android:name="com.nononsenseapps.filepicker.FilePickerActivity"
+            android:label="@string/app_name"
+            android:theme="@style/FilePickerTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!--<receiver android:name=".WidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/app_widget_info"/>
+        </receiver>
+        <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+            android:minWidth="250dp"
+            android:minHeight="180dp"
+            android:previewImage="@drawable/default_album_art"
+            android:initialLayout="@layout/widget_layout"
+            android:resizeMode="horizontal|vertical"
+            android:widgetCategory="home_screen|keyguard">
+        </appwidget-provider>-->
     </application>
 
 </manifest>

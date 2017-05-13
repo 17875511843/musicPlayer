@@ -3,6 +3,7 @@ package ironbear775.com.musicplayer.Service;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -76,31 +77,36 @@ public class MusicService extends Service {
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
 
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         intentFilter.addAction(AudioManager.ACTION_HEADSET_PLUG);
+        intentFilter.addAction("NEXT");
+        intentFilter.addAction("PlAYORPAUSE");
+        intentFilter.addAction("PREVIOUS");
+        intentFilter.addAction("STOP");
         registerReceiver(receiver, intentFilter);
 
         musicService = this;
 
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        ComponentName audiobutton = new ComponentName(getPackageName(), MediaButtonReceiver.class.getName());
+
+        audioManager.registerMediaButtonEventReceiver(audiobutton);
         int result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
         notification = new Notification(this);
         switch (intent.getAction()) {
             case "musiclist":
                 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    //Bundle bundle = intent.getBundleExtra("value");
                     musicList = intent.getParcelableArrayListExtra("musicList");
-                    //bundle.getParcelableArrayList("musicList");
                     musicPosition = intent.getIntExtra("musicPosition", 0);
-                    //bundle.getInt("musicPosition");
                     int progress = intent.getIntExtra("musicProgress", 0);
-                    //bundle.getInt("musicProgress");
                     last = new int[musicList.size()];
                     i = 0;
                     initMusic(musicPosition, progress);
-                    MusicUtils.saveInfoService(getApplicationContext());
+                    //MusicUtils.saveInfoService(getApplicationContext());
                     playOrPause();
 
                 }
@@ -109,11 +115,35 @@ public class MusicService extends Service {
                 preMusic();
                 break;
             case "isPause":
+
                 playOrPause();
-                notification.setNotificationPlayOrPause(getBaseContext(), R.drawable.footplay);
+
                 break;
             case "isPlaying":
+                /*if (MusicService.mediaPlayer == null) {
+                    Intent serviceIntent = new Intent(this, MusicService.class);
+                    serviceIntent.setAction("musiclist");
+                    SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+                    ArrayList<Music> arrayList = new ArrayList<>();
+                    String json = sharedPreferences.getString("json", null);
+                    if (json != null)
+                    {
+                        Gson gson = new Gson();
+                        Type type = new TypeToken<ArrayList<Music>>(){}.getType();
+
+                        arrayList = gson.fromJson(json, type);
+
+                    }
+
+                    serviceIntent.putParcelableArrayListExtra("musicList", arrayList);
+                    serviceIntent.putExtra("musicPosition", sharedPreferences.getInt("position", 0));
+                    serviceIntent.putExtra("musicProgress", 0);
+                    startService(serviceIntent);
+                    MusicList.flag = 1;
+
+                }*/
                 playOrPause();
+
                 break;
             case "NextMusic":
                 Glide.with(getBaseContext())
@@ -121,6 +151,7 @@ public class MusicService extends Service {
                         .thumbnail(0.5f)
                         .into(MusicList.footAlbumArt);
                 nextMusic();
+
                 break;
             case "ClearMusic":
                 MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
@@ -159,7 +190,7 @@ public class MusicService extends Service {
                     if (!mediaPlayer.isPlaying() && haveFocus) {
                         haveFocus = false;
                         mediaPlayer.start();
-                        notification.setNotificationPlayOrPause(getBaseContext(), R.drawable.footpause);
+                        createNewNotification(R.drawable.footpause);
                         MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
                     }
                     break;
@@ -237,23 +268,32 @@ public class MusicService extends Service {
                     nextMusic();
                     createNewNotification(R.drawable.footpause);
                 }
+
+                MusicList.lyricView.onDrag(0);
             }
         });
+        Intent intent1 = new Intent("update");
+        sendBroadcast(intent1);
         MusicUtils.saveInfoService(getApplicationContext());
         if (MusicService.mediaPlayer.isPlaying()) {
-            try {
-                Mp3File file = new Mp3File(MusicService.music.getUri());
-                if (file.hasId3v2Tag()) {
-                    if (file.getId3v2Tag().getLyrics() != null) {
-                        MusicList.lyricButton.setVisibility(View.VISIBLE);
-                    }else {
-                        MusicList.lyricButton.setVisibility(View.GONE);
-                        MusicList.lyricView.setVisibility(View.GONE);
+            if (!MusicUtils.loadWebLyric) {
+                try {
+                    Mp3File file = new Mp3File(MusicService.music.getUri());
+                    if (file.hasId3v2Tag()) {
+                        if (file.getId3v2Tag().getLyrics() != null) {
+                            MusicList.lyricButton.setVisibility(View.VISIBLE);
+                        } else {
+                            MusicList.lyricButton.setVisibility(View.GONE);
+                            MusicList.lyricView.setVisibility(View.GONE);
+                            MusicList.blurBG.setVisibility(View.GONE);
+                        }
                     }
-                }
 
-            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
-                e.printStackTrace();
+                } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                MusicList.lyricButton.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -293,10 +333,11 @@ public class MusicService extends Service {
             MusicList.footArtist.setText(musicList.get(musicPosition).getArtist());
             MusicList.footTitle.setText(musicList.get(musicPosition).getTitle());
 
+
             Glide.with(this)
                     .load(music.getAlbumArtUri())
                     .centerCrop()
-                    .placeholder(R.drawable.default_album_art)
+                    .placeholder(R.drawable.default_album_art_land)
                     .into(MusicList.accountHeader.getHeaderBackgroundView());
             Glide.with(this)
                     .load(music.getAlbumArtUri())
@@ -317,24 +358,27 @@ public class MusicService extends Service {
         Intent intent = new Intent("sendPosition");
         intent.putExtra("position", musicPosition);
         sendBroadcast(intent);
-        if (MusicService.mediaPlayer.isPlaying()) {
+
+        Intent intent1 = new Intent("update");
+        sendBroadcast(intent1);
+        if (!MusicUtils.loadWebLyric) {
             try {
                 Mp3File file = new Mp3File(MusicService.music.getUri());
                 if (file.hasId3v2Tag()) {
                     if (file.getId3v2Tag().getLyrics() != null) {
                         MusicList.lyricButton.setVisibility(View.VISIBLE);
-                    }else {
+                    } else {
                         MusicList.lyricButton.setVisibility(View.GONE);
-
                     }
                 }
-                if (MusicList.lyricView.getVisibility() == View.VISIBLE) {
-                    MusicList.lyricView.setVisibility(View.GONE);
-                }
+
             } catch (IOException | UnsupportedTagException | InvalidDataException e) {
                 e.printStackTrace();
             }
         }
+
+        MusicList.lyricView.setVisibility(View.GONE);
+        MusicList.blurBG.setVisibility(View.GONE);
     }
 
     public void preMusic() {
@@ -368,7 +412,7 @@ public class MusicService extends Service {
             Glide.with(this)
                     .load(music.getAlbumArtUri())
                     .centerCrop()
-                    .placeholder(R.drawable.default_album_art)
+                    .placeholder(R.drawable.default_album_art_land)
                     .into(MusicList.accountHeader.getHeaderBackgroundView());
             Glide.with(this)
                     .load(music.getAlbumArtUri())
@@ -379,6 +423,7 @@ public class MusicService extends Service {
             MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
             Intent intent = new Intent("Music play to the end");
             sendBroadcast(intent);
+
             createNewNotification(R.drawable.footpause);
             MusicUtils.saveInfoService(getApplicationContext());
         } catch (Exception e) {
@@ -388,24 +433,26 @@ public class MusicService extends Service {
         Intent intent = new Intent("sendPosition");
         intent.putExtra("position", musicPosition);
         sendBroadcast(intent);
-        if (MusicService.mediaPlayer.isPlaying()) {
+
+        Intent intent1 = new Intent("update");
+        sendBroadcast(intent1);
+        if (!MusicUtils.loadWebLyric) {
             try {
                 Mp3File file = new Mp3File(MusicService.music.getUri());
                 if (file.hasId3v2Tag()) {
                     if (file.getId3v2Tag().getLyrics() != null) {
                         MusicList.lyricButton.setVisibility(View.VISIBLE);
-                    }else {
+                    } else {
                         MusicList.lyricButton.setVisibility(View.GONE);
-
                     }
                 }
-                if (MusicList.lyricView.getVisibility() == View.VISIBLE) {
-                    MusicList.lyricView.setVisibility(View.GONE);
-                }
+
             } catch (IOException | UnsupportedTagException | InvalidDataException e) {
                 e.printStackTrace();
             }
         }
+        MusicList.lyricView.setVisibility(View.GONE);
+        MusicList.blurBG.setVisibility(View.GONE);
     }
 
     private int createRandom() {
@@ -455,6 +502,7 @@ public class MusicService extends Service {
                                         msg.arg1 = swatch.getTitleTextColor();
                                         msg.arg2 = swatch.getBodyTextColor();
                                         msg.obj = MusicUtils.messageGood;
+
                                         notification.createNotification(getBaseContext(), id,
                                                 MusicService.musicList, msg);
                                     } else {
@@ -464,6 +512,7 @@ public class MusicService extends Service {
                                             msg.arg1 = swatch.getTitleTextColor();
                                             msg.arg2 = swatch.getBodyTextColor();
                                             msg.obj = MusicUtils.messageGood;
+
                                             notification.createNotification(getBaseContext(), id,
                                                     MusicService.musicList, msg);
                                         } else {
@@ -508,6 +557,18 @@ public class MusicService extends Service {
                     if (intent.hasExtra("state")) {
                         isPlug = intent.getIntExtra("state", 0) != 0;
                     }
+                    break;
+                case "STOP":
+                    mediaPlayer.stop();
+                    break;
+                case "PlAYORPAUSE":
+                    playOrPause();
+                    break;
+                case "PREVIOUS":
+                    preMusic();
+                    break;
+                case "NEXT":
+                    nextMusic();
                     break;
             }
         }

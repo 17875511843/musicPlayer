@@ -3,6 +3,7 @@ package ironbear775.com.musicplayer.Adapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -28,6 +29,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import ironbear775.com.musicplayer.Activity.MusicList;
+import ironbear775.com.musicplayer.Activity.TagEditActivty;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
 import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
@@ -202,6 +204,11 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHold
                             case R.id.menu_detail:
                                 DetailDialog detailDialog = new DetailDialog(mContext, mList, position);
                                 detailDialog.show();
+                                break;
+                            case R.id.tag_edit:
+                                Intent intent = new Intent(mContext, TagEditActivty.class);
+                                intent.putExtra("music", (Parcelable) mList.get(position));
+                                mContext.startActivity(intent);
                                 break;
                         }
                         return false;

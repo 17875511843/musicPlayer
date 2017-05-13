@@ -14,9 +14,11 @@
             android:id="@+id/iv_image"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:scaleType="centerCrop"
             />
 
         <RelativeLayout
+            android:paddingTop="3dp"
             android:layout_toStartOf="@+id/item_menu"
             android:layout_toEndOf="@+id/iv_image"
             android:orientation="vertical"
@@ -33,18 +35,18 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="@color/black"
-                android:textStyle="bold"/>
+                android:textColor="@color/black"/>
             <TextView
                 android:layout_below="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:id="@+id/tv_others"
                 android:layout_marginStart="3dp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="@color/black"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:textSize="13sp"
+                android:textColor="@color/material_gray_dark"/>
         </RelativeLayout>
         <ImageView
             android:id="@+id/item_menu"

@@ -44,7 +44,7 @@ public class PlaylistDetaiNewlAdapter extends RecyclerView.Adapter<PlaylistViewH
     @NonNull
     @Override
     public String getSectionName(int position) {
-        return mList.get(position).getArtist().substring(0, 1).toUpperCase(Locale.ENGLISH);
+        return mList.get(position).getTitle().substring(0, 1).toUpperCase(Locale.ENGLISH);
     }
 
     @Override
