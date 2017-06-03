@@ -13,6 +13,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -37,4 +38,6 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(MainActivity.this,MusicList.class);
         startActivity(intent);
     }
+
+
 }

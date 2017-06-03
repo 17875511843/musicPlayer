@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,7 +24,6 @@ import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -104,11 +102,6 @@ public class ArtistListFragment extends Fragment {
                 getActivity(), LinearLayout.VERTICAL, false);
         artistView.setLayoutManager(layoutManager);
 
-        artistView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
-                .color(Color.parseColor("#22616161"))
-                .sizeResId(R.dimen.divider)
-                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
-                .build());
         artistAdapter = new ArtistAdapter(getActivity(), artistlist);
         artistView.setAdapter(artistAdapter);
 

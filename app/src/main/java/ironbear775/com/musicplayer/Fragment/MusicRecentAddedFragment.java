@@ -28,7 +28,6 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -123,12 +122,6 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         musicView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         musicView.setLayoutManager(layoutManager);
-
-        musicView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
-                .color(Color.parseColor("#22616161"))
-                .sizeResId(R.dimen.divider)
-                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
-                .build());
 
         musicAdapter = new MusicAdapter(getActivity(), musicList);
         musicView.setAdapter(musicAdapter);

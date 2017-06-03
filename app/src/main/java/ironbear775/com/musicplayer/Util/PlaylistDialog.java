@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -83,6 +82,10 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+
+                        PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
+                                table.toString() + ".db", name);
+                        SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                         for (int pos : playlistPositionSet) {
                             ContentValues values = new ContentValues();
                             String title = musicList.get(pos).getTitle();
@@ -95,21 +98,20 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                             values.put("albumArtUri", albumArtUri);
                             values.put("album", album);
                             values.put("uri", uri);
-                            PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
-                                    table.toString() + ".db", name);
-                            SQLiteDatabase database1 = dbHelper.getWritableDatabase();
 
                             Cursor cur = database1.query(table.toString(), null, null, null, null, null, null);
-                            if (cur.moveToFirst()) {
-                                do {
-                                    String uri1 = cur.getString(cur.getColumnIndex("uri"));
-                                    if (uri.equals(uri1)) {
-                                        flag = 1;
-                                        break;
-                                    }
-                                } while (cur.moveToNext());
+
+                            if (cur!=null) {
+                                if (cur.moveToFirst()) {
+                                    do {
+                                        if (uri.equals(cur.getString(cur.getColumnIndex("uri")))) {
+                                            flag = 1;
+                                            break;
+                                        }
+                                    } while (cur.moveToNext());
+                                }
+                                cur.close();
                             }
-                            cur.close();
                             if (flag == 0) {
                                 database1.insert(table.toString(), null, values);
                                 values.clear();
@@ -124,9 +126,12 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                 }).start();
             } else if (MusicList.isAlbum) {
                 new Thread(() -> {
+
+                    PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
+                            table.toString() + ".db", name);
+                    SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                     for (int pos : playlistPositionSet) {
                         String albumTag = musicList.get(pos).getAlbum();
-                        Log.d("Tag", albumTag);
                         ArrayList<Music> albumMusicList = new ArrayList<>();
                         Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                 null, MediaStore.Audio.Media.ALBUM + "=?", new String[]{albumTag}, MediaStore.Audio.Media.TITLE);
@@ -170,9 +175,6 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                             values.put("albumArtUri", albumArtUri);
                             values.put("album", album);
                             values.put("uri", uri);
-                            PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
-                                    table.toString() + ".db", name);
-                            SQLiteDatabase database1 = dbHelper.getWritableDatabase();
 
                             Cursor cur = database1.query(table.toString(), null, null, null, null, null, null);
                             if (cur.moveToFirst()) {
@@ -199,6 +201,10 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                     addHandler.sendMessage(message);
                 }).start();
             } else if (MusicList.isArtist) {
+
+                PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
+                        table.toString() + ".db", name);
+                SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -248,9 +254,6 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                                 values.put("albumArtUri", albumArtUri);
                                 values.put("album", album);
                                 values.put("uri", uri);
-                                PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
-                                        table.toString() + ".db", name);
-                                SQLiteDatabase database1 = dbHelper.getWritableDatabase();
 
                                 Cursor cur = database1.query(table.toString(), null, null, null, null, null, null);
                                 if (cur.moveToFirst()) {

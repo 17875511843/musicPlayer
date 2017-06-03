@@ -143,6 +143,14 @@
                     android:gravity="start|center_vertical"
                     android:text="@string/toolbar_title_recent_added" />
 
+                <android.support.v7.widget.AppCompatRadioButton
+                    android:id="@+id/page_folder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/material_gray_dark"
+                    android:gravity="start|center_vertical"
+                    android:text="@string/toolbar_title_folder" />
+
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -286,6 +294,37 @@
                 android:textSize="15sp"
                 android:background="?android:attr/selectableItemBackground"
                 />
+
+            <RelativeLayout
+                android:id="@+id/layout_cache"
+                android:layout_width="match_parent"
+                android:layout_below="@+id/about"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/cache"
+                    android:layout_width="wrap_content"
+                    android:layout_height="?attr/actionBarSize"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/cache"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    />
+                <TextView
+                    android:layout_alignParentEnd="true"
+                    android:id="@+id/clear_cache"
+                    android:layout_width="wrap_content"
+                    android:layout_height="?attr/actionBarSize"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"
+                    />
+            </RelativeLayout>
 
         </RelativeLayout>
 

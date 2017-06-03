@@ -8,7 +8,7 @@
         <item name="colorPrimary">@color/material_gray</item>
 
         <item name="android:windowTranslucentStatus">false</item>
-        <item name="android:windowTranslucentNavigation" >false</item>
+        <item name="android:windowTranslucentNavigation" >true</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -27,9 +27,6 @@
         <item name="colorAccent">@color/material_gray</item>
         <item name="colorPrimaryDark">@color/material_gray_dark</item>
         <item name="colorPrimary">@color/material_gray</item>
-
-
-
 
         <item name="windowActionModeOverlay">true</item>
 
@@ -72,7 +69,6 @@
         <item name="colorControlActivated">@color/material_gray_dark</item>
     </style>
 
-
     <style name="FilePickerTheme" parent="NNF_BaseTheme">
         <item name="colorPrimary">@color/material_gray</item>
         <item name="colorPrimaryDark">@color/material_gray_dark</item>
@@ -80,7 +76,6 @@
 
         <item name="nnf_list_item_divider">?android:attr/listDivider</item>
         <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>
-
 
     </style>
 

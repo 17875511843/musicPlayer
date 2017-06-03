@@ -7,9 +7,11 @@
     <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
         android:id="@+id/music_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@color/listView_bg_color"
         android:scrollbars="none"
+        app:fastScrollPopupBackgroundSize="56dp"
+        app:fastScrollPopupTextSize="24sp"
         app:fastScrollAutoHide="true"
         app:fastScrollAutoHideDelay="500"
         app:fastScrollPopupBgColor="@color/material_gray_dark"

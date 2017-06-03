@@ -10,13 +10,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -31,10 +31,12 @@ import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Activity.SearchActivity;
 import ironbear775.com.musicplayer.Activity.TagEditActivty;
 import ironbear775.com.musicplayer.Class.Music;
+import ironbear775.com.musicplayer.Fragment.FolderDetailFragment;
 import ironbear775.com.musicplayer.Fragment.MusicListFragment;
 import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.DetailDialog;
+import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.PlaylistDialog;
 
 /**
@@ -150,10 +152,12 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         switch (MusicList.Mod){
                                             case 1:
                                                 listPositionSet = MusicListFragment.positionSet;
-                                                Log.d("dsadas",listPositionSet+"");
                                                 break;
                                             case 5:
                                                 listPositionSet = MusicRecentAddedFragment.positionSet;
+                                                break;
+                                            case 6:
+                                                listPositionSet = FolderDetailFragment.positionSet;
                                                 break;
                                         }
                                         listPositionSet.add(position);
@@ -189,6 +193,9 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                                             case 5:
                                                                 MusicRecentAddedFragment.musicList.remove(position);
                                                                 break;
+                                                            case 6:
+                                                                FolderDetailFragment.musicList.remove(position);
+                                                                break;
                                                         }
                                                         if (SearchActivity.musicList!=null && SearchActivity.musicList.size()>0){
                                                             SearchActivity.musicList.remove(position);
@@ -212,9 +219,13 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
                                         detailDialog.show();
                                         break;
                                     case R.id.tag_edit:
-                                        Intent intent = new Intent(mContext, TagEditActivty.class);
-                                        intent.putExtra("music", (Parcelable) mList.get(position));
-                                        mContext.startActivity(intent);
+                                        if (mList.get(position).getUri().contains(".mp3")) {
+                                            Intent intent = new Intent(mContext, TagEditActivty.class);
+                                            intent.putExtra("music", (Parcelable) mList.get(position));
+                                            mContext.startActivity(intent);
+                                        }else {
+                                            Toast.makeText(mContext,R.string.open_failed,Toast.LENGTH_SHORT).show();
+                                        }
                                         break;
                                 }
                                 return false;
@@ -262,13 +273,20 @@ class MusicViewHolder extends RecyclerView.ViewHolder   {
 
     public void setData(int position){
         Set<Integer> positionSet = new HashSet<>();
-        switch (MusicList.Mod){
-            case 1:
-                positionSet = MusicListFragment.positionSet;
-                break;
-            case 5:
-                positionSet = MusicRecentAddedFragment.positionSet;
-                break;
+        if (MusicUtils.isSelectAll){
+            positionSet = MusicList.listPositionSet;
+        }else {
+            switch (MusicList.Mod) {
+                case 1:
+                    positionSet = MusicListFragment.positionSet;
+                    break;
+                case 5:
+                    positionSet = MusicRecentAddedFragment.positionSet;
+                    break;
+                case 6:
+                    positionSet = FolderDetailFragment.positionSet;
+                    break;
+            }
         }
         if (positionSet.contains(position)){
             itemView.setBackgroundResource(R.color.items_selected_bg_color);

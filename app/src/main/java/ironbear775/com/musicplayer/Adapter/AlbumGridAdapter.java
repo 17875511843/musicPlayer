@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
 
+import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
 import ironbear775.com.musicplayer.R;
+import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.SquareImageView;
 
 /**
@@ -157,6 +159,9 @@ class AlbumGridViewHolder extends RecyclerView.ViewHolder {
 
     public void setData(int position) {
         Set<Integer> positionSet = AlbumListFragment.positionSet;
+        if (MusicUtils.isSelectAll){
+            positionSet = MusicList.listPositionSet;
+        }
         if (positionSet.contains(position)) {
             bg.setVisibility(View.VISIBLE);
         } else {

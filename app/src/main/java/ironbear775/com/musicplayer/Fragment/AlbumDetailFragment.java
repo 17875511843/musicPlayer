@@ -27,7 +27,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,7 +73,6 @@ public class AlbumDetailFragment extends Fragment {
 
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
         collapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
@@ -178,11 +176,6 @@ public class AlbumDetailFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         albumListView.setLayoutManager(linearLayoutManager);
 
-        albumListView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
-                .color(Color.parseColor("#22616161"))
-                .sizeResId(R.dimen.divider)
-                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
-                .build());
         albumAdapter = new AlbumDetailAdapter(getActivity(), musicList);
         albumListView.setAdapter(albumAdapter);
 
@@ -254,6 +247,24 @@ public class AlbumDetailFragment extends Fragment {
                     break;
                 case "notifyDataSetChanged":
                     albumAdapter.notifyDataSetChanged();
+                    if (musicList.size() == 0){
+                        FragmentManager fragmentManager = getFragmentManager();
+                        FragmentTransaction transaction;
+
+                        transaction = fragmentManager.beginTransaction();
+                        transaction.hide(AlbumListFragment.detailFragment);
+                        transaction.setCustomAnimations(
+                                R.animator.fragment_slide_right_enter,
+                                R.animator.fragment_slide_right_exit,
+                                R.animator.fragment_slide_left_enter,
+                                R.animator.fragment_slide_left_exit
+                        );
+                        transaction.show(MusicList.albumFragment);
+                        transaction.commit();
+                        AlbumListFragment.detailFragment = null;
+                        MusicList.toolbar.setVisibility(View.VISIBLE);
+                        MusicList.toolbar.setTitle(R.string.toolbar_title_album);
+                    }
                     break;
             }
         }

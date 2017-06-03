@@ -9,5 +9,6 @@
     <color name="transparent_color">#00000000</color>
     <color name="slide_layout_middle_color">#bdbdbd</color>
     <color name="slide_layout_control_bg_color">#e0e0e0</color>
+    <color name="slide_layout_bg_color">#e2e2e2</color>
     <color name="items_selected_bg_color">#dcdcdc</color>
 </resources>

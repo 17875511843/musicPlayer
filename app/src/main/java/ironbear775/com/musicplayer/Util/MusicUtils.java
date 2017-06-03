@@ -13,11 +13,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.cache.ExternalCacheDiskCacheFactory;
+import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -29,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -87,6 +92,7 @@ public class MusicUtils {
     public static String messageNull = "null";
     public static int[] time = {0, 15000, 20000, 30000, 40000, 50000, 60000};
     private MusicService musicService;
+    public static boolean isSelectAll = false;
 
     public MusicUtils(Context context) {
         mContext = context;
@@ -105,6 +111,7 @@ public class MusicUtils {
 
         mContext.startService(serviceIntent);
     }
+
     private final ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -167,8 +174,30 @@ public class MusicUtils {
         getFootAlbumArt(0, musicList);
     }
 
+
+    public void selectAll(Set<Integer> positionSet,ArrayList<Music> list){
+        for (int position = 0;position< list.size();position++){
+            positionSet.add(position);
+        }
+        if (positionSet.size() == 0) {
+            MusicList.actionMode.finish();
+        } else {
+            String locale = Locale.getDefault().toString();
+            if (locale.equals("zh_CN")) {
+                MusicList.actionMode.setTitle(mContext.getResources().getString(R.string.selected) +
+                        " " + positionSet.size());
+            } else {
+                MusicList.actionMode.setTitle(positionSet.size() +
+                        " " + mContext.getResources().getString(R.string.selected));
+            }
+        }
+        isSelectAll = true;
+    }
     public void addOrRemoveItem(int position, Set<Integer> positionSet,
                                 RecyclerView.Adapter adapter) {
+        if (isSelectAll){
+            positionSet = MusicList.listPositionSet;
+        }
         if (positionSet.contains(position)) {
             positionSet.remove(position);
         } else {
@@ -186,7 +215,6 @@ public class MusicUtils {
                 MusicList.actionMode.setTitle(positionSet.size() +
                         " " + mContext.getResources().getString(R.string.selected));
             }
-            //更新列表界面，否则无法显示已选的item
             adapter.notifyItemChanged(position);
         }
     }
@@ -212,7 +240,7 @@ public class MusicUtils {
 
         Gson gson = new Gson();
         String json = gson.toJson(MusicListFragment.musicList);
-        editor.putString("json",json);
+        editor.putString("json", json);
 
         editor.apply();
         editor.commit();
@@ -450,7 +478,7 @@ public class MusicUtils {
                             key.add(1, list.getString("FileHash"));
                         }
                     }
-                }else {
+                } else {
                     key.add(0, "");
                     key.add(1, "");
                 }
@@ -512,7 +540,7 @@ public class MusicUtils {
                         album_id = key.get(0);
                         hashkey = key.get(1);
 
-                        if (album_id!=null && hashkey !=null) {
+                        if (album_id != null && hashkey != null) {
 
                             URL url = new URL(newPath + hashkey + "&album_id=" + album_id);
                             Request.Builder builder = new Request.Builder().url(url);
@@ -549,7 +577,7 @@ public class MusicUtils {
                                                             dir.mkdirs();
                                                         }
 
-                                                        String newSongTitle,newSinger;
+                                                        String newSongTitle, newSinger;
                                                         if (songTitle.contains("/")) {
                                                             newSongTitle = songTitle.replace("/", "_");
                                                         } else {
@@ -561,7 +589,7 @@ public class MusicUtils {
                                                             newSinger = singer;
                                                         }
 
-                                                        File file = new File(dir, newSongTitle+"_"+newSinger+".lrc");
+                                                        File file = new File(dir, newSongTitle + "_" + newSinger + ".lrc");
                                                         FileOutputStream fos = new FileOutputStream(file);
                                                         fos.write(lyric.getBytes());
                                                         fos.close();
@@ -592,7 +620,7 @@ public class MusicUtils {
                                     }
                                 }
                             });
-                        }else {
+                        } else {
                             MusicList.lyricView.loadLrc("");
                             MusicList.lyricView.setLabel(
                                     BaseActivity.myContext.getResources()
@@ -607,5 +635,119 @@ public class MusicUtils {
         }
     }
 
+
+    public void clearImageDiskCache(Context context) {
+        try {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.get(context).clearDiskCache();
+                    }
+                }).start();
+            } else {
+                Glide.get(context).clearDiskCache();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearImageMemoryCache(Context context) {
+        try {
+            if (Looper.myLooper() == Looper.getMainLooper()) { //只能在主线程执行
+                Glide.get(context).clearMemory();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearImageAllCache(Context context) {
+        clearImageDiskCache(context);
+        clearImageMemoryCache(context);
+        String ImageExternalCatchDir = context.getExternalCacheDir() + ExternalCacheDiskCacheFactory.DEFAULT_DISK_CACHE_DIR;
+        deleteFolderFile(ImageExternalCatchDir, true);
+    }
+
+    private void deleteFolderFile(String filePath, boolean deleteThisPath) {
+        if (!TextUtils.isEmpty(filePath)) {
+            try {
+                File file = new File(filePath);
+                if (file.isDirectory()) {
+                    File files[] = file.listFiles();
+                    for (File file1 : files) {
+                        deleteFolderFile(file1.getAbsolutePath(), true);
+                    }
+                }
+                if (deleteThisPath) {
+                    if (!file.isDirectory()) {
+                        file.delete();
+                    } else {
+                        if (file.listFiles().length == 0) {
+                            file.delete();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getCacheSize(Context context) {
+        try {
+            return getFormatSize(getFolderSize(new File(context.getCacheDir() + "/" + InternalCacheDiskCacheFactory.DEFAULT_DISK_CACHE_DIR)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private static String getFormatSize(double size) {
+
+        double kiloByte = size / 1024;
+        if (kiloByte < 1) {
+            return size + "Byte";
+        }
+
+        double megaByte = kiloByte / 1024;
+        if (megaByte < 1) {
+            BigDecimal result1 = new BigDecimal(Double.toString(kiloByte));
+            return result1.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "KB";
+        }
+
+        double gigaByte = megaByte / 1024;
+        if (gigaByte < 1) {
+            BigDecimal result2 = new BigDecimal(Double.toString(megaByte));
+            return result2.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "MB";
+        }
+
+        double teraBytes = gigaByte / 1024;
+        if (teraBytes < 1) {
+            BigDecimal result3 = new BigDecimal(Double.toString(gigaByte));
+            return result3.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "GB";
+        }
+        BigDecimal result4 = new BigDecimal(teraBytes);
+
+        return result4.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "TB";
+    }
+
+    private long getFolderSize(File file) throws Exception {
+        long size = 0;
+        try {
+            File[] fileList = file.listFiles();
+            for (File aFileList : fileList) {
+                if (aFileList.isDirectory()) {
+                    size = size + getFolderSize(aFileList);
+                } else {
+                    size = size + aFileList.length();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return size;
+    }
 
 }

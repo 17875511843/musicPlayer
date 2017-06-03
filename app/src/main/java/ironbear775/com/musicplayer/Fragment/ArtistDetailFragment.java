@@ -70,7 +70,6 @@ public class ArtistDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.artist_detail_new_layout, container, false);
-
         musicList = getArguments().getParcelableArrayList("musicList");
         artist = getArguments().getString("artist");
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -85,7 +84,6 @@ public class ArtistDetailFragment extends Fragment {
 
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
         collapsingToolbarLayout.setCollapsedTitleTextColor(Color.WHITE);
@@ -299,6 +297,24 @@ public class ArtistDetailFragment extends Fragment {
                     break;
                 case "notifyDataSetChanged":
                     songAdapter.notifyDataSetChanged();
+                    if (musicList.size() == 0){
+                        FragmentManager fragmentManager = getFragmentManager();
+                        FragmentTransaction transaction;
+
+                        transaction = fragmentManager.beginTransaction();
+                        transaction.hide(ArtistListFragment.artistDetailFragment);
+                        transaction.setCustomAnimations(
+                                R.animator.fragment_slide_right_enter,
+                                R.animator.fragment_slide_right_exit,
+                                R.animator.fragment_slide_left_enter,
+                                R.animator.fragment_slide_left_exit
+                        );
+                        transaction.show(MusicList.artistFragment);
+                        transaction.commit();
+                        ArtistListFragment.artistDetailFragment = null;
+                        MusicList.toolbar.setVisibility(View.VISIBLE);
+                        MusicList.toolbar.setTitle(R.string.toolbar_title_artist);
+                    }
                     break;
             }
         }

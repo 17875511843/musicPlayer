@@ -1,12 +1,16 @@
 package ironbear775.com.musicplayer.Activity;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -17,6 +21,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -29,11 +34,15 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  * Created by ironbear on 2017/3/28.
  */
 
-public class Setting extends BaseActivity implements Switch.OnCheckedChangeListener, View.OnClickListener {
+public class Setting extends BaseActivity implements Switch.OnCheckedChangeListener
+        , View.OnClickListener {
     private Toolbar toolbar;
     private RadioGroup group;
     private String[] time;
     private TextView filter;
+    private TextView cache;
+    private MusicUtils musicUtils;
+    private Dialog dialog;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -41,7 +50,9 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting_layout);
 
-        time = new String[]{"0s","15s", "20s", "30s", "40s", "50s", "60s"};
+        time = new String[]{"0s", "15s", "20s", "30s", "40s", "50s", "60s"};
+
+        musicUtils = new MusicUtils(this);
 
         findViews();
 
@@ -75,6 +86,9 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                     case R.id.page_recent:
                         MusicUtils.launchPage = 5;
                         break;
+                    case R.id.page_folder:
+                        MusicUtils.launchPage = 6;
+                        break;
                 }
                 editor.putInt("launchPage", MusicUtils.launchPage);
                 editor.apply();
@@ -93,6 +107,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
     private void findViews() {
 
+        RelativeLayout clearCache = (RelativeLayout) findViewById(R.id.layout_cache);
         filter = (TextView) findViewById(R.id.filter_text);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         Switch defaultAlbumArt = (Switch) findViewById(R.id.use_default_cover);
@@ -101,7 +116,9 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         Switch downloadCover = (Switch) findViewById(R.id.download_cover);
         Switch keepScreenOn = (Switch) findViewById(R.id.keep_screen_on);
         Switch loadWebLyric = (Switch) findViewById(R.id.load_web_lyric);
+        cache = (TextView) findViewById(R.id.clear_cache);
 
+        cache.setText(musicUtils.getCacheSize(this));
         group = (RadioGroup) findViewById(R.id.page_group);
 
         RadioButton musicButton = (RadioButton) findViewById(R.id.page_music);
@@ -109,6 +126,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         RadioButton artistButton = (RadioButton) findViewById(R.id.page_artist);
         RadioButton recentButton = (RadioButton) findViewById(R.id.page_recent);
         RadioButton playlistButton = (RadioButton) findViewById(R.id.page_playlist);
+        RadioButton folderButton = (RadioButton) findViewById(R.id.page_folder);
 
         TextView about = (TextView) findViewById(R.id.about);
 
@@ -153,6 +171,9 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
             case 5:
                 recentButton.setChecked(true);
                 break;
+            case 6:
+                folderButton.setChecked(true);
+                break;
 
         }
 
@@ -172,6 +193,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
         filter.setOnClickListener(this);
         about.setOnClickListener(this);
+        clearCache.setOnClickListener(this);
     }
 
     @Override
@@ -234,12 +256,42 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         editor.commit();
     }
 
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 13 && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            cache.setText(musicUtils.getCacheSize(getApplicationContext()));
+        }
+    };
+
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.about) {
             Intent intent = new Intent(this, About.class);
             startActivity(intent);
         }
+        if (v.getId() == R.id.layout_cache) {
+
+            dialog = ProgressDialog.show(this, null, getResources().getString(R.string.clear_cache));
+
+            dialog.show();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    musicUtils.clearImageAllCache(getApplicationContext());
+                    if (musicUtils.getCacheSize(getApplicationContext()).equals("0.0Byte")) {
+                        Message message = new Message();
+                        message.what = 13;
+                        handler.sendMessage(message);
+                    }
+                }
+            }).start();
+
+        }
+
         if (v.getId() == R.id.filter_text) {
             AlertDialog.Builder filterDialog = new AlertDialog.Builder(this);
             filterDialog.setTitle("Ignore");
@@ -254,7 +306,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
             filterDialog.setPositiveButton(R.string.delete_confrim, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MusicUtils.filterNum = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                    MusicUtils.filterNum = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
 
                     SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
                     editor.putInt("filterNum", MusicUtils.filterNum);
@@ -288,5 +340,6 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
             filterDialog.show();
 
         }
+
     }
 }

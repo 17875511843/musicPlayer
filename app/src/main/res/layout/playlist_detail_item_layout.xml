@@ -10,6 +10,7 @@
         android:id="@+id/playlist_iv_image"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:scaleType="centerCrop"
         />
 
     <RelativeLayout
@@ -27,8 +28,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textColor="@color/black"
-            android:textStyle="bold"/>
+            android:textColor="@color/black"/>
         <TextView
             android:layout_below="@+id/playlist_tv_title"
             android:gravity="center_vertical"

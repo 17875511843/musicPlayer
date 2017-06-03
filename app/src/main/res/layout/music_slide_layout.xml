@@ -11,6 +11,7 @@
     <FrameLayout
         android:id="@+id/left_shadow"
         android:layout_width="10dp"
+        android:layout_marginTop="2dp"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/top_blank"
@@ -20,6 +21,7 @@
     <FrameLayout
         android:id="@+id/right_shadow"
         android:layout_width="10dp"
+        android:layout_marginTop="2dp"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/top_blank"
@@ -42,14 +44,15 @@
         android:background="@drawable/top_round_bg">
 
         <ImageView
-            android:id="@+id/slideDown"
+            android:id="@+id/slide_menu"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="9dp"
             android:layout_marginStart="9dp"
-            android:src="@drawable/slidedwon" />
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/list_menu" />
 
         <ImageView
             android:id="@+id/lyric"
@@ -59,7 +62,9 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
-            android:src="@drawable/lyric"/>
+            android:src="@drawable/lyric"
+            android:background="?android:attr/selectableItemBackground"
+            />
         <ImageView
             android:id="@+id/blank"
             android:layout_width="30dp"
@@ -74,7 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_toEndOf="@+id/slideDown"
+            android:layout_toEndOf="@+id/slide_menu"
             android:layout_toStartOf="@+id/blank"
             android:layout_centerHorizontal="true"
             android:clickable="false"
@@ -83,7 +88,7 @@
             android:maxLines="1"
             android:paddingBottom="6dp"
             android:paddingTop="6dp"
-            android:textSize="30sp"
+            android:textSize="28sp"
             android:textStyle="bold"/>
     </RelativeLayout>
 
@@ -95,7 +100,6 @@
         android:layout_toEndOf="@+id/left_shadow"
         android:layout_toStartOf="@+id/right_shadow"
         android:background="@color/slide_layout_middle_color">
-
 
         <RelativeLayout
             android:id="@+id/music_info"

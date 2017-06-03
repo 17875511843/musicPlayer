@@ -3,7 +3,6 @@ package ironbear775.com.musicplayer.Util;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.mpatric.mp3agic.InvalidDataException;
@@ -50,16 +49,22 @@ public class DetailDialog extends Dialog {
         fileArtist.setText(list.get(pos).getArtist());
         fileAlbum.setText(list.get(pos).getAlbum());
 
-        try {
-            Mp3File file = new Mp3File(list.get(pos).getUri());
-            String duration = time.format(file.getLengthInMilliseconds()) + "";
-            fileDuration.setText(duration);
+        if (list.get(pos).getUri().contains(".mp3")) {
+            try {
+                Mp3File file = new Mp3File(list.get(pos).getUri());
+                String duration = time.format(file.getLengthInMilliseconds()) + "";
+                fileDuration.setText(duration);
 
-            fileSamplingRate.setText("" + file.getSampleRate() + " Hz");
-            fileBitrate.setText("" + file.getBitrate() + "kb/s");
+                fileSamplingRate.setText("" + file.getSampleRate() + " Hz");
+                fileBitrate.setText("" + file.getBitrate() + "kb/s");
 
-        } catch (IOException | UnsupportedTagException | InvalidDataException e) {
-            e.printStackTrace();
+            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                e.printStackTrace();
+            }
+        }else {
+            fileDuration.setText("-");
+            fileSamplingRate.setText("-");
+            fileBitrate.setText("-");
         }
 
     }

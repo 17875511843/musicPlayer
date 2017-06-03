@@ -77,5 +77,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/listView_bg_color"
+        app:fastScrollPopupBackgroundSize="56dp"
+        app:fastScrollPopupTextSize="24sp"
+        app:fastScrollAutoHide="true"
+        app:fastScrollAutoHideDelay="500"
+        app:fastScrollPopupBgColor="@color/material_gray_dark"
+        app:fastScrollPopupTextColor="@android:color/primary_text_dark"
+        app:fastScrollThumbColor="@color/material_gray_dark_light"
+        app:fastScrollTrackColor="@color/material_gray"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 </android.support.design.widget.CoordinatorLayout>

@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -37,6 +38,7 @@ import ironbear775.com.musicplayer.Fragment.ArtistDetailFragment;
 import ironbear775.com.musicplayer.Fragment.ArtistListFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.DetailDialog;
+import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.PlaylistDialog;
 
 /**
@@ -206,9 +208,13 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHold
                                 detailDialog.show();
                                 break;
                             case R.id.tag_edit:
-                                Intent intent = new Intent(mContext, TagEditActivty.class);
-                                intent.putExtra("music", (Parcelable) mList.get(position));
-                                mContext.startActivity(intent);
+                                if (mList.get(position).getUri().contains(".mp3")) {
+                                    Intent intent = new Intent(mContext, TagEditActivty.class);
+                                    intent.putExtra("music", (Parcelable) mList.get(position));
+                                    mContext.startActivity(intent);
+                                }else {
+                                    Toast.makeText(mContext,R.string.open_failed,Toast.LENGTH_SHORT).show();
+                                }
                                 break;
                         }
                         return false;
@@ -241,13 +247,17 @@ class AlbumDetailViewHolder extends RecyclerView.ViewHolder {
     }
     public void setData(int position){
         Set<Integer> positionSet = new HashSet<>();
-        switch (MusicList.Mod){
-            case 2:
-                positionSet = ArtistDetailFragment.positionSet;
-                break;
-            case 3:
-                positionSet = AlbumDetailFragment.positionSet;
-                break;
+        if (MusicUtils.isSelectAll){
+            positionSet = MusicList.listPositionSet;
+        }else {
+            switch (MusicList.Mod) {
+                case 2:
+                    positionSet = ArtistDetailFragment.positionSet;
+                    break;
+                case 3:
+                    positionSet = AlbumDetailFragment.positionSet;
+                    break;
+            }
         }
         if (positionSet.contains(position)){
             itemView.setBackgroundResource(R.color.items_selected_bg_color);

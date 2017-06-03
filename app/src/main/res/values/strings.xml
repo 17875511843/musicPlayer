@@ -82,7 +82,15 @@
     <string name="search_none">no match result</string>
     <string name="tag_editor">Tag editor</string>
     <string name="song_title">Title</string>
-    <string name="genre">Track</string>
+    <string name="track">Track</string>
     <string name="year">Year</string>
     <string name="not_lyric_file">This file is not a lyric file</string>
+    <string name="toolbar_title_folder">Folder</string>
+    <string name="songs">songs</string>
+    <string name="cache">Clear cache</string>
+    <string name="clear_cache">clearing</string>
+    <string name="select_local_lyric">Select local lyric</string>
+    <string name="open_failed">Can only edit mp3 file</string>
+    <string name="select_all">Select all</string>
+
 </resources>

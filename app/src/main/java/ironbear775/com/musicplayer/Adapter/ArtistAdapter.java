@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
 
+import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.ArtistListFragment;
 import ironbear775.com.musicplayer.R;
@@ -170,7 +171,9 @@ class ArtistViewHolder extends RecyclerView.ViewHolder {
 
     public void setData(int position) {
         Set<Integer> positionSet = ArtistListFragment.positionSet;
-
+        if (MusicUtils.isSelectAll){
+            positionSet = MusicList.listPositionSet;
+        }
         if (positionSet.contains(position)) {
             itemView.setBackgroundResource(R.color.items_selected_bg_color);
         } else {

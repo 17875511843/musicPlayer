@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -28,11 +29,15 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.graphics.Palette;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -87,6 +92,8 @@ import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
 import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
 import ironbear775.com.musicplayer.Fragment.ArtistDetailFragment;
 import ironbear775.com.musicplayer.Fragment.ArtistListFragment;
+import ironbear775.com.musicplayer.Fragment.FolderDetailFragment;
+import ironbear775.com.musicplayer.Fragment.FolderFragment;
 import ironbear775.com.musicplayer.Fragment.MusicListFragment;
 import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
 import ironbear775.com.musicplayer.Fragment.PlaylistDetailFragment;
@@ -94,6 +101,7 @@ import ironbear775.com.musicplayer.Fragment.PlaylistFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Service.MediaButtonReceiver;
 import ironbear775.com.musicplayer.Service.MusicService;
+import ironbear775.com.musicplayer.Util.DetailDialog;
 import ironbear775.com.musicplayer.Util.Lyric.LrcView;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.Notification;
@@ -117,12 +125,14 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     public static Fragment albumFragment;
     public static Fragment artistFragment;
     public static Fragment playlistFragment;
+    public static Fragment folderFragment;
     public static int Mod = 1;
     public static ActionMode actionMode;
     public static boolean isAlbum = false;
     public static boolean isArtist = false;
     public static int flag = 0;
 
+    private ImageView slideMenu;
     private SlideUp slideUp;
     private int progress = 0;
     private MusicService musicService;
@@ -140,7 +150,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     private FragmentManager fragmentManager;
     private FragmentTransaction transaction;
     private ArrayList<Music> musicList = new ArrayList<>();
-    private Set<Integer> listPositionSet = new HashSet<>();
+    public static Set<Integer> listPositionSet = new HashSet<>();
     private MusicUtils musicUtils;
     private View slideView;
     private Notification noti;
@@ -166,8 +176,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.music_list_layout);
 
+        setContentView(R.layout.music_list_layout);
 
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
@@ -180,7 +190,6 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         init();
 
         toolbar.inflateMenu(R.menu.menu_short);
-
 
     }
 
@@ -203,6 +212,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         MusicListFragment.count = sharedPreferences.getInt("musicCount", 0);
         MusicRecentAddedFragment.count = sharedPreferences.getInt("musicRecentCount", 0);
         PlaylistDetailFragment.count = sharedPreferences.getInt("playlistCount", 0);
+        FolderDetailFragment.count = sharedPreferences.getInt("folderlistcount", 0);
         MusicUtils.enableDownload = sharedPreferences.getBoolean("enableDownload", true);
         MusicUtils.enableDefaultCover = sharedPreferences.getBoolean("enableDefaultCover", false);
         MusicUtils.enableColorNotification = sharedPreferences.getBoolean("enableColorNotification", true);
@@ -280,14 +290,11 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
     private void showFragment(int i) {
         transaction = fragmentManager.beginTransaction();
-        if (musicRecentFragment != null) {
-            transaction.hide(musicRecentFragment);
+        if (musicFragment != null) {
+            transaction.hide(musicFragment);
         }
         if (albumFragment != null) {
             transaction.hide(albumFragment);
-        }
-        if (musicFragment != null) {
-            transaction.hide(musicFragment);
         }
         if (AlbumListFragment.detailFragment != null) {
             transaction.hide(AlbumListFragment.detailFragment);
@@ -295,14 +302,23 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         if (artistFragment != null) {
             transaction.hide(artistFragment);
         }
-        if (playlistFragment != null) {
-            transaction.hide(playlistFragment);
-        }
         if (ArtistListFragment.artistDetailFragment != null) {
             transaction.hide(ArtistListFragment.artistDetailFragment);
         }
+        if (playlistFragment != null) {
+            transaction.hide(playlistFragment);
+        }
         if (PlaylistFragment.playlistDetailFragment != null) {
             transaction.hide(PlaylistFragment.playlistDetailFragment);
+        }
+        if (musicRecentFragment != null) {
+            transaction.hide(musicRecentFragment);
+        }
+        if (folderFragment != null) {
+            transaction.hide(folderFragment);
+        }
+        if (FolderFragment.folderDetailFragment != null) {
+            transaction.hide(FolderFragment.folderDetailFragment);
         }
 
         transaction.setCustomAnimations(R.animator.fragment_slide_left_enter,
@@ -397,6 +413,26 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 getWindow().setStatusBarColor(0);
                 toolbar.setBackgroundColor(0);
                 break;
+            case 6:
+                if (ArtistListFragment.count == 1) {
+                    MusicUtils.closeDownloadArtistImage();
+                }
+                toolbar.setTitle(R.string.toolbar_title_folder);
+                Mod = 6;
+                if (folderFragment == null || flag == 1) {
+                    folderFragment = new FolderFragment();
+                    transaction.add(R.id.content, folderFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                } else {
+                    transaction.show(folderFragment);
+                    transaction.commit();
+                }
+                toolbar.setVisibility(View.VISIBLE);
+                getWindow().setStatusBarColor(0);
+                toolbar.setBackgroundColor(0);
+
+                break;
         }
     }
 
@@ -443,15 +479,20 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 .withIcon(R.drawable.recent_added)
                 .withSelectedTextColorRes(R.color.material_gray_dark)
                 .withName(getResources().getString(R.string.toolbar_title_recent_added));
+        PrimaryDrawerItem slideFolder = new PrimaryDrawerItem()
+                .withIdentifier(6)
+                .withIcon(R.drawable.folder)
+                .withSelectedTextColorRes(R.color.material_gray_dark)
+                .withName(getResources().getString(R.string.toolbar_title_folder));
 
         SecondaryDrawerItem slideSleepTimer = new SecondaryDrawerItem()
-                .withIdentifier(6)
+                .withIdentifier(7)
                 .withIcon(R.drawable.sleeptimer)
                 .withSelectedTextColorRes(R.color.material_gray_dark)
                 .withName(getResources().getString(R.string.sleep_timer));
 
         SecondaryDrawerItem setting = new SecondaryDrawerItem()
-                .withIdentifier(7)
+                .withIdentifier(8)
                 .withIcon(R.drawable.settings)
                 .withSelectedTextColorRes(R.color.material_gray_dark)
                 .withName(getResources().getString(R.string.settings));
@@ -478,6 +519,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         slideAlbum,
                         slidePlayList,
                         slideRecentAdded,
+                        slideFolder,
                         new DividerDrawerItem(),
                         slideSleepTimer,
                         setting
@@ -504,10 +546,13 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                                 showFragment(5);
                                 break;
                             case 6:
+                                showFragment(6);
+                                break;
+                            case 7:
                                 Intent timerIntent = new Intent(MusicList.this, SleepTimer.class);
                                 startActivity(timerIntent);
                                 break;
-                            case 7:
+                            case 8:
                                 Intent settingIntent = new Intent(MusicList.this, Setting.class);
                                 startActivity(settingIntent);
                                 break;
@@ -537,7 +582,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         || MusicRecentAddedFragment.musicList.size() > 0
                         || ArtistListFragment.artistlist.size() > 0
                         || AlbumListFragment.albumlist.size() > 0
-                        || PlaylistDetailFragment.musicList.size() > 0) {
+                        || PlaylistDetailFragment.musicList.size() > 0
+                        || FolderDetailFragment.musicList.size() > 0) {
                     playOrPauseMusic();
                 }
                 break;
@@ -554,7 +600,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         || MusicRecentAddedFragment.musicList.size() > 0
                         || ArtistListFragment.artistlist.size() > 0
                         || AlbumListFragment.albumlist.size() > 0
-                        || PlaylistDetailFragment.musicList.size() > 0) {
+                        || PlaylistDetailFragment.musicList.size() > 0
+                        || FolderDetailFragment.musicList.size() > 0) {
                     playOrPauseMusic();
                 }
                 break;
@@ -564,7 +611,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         || MusicRecentAddedFragment.musicList.size() > 0
                         || ArtistListFragment.artistlist.size() > 0
                         || AlbumListFragment.albumlist.size() > 0
-                        || PlaylistDetailFragment.musicList.size() > 0)) {
+                        || PlaylistDetailFragment.musicList.size() > 0
+                        || FolderDetailFragment.musicList.size() > 0)) {
                     if (MusicService.mediaPlayer.isPlaying()) {
                         MusicService.mediaPlayer.pause();
                         PlayOrPause.setImageResource(R.drawable.footplaywhite);
@@ -578,6 +626,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                             && MusicRecentAddedFragment.count == 0
                             && ArtistDetailFragment.count == 0
                             && PlaylistDetailFragment.count == 0
+                            && FolderDetailFragment.count == 0
                             && !MusicService.mediaPlayer.isPlaying()
                             && flag == 0) {
                         startMusic(MusicUtils.pos);
@@ -626,13 +675,89 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     MusicService.isSingleOrCycle = 1;
                 }
                 break;
-            case R.id.slideDown:
-                slideUp.hide();
-                Intent intent = new Intent("SetClickable_True");
-                sendBroadcast(intent);
-                footBar.setVisibility(View.VISIBLE);
-                lyricView.setVisibility(View.GONE);
-                blurBG.setVisibility(View.GONE);
+            case R.id.slide_menu:
+                PopupMenu popupMenu = new PopupMenu(this, slideMenu);
+                popupMenu.inflate(R.menu.slide_menu);
+
+                ArrayList<Music> mList = new ArrayList<>();
+                mList.clear();
+                mList.add(MusicService.music);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_add:
+                                Set<Integer> listPositionSet = new HashSet<>();
+                                listPositionSet.add(0);
+                                PlaylistDialog dialog = new PlaylistDialog(
+                                        MusicList.this, listPositionSet, mList);
+                                dialog.show();
+                                break;
+                            case R.id.menu_delete:
+                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MusicList.this);
+                                alertDialog.setTitle(R.string.delete_alert_title);
+                                alertDialog.setMessage(mList.get(0).getTitle());
+                                alertDialog.setCancelable(true);
+                                alertDialog.setNegativeButton(R.string.delete_cancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                });
+                                alertDialog.setPositiveButton(R.string.delete_confrim, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String uri = mList.get(0).getUri();
+                                        getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                                MediaStore.Audio.Media.DATA + "=?",
+                                                new String[]{uri});
+                                        File file = new File(uri);
+                                        if (file.isFile()) {
+                                            if (file.delete()) {
+                                                Intent intent = new Intent("notifyDataSetChanged");
+
+                                                sendBroadcast(intent);
+                                                Toast.makeText(getApplicationContext(),
+                                                        R.string.success, Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(getApplicationContext(),
+                                                        R.string.failed, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    }
+                                });
+                                alertDialog.show();
+                                break;
+                            case R.id.menu_detail:
+                                DetailDialog detailDialog = new DetailDialog(
+                                        MusicList.this, mList, 0);
+                                detailDialog.show();
+                                break;
+                            case R.id.tag_edit:
+                                if (mList.get(0).getUri().contains(".mp3")) {
+                                    Intent intent = new Intent(getApplicationContext(), TagEditActivty.class);
+                                    intent.putExtra("music", (Parcelable) mList.get(0));
+                                    startActivity(intent);
+                                } else {
+                                    Toast.makeText(getApplicationContext(), R.string.open_failed, Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                            case R.id.select_local_lyric:
+                                Intent i = new Intent(getApplicationContext(), FilePickerActivity.class);
+
+                                i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+                                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+                                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
+
+                                i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+                                startActivityForResult(i, 1313);
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
                 break;
             case R.id.lyric:
 
@@ -666,34 +791,43 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                             Environment.getExternalStorageDirectory().getAbsolutePath() + "/MusicPlayer/lyric",
                             newSongTitle + "_" + newSinger + ".lrc");
                     if (file.exists()) {
-                        Log.d("File1",file.getPath()+"");
                         lyricView.loadLrc(file);
                         handler.post(runnable1);
                     } else {
-                        try {
-                            Mp3File f = new Mp3File(MusicService.music.getUri());
 
-                            if (f.hasId3v2Tag()) {
-                                String lyric = f.getId3v2Tag().getLyrics();
+                        if (MusicService.music.getUri().contains(".mp3")) {
+                            try {
 
-                                if (lyric != null) {
+                                Mp3File f = new Mp3File(MusicService.music.getUri());
 
-                                    String[] array = lyric.split("\\n");
-                                    for (String line : array) {
-                                        Matcher lineMatcher = Pattern.compile("(\\[\\d\\d:\\d\\d\\.\\d\\d\\])(.*?)")
-                                                .matcher(line);
-                                        Matcher newLineMatcher = Pattern.compile("(\\[\\d\\d:\\d\\d\\.\\d\\d\\d\\])(.*?)")
-                                                .matcher(line);
-                                        if (lineMatcher.matches()) {
-                                            canSrcoll = true;
-                                        } else if (newLineMatcher.matches()) {
-                                            canSrcoll = true;
+                                if (f.hasId3v2Tag()) {
+                                    String lyric = f.getId3v2Tag().getLyrics();
+
+                                    if (lyric != null) {
+
+                                        String[] array = lyric.split("\\n");
+                                        for (String line : array) {
+                                            Matcher lineMatcher = Pattern.compile("(\\[\\d\\d:\\d\\d\\.\\d\\d\\])(.*?)")
+                                                    .matcher(line);
+                                            Matcher newLineMatcher = Pattern.compile("(\\[\\d\\d:\\d\\d\\.\\d\\d\\d\\])(.*?)")
+                                                    .matcher(line);
+                                            if (lineMatcher.matches()) {
+                                                canSrcoll = true;
+                                            } else if (newLineMatcher.matches()) {
+                                                canSrcoll = true;
+                                            }
                                         }
-                                    }
 
-                                    if (canSrcoll) {
-                                        lyricView.loadLrc(lyric);
-                                        handler.post(runnable1);
+                                        if (canSrcoll) {
+                                            lyricView.loadLrc(lyric);
+                                            handler.post(runnable1);
+                                        } else {
+                                            lyricView.setLabel(getResources().getString(R.string.searching_lyric));
+                                            if (MusicUtils.loadWebLyric)
+                                                MusicUtils.getWebLyric(MusicService.music.getTitle(),
+                                                        MusicService.music.getArtist(),
+                                                        MusicService.music.getDuration());
+                                        }
                                     } else {
                                         lyricView.setLabel(getResources().getString(R.string.searching_lyric));
                                         if (MusicUtils.loadWebLyric)
@@ -702,18 +836,18 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                                                     MusicService.music.getDuration());
                                     }
                                 } else {
-                                    lyricView.setLabel(getResources().getString(R.string.searching_lyric));
-                                    if (MusicUtils.loadWebLyric)
-                                        MusicUtils.getWebLyric(MusicService.music.getTitle(),
-                                                MusicService.music.getArtist(),
-                                                MusicService.music.getDuration());
+                                    lyricView.setLabel(getResources().getString(R.string.no_lyric));
                                 }
-                            } else {
-                                lyricView.setLabel(getResources().getString(R.string.no_lyric));
-                            }
 
-                        } catch (IOException | UnsupportedTagException | InvalidDataException e) {
-                            e.printStackTrace();
+                            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            lyricView.setLabel(getResources().getString(R.string.searching_lyric));
+                            if (MusicUtils.loadWebLyric)
+                                MusicUtils.getWebLyric(MusicService.music.getTitle(),
+                                        MusicService.music.getArtist(),
+                                        MusicService.music.getDuration());
                         }
                     }
 
@@ -726,23 +860,25 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         }
 
     }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == 1313 && resultCode == Activity.RESULT_OK) {
 
             List<Uri> files = Utils.getSelectedFilesFromResult(intent);
-            for (Uri uri: files) {
+            for (Uri uri : files) {
                 File file = Utils.getFileForUri(uri);
 
-                if (uri.toString().contains(".lrc")){
+                if (uri.toString().contains(".lrc")) {
                     Intent i = new Intent("select_file");
                     i.putExtra("uri", file.getAbsolutePath());
                     sendBroadcast(i);
-                }else {
-                    Toast.makeText(this,R.string.not_lyric_file,Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, R.string.not_lyric_file, Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
+
     public static Runnable runnable1 = new Runnable() {
         @Override
         public void run() {
@@ -823,8 +959,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 && ArtistDetailFragment.count == 0
                 && AlbumDetailFragment.count == 0
                 && MusicRecentAddedFragment.count == 0
-                && MusicRecentAddedFragment.count == 0
                 && PlaylistDetailFragment.count == 0
+                && FolderDetailFragment.count == 0
                 && !MusicService.mediaPlayer.isPlaying()
                 && MusicListFragment.musicList.size() >= 1
                 && flag == 0) {
@@ -839,6 +975,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 PlaylistDetailFragment.count = 1;
             if (Mod == 5)
                 MusicRecentAddedFragment.count = 1;
+            if (Mod == 6)
+                FolderDetailFragment.count = 1;
             PlayOrPause.setImageResource(R.drawable.footpausewhite);
             play_pause.setImageResource(R.drawable.footpausewhite);
 
@@ -865,6 +1003,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 || ArtistDetailFragment.count == 1
                 || AlbumDetailFragment.count == 1
                 || PlaylistDetailFragment.count == 1
+                || FolderDetailFragment.count == 1
                 || flag == 1) {
             MusicService.mediaPlayer.start();
 
@@ -933,6 +1072,9 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
         } else if (PlaylistDetailFragment.count == 1) {
             serviceIntent.putParcelableArrayListExtra("musicList", PlaylistDetailFragment.musicList);
+
+        } else if (FolderDetailFragment.count == 1) {
+            serviceIntent.putParcelableArrayListExtra("musicList", FolderDetailFragment.musicList);
 
         } else {
             serviceIntent.putParcelableArrayListExtra("musicList", MusicListFragment.musicList);
@@ -1046,6 +1188,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     PlaylistDetailFragment.count = 0;
                     MusicRecentAddedFragment.count = 0;
                     MusicListFragment.count = 1;
+                    FolderDetailFragment.count = 0;
 
                     musicUtils.shufflePlay(MusicListFragment.musicList);
 
@@ -1061,6 +1204,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     PlaylistDetailFragment.count = 0;
                     MusicRecentAddedFragment.count = 0;
                     MusicListFragment.count = 0;
+                    FolderDetailFragment.count = 0;
 
                     musicUtils.shufflePlay(ArtistDetailFragment.musicList);
 
@@ -1076,6 +1220,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     PlaylistDetailFragment.count = 0;
                     MusicRecentAddedFragment.count = 0;
                     MusicListFragment.count = 0;
+                    FolderDetailFragment.count = 0;
 
                     musicUtils.shufflePlay(AlbumDetailFragment.musicList);
 
@@ -1091,6 +1236,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     PlaylistDetailFragment.count = 1;
                     MusicRecentAddedFragment.count = 0;
                     MusicListFragment.count = 0;
+                    FolderDetailFragment.count = 0;
 
                     musicUtils.shufflePlay(PlaylistDetailFragment.musicList);
                 }
@@ -1105,49 +1251,27 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     PlaylistDetailFragment.count = 0;
                     MusicRecentAddedFragment.count = 1;
                     MusicListFragment.count = 0;
+                    FolderDetailFragment.count = 0;
 
                     musicUtils.shufflePlay(MusicRecentAddedFragment.musicList);
 
                 }
                 break;
+            case 6:
+                if (FolderFragment.folderDetailFragment != null && FolderDetailFragment.musicList.size() >= 1) {
+                    FolderDetailFragment.pos = musicUtils.createRandom(FolderDetailFragment.musicList);
+                    progress = 0;
+
+                    ArtistDetailFragment.count = 0;
+                    AlbumDetailFragment.count = 0;
+                    PlaylistDetailFragment.count = 0;
+                    MusicRecentAddedFragment.count = 0;
+                    MusicListFragment.count = 0;
+                    FolderDetailFragment.count = 1;
+                    musicUtils.shufflePlay(FolderDetailFragment.musicList);
+                }
+                break;
         }
-    }
-
-    //设置底部栏专辑封面
-    private void getFootAlbumArt(int pos1) {
-        String AlbumUri = null;
-        switch (Mod) {
-            case 1:
-                AlbumUri = MusicListFragment.musicList.get(pos1).getAlbumArtUri();
-                break;
-            case 2:
-                AlbumUri = ArtistDetailFragment.musicList.get(pos1).getAlbumArtUri();
-                break;
-            case 3:
-                AlbumUri = AlbumDetailFragment.musicList.get(pos1).getAlbumArtUri();
-                break;
-            case 5:
-                AlbumUri = MusicRecentAddedFragment.musicList.get(pos1).getAlbumArtUri();
-                break;
-
-        }
-
-        if (MusicService.mediaPlayer.isPlaying()) {
-            AlbumUri = MusicService.music.getAlbumArtUri();
-        }
-
-        Glide.with(this)
-                .load(AlbumUri)
-                .centerCrop()
-                .error(R.drawable.default_album_art)
-                .placeholder(R.drawable.default_album_art)
-                .into(accountHeader.getHeaderBackgroundView());
-        Glide.with(this)
-                .load(AlbumUri)
-                .centerCrop()
-                .error(R.drawable.default_album_art)
-                .placeholder(R.drawable.default_album_art)
-                .into(footAlbumArt);
     }
 
     @Override
@@ -1155,7 +1279,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         MenuItem item = menu.getItem(0);
         if (Mod == 2 && ArtistListFragment.artistDetailFragment == null
                 || Mod == 3 && AlbumListFragment.detailFragment == null
-                || Mod == 4) {
+                || Mod == 4
+                || Mod == 6 && FolderFragment.folderDetailFragment == null) {
             item.setEnabled(false);
             item.setVisible(false);
         } else {
@@ -1191,6 +1316,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         super.onDestroy();
     }
 
+
     //按下返回键不销毁activity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -1209,6 +1335,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 footBar.setVisibility(View.VISIBLE);
             } else {
                 Intent in = new Intent("notifyDataSetChanged");
+                MusicUtils.isSelectAll = false;
                 switch (Mod) {
                     case 1:
                         if (actionMode != null) {
@@ -1234,7 +1361,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                             getWindow().setStatusBarColor(0);
                             toolbar.setBackgroundColor(0);
                             transaction = fragmentManager.beginTransaction();
-                            transaction.hide(ArtistListFragment.artistDetailFragment);
+                            if (ArtistListFragment.artistDetailFragment != null)
+                                transaction.hide(ArtistListFragment.artistDetailFragment);
                             transaction.setCustomAnimations(
                                     R.animator.fragment_slide_right_enter,
                                     R.animator.fragment_slide_right_exit,
@@ -1265,7 +1393,9 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                             getWindow().setStatusBarColor(0);
                             toolbar.setBackgroundColor(0);
                             transaction = fragmentManager.beginTransaction();
-                            transaction.hide(AlbumListFragment.detailFragment);
+
+                            if (AlbumListFragment.detailFragment != null)
+                                transaction.hide(AlbumListFragment.detailFragment);
                             transaction.setCustomAnimations(
                                     R.animator.fragment_slide_right_enter,
                                     R.animator.fragment_slide_right_exit,
@@ -1309,7 +1439,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                                 }).start();
                             }
                             transaction = fragmentManager.beginTransaction();
-                            transaction.hide(PlaylistFragment.playlistDetailFragment);
+                            if (PlaylistFragment.playlistDetailFragment != null)
+                                transaction.hide(PlaylistFragment.playlistDetailFragment);
                             transaction.setCustomAnimations(
                                     R.animator.fragment_slide_right_enter,
                                     R.animator.fragment_slide_right_exit,
@@ -1330,6 +1461,35 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                             actionMode = null;
                             MusicRecentAddedFragment.positionSet.clear();
                             sendBroadcast(in);
+                        } else {
+                            moveTaskToBack(true);
+                        }
+                        break;
+                    case 6:
+                        if (actionMode != null && FolderFragment.folderDetailFragment != null) {
+                            actionMode = null;
+                            FolderDetailFragment.positionSet.clear();
+                            getWindow().setStatusBarColor(0);
+                            toolbar.setBackgroundColor(0);
+                            sendBroadcast(in);
+                        } else if (FolderFragment.folderDetailFragment != null) {
+                            getWindow().setStatusBarColor(0);
+                            toolbar.setBackgroundColor(0);
+                            transaction = fragmentManager.beginTransaction();
+                            if (FolderFragment.folderDetailFragment != null)
+                                transaction.hide(FolderFragment.folderDetailFragment);
+                            transaction.setCustomAnimations(
+                                    R.animator.fragment_slide_right_enter,
+                                    R.animator.fragment_slide_right_exit,
+                                    R.animator.fragment_slide_left_enter,
+                                    R.animator.fragment_slide_left_exit
+                            );
+                            transaction.show(folderFragment);
+                            transaction.commit();
+                            FolderFragment.folderDetailFragment = null;
+
+                            MusicList.toolbar.setVisibility(View.VISIBLE);
+                            MusicList.toolbar.setTitle(R.string.toolbar_title_folder);
                         } else {
                             moveTaskToBack(true);
                         }
@@ -1365,48 +1525,115 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     public void onDestroyActionMode(ActionMode mode) {
         actionMode = null;
         MusicListFragment.positionSet.clear();
-        Intent in = new Intent("notifyDataSetChanged");
-        sendBroadcast(in);
+        sendBroadcast(new Intent("notifyDataSetChanged"));
         getWindow().setStatusBarColor(0);
     }
 
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
+        Intent intent = new Intent("notifyDataSetChanged");
         switch (item.getItemId()) {
+            case R.id.select_all:
+                switch (Mod) {
+                    case 1:
+                        listPositionSet.clear();
+                        musicUtils.selectAll(listPositionSet, MusicListFragment.musicList);
+                        isArtist = false;
+                        break;
+                    case 2:
+                        listPositionSet.clear();
+
+                        if (ArtistListFragment.artistDetailFragment != null) {
+                            musicUtils.selectAll(listPositionSet, ArtistDetailFragment.musicList);
+                            isArtist = false;
+                        } else {
+                            musicUtils.selectAll(listPositionSet, ArtistListFragment.artistlist);
+                            isArtist = true;
+                        }
+                        break;
+                    case 3:
+                        listPositionSet.clear();
+                        if (AlbumListFragment.detailFragment != null) {
+                            musicUtils.selectAll(listPositionSet, AlbumDetailFragment.musicList);
+                            isArtist = false;
+                        } else {
+                            musicUtils.selectAll(listPositionSet, AlbumListFragment.albumlist);
+                            isAlbum = true;
+                        }
+                        break;
+                    case 5:
+                        listPositionSet.clear();
+                        musicUtils.selectAll(listPositionSet, MusicRecentAddedFragment.musicList);
+                        isArtist = false;
+                        break;
+                    case 6:
+                        listPositionSet.clear();
+                        if (FolderFragment.folderDetailFragment != null) {
+                            musicUtils.selectAll(listPositionSet, FolderDetailFragment.musicList);
+                            isArtist = false;
+                        }
+                        break;
+                }
+
+                sendBroadcast(intent);
+                break;
             case R.id.add_to_list:
                 switch (Mod) {
                     case 1:
-                        listPositionSet = MusicListFragment.positionSet;
+                        if (!MusicUtils.isSelectAll) {
+                            listPositionSet = MusicListFragment.positionSet;
+                        }
                         musicList = MusicListFragment.musicList;
                         isArtist = false;
                         break;
                     case 2:
                         if (ArtistListFragment.artistDetailFragment != null) {
-                            listPositionSet = ArtistDetailFragment.positionSet;
+                            if (!MusicUtils.isSelectAll) {
+                                listPositionSet = ArtistDetailFragment.positionSet;
+                            }
                             musicList = ArtistDetailFragment.musicList;
                             isArtist = false;
                         } else {
-                            listPositionSet = ArtistListFragment.positionSet;
+                            if (!MusicUtils.isSelectAll) {
+                                listPositionSet = ArtistListFragment.positionSet;
+                            }
                             musicList = ArtistListFragment.artistlist;
                             isArtist = true;
                         }
                         break;
                     case 3:
                         if (AlbumListFragment.detailFragment != null) {
-                            listPositionSet = AlbumDetailFragment.positionSet;
+
+                            if (!MusicUtils.isSelectAll) {
+                                listPositionSet = AlbumDetailFragment.positionSet;
+                            }
                             musicList = AlbumDetailFragment.musicList;
                             isArtist = false;
                         } else {
-                            listPositionSet = AlbumListFragment.positionSet;
+                            if (!MusicUtils.isSelectAll) {
+                                listPositionSet = AlbumListFragment.positionSet;
+                            }
                             musicList = AlbumListFragment.albumlist;
                             isAlbum = true;
                         }
                         break;
                     case 5:
-                        listPositionSet = MusicRecentAddedFragment.positionSet;
+                        if (!MusicUtils.isSelectAll) {
+                            listPositionSet = MusicRecentAddedFragment.positionSet;
+                        }
                         musicList = MusicRecentAddedFragment.musicList;
                         isArtist = false;
+                        break;
+                    case 6:
+                        if (FolderFragment.folderDetailFragment != null) {
+                            if (!MusicUtils.isSelectAll) {
+                                listPositionSet = FolderDetailFragment.positionSet;
+                            }
+                            musicList = FolderDetailFragment.musicList;
+                            isArtist = false;
+                        }
                         break;
                 }
                 PlaylistDialog dialog = new PlaylistDialog(this, listPositionSet, musicList);
@@ -1487,8 +1714,6 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
                     File file = new File(intent.getStringExtra("uri"));
 
-                    Log.d("File",file.getPath()+"");
-
                     lyricView.loadLrc(file);
                     handler.post(runnable1);
 
@@ -1513,15 +1738,15 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     File oldfile = new File(oldPath);
                     File file1 = new File(newPath);
                     if (oldfile.exists()) {
-                        if(file1.exists())
+                        if (file1.exists())
                             file1.delete();
 
-                        InputStream inStream = null; //读入原文件
+                        InputStream inStream;
                         try {
                             inStream = new FileInputStream(oldPath);
                             FileOutputStream fs = new FileOutputStream(newPath);
                             byte[] buffer = new byte[1444];
-                            while ( (byteread = inStream.read(buffer)) != -1) {
+                            while ((byteread = inStream.read(buffer)) != -1) {
                                 bytesum += byteread; //字节数 文件大小
                                 System.out.println(bytesum);
                                 fs.write(buffer, 0, byteread);
@@ -1551,7 +1776,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     private void findView() {
         slideView = findViewById(R.id.slideview);
         musicProgressBar = (ProgressBar) findViewById(R.id.music_progressbar);
-        ImageView slideDown = (ImageView) findViewById(R.id.slideDown);
+        slideMenu = (ImageView) findViewById(R.id.slide_menu);
         footBar = (RelativeLayout) findViewById(R.id.footBar);
         play_pause = (FloatingActionButton) findViewById(R.id.music_play);
         ImageView next = (ImageView) findViewById(R.id.music_next);
@@ -1579,31 +1804,13 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         footLayout.setOnClickListener(this);
         footAlbumArt.setOnClickListener(this);
         PlayOrPause.setOnClickListener(this);
-        slideDown.setOnClickListener(this);
+        slideMenu.setOnClickListener(this);
         play_pause.setOnClickListener(this);
         next.setOnClickListener(this);
         last.setOnClickListener(this);
         randomPlay.setOnClickListener(this);
         cyclePlay.setOnClickListener(this);
         lyricButton.setOnClickListener(this);
-        //mainImageView.setOnClickListener(this);
-
-        lyricView.setLongClickable(true);
-        lyricView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Intent i = new Intent(v.getContext(), FilePickerActivity.class);
-
-                i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
-
-                i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
-
-                startActivityForResult(i, 1313);
-                return false;
-            }
-        });
 
 
         fragmentManager = getFragmentManager();

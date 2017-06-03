@@ -27,7 +27,8 @@ public class IntroFragment extends android.support.v4.app.Fragment {
             @Override
             public void onClick(View v) {
                 ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.SYSTEM_ALERT_WINDOW}, 1);
+
             }
         });
         return view;

@@ -28,7 +28,6 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,7 +71,6 @@ public class MusicListFragment extends android.app.Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
 
@@ -169,11 +167,6 @@ public class MusicListFragment extends android.app.Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         musicView.setLayoutManager(layoutManager);
 
-        musicView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
-                .color(Color.parseColor("#22616161"))
-                .sizeResId(R.dimen.divider)
-                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
-                .build());
         musicAdapter = new MusicAdapter(getActivity(), musicList);
         musicView.setAdapter(musicAdapter);
 
@@ -291,11 +284,6 @@ public class MusicListFragment extends android.app.Fragment {
                             music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-                            //Log.d("TAG1", 1+"");
-
-                            String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                            int p = data.lastIndexOf("/");
-                            Log.d("CUT",data.substring(0,p)+"");
 
                             if (!music.getUri().contains(".wmv")) {
                                 if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
