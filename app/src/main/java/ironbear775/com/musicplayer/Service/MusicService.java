@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.audiofx.AudioEffect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Message;
@@ -32,9 +33,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import ironbear775.com.musicplayer.Activity.Equalizer;
 import ironbear775.com.musicplayer.Activity.MusicList;
+import ironbear775.com.musicplayer.Activity.SearchActivity;
 import ironbear775.com.musicplayer.Class.Music;
+import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
+import ironbear775.com.musicplayer.Fragment.ArtistDetailFragment;
+import ironbear775.com.musicplayer.Fragment.FolderDetailFragment;
 import ironbear775.com.musicplayer.Fragment.MusicListFragment;
+import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
+import ironbear775.com.musicplayer.Fragment.PlaylistDetailFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.Notification;
@@ -59,6 +67,9 @@ public class MusicService extends Service {
     private int[] last;
     private int i = 0;
     private boolean isPlug = false;
+    private android.media.audiofx.Equalizer equalizer;
+    Intent in = new Intent(AudioEffect
+            .ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
 
     //回传数据,返回Binder类
     public class MusicBinder extends Binder {
@@ -96,11 +107,52 @@ public class MusicService extends Service {
         audioManager.registerMediaButtonEventReceiver(audiobutton);
         int result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
+
+        if ((in.resolveActivity(getPackageManager()) == null)) {
+            equalizer = new android.media.audiofx.Equalizer(0,
+                    MusicService.mediaPlayer.getAudioSessionId());
+
+            if (MusicUtils.enableEqualizer)
+                equalizer.setEnabled(true);
+            else
+                equalizer.setEnabled(false);
+            int num = equalizer.getNumberOfBands();
+            SharedPreferences sharedPreferences = getSharedPreferences("data", MODE_PRIVATE);
+            for (int i = 0; i < num && i < Equalizer.Max; i++) {
+                int level = sharedPreferences.getInt("equalizer" + i,
+                        equalizer.getBandLevel((short) i));
+                equalizer.setBandLevel((short) i, (short) level);
+            }
+        }
+
         notification = new Notification(this);
         switch (intent.getAction()) {
             case "musiclist":
                 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    musicList = intent.getParcelableArrayListExtra("musicList");
+                    switch (intent.getIntExtra("from", 1)) {
+                        case 1:
+                            musicList = MusicListFragment.musicList;
+                            break;
+                        case 2:
+                            musicList = ArtistDetailFragment.musicList;
+                            break;
+                        case 3:
+                            musicList = AlbumDetailFragment.musicList;
+                            break;
+                        case 4:
+                            musicList = PlaylistDetailFragment.musicList;
+                            break;
+                        case 5:
+                            musicList = FolderDetailFragment.musicList;
+                            break;
+                        case 6:
+                            musicList = MusicRecentAddedFragment.musicList;
+                            break;
+                        case 7:
+                            musicList = SearchActivity.musicList;
+                            break;
+                    }
+                    //musicList = intent.getParcelableArrayListExtra("musicList");
                     musicPosition = intent.getIntExtra("musicPosition", 0);
                     int progress = intent.getIntExtra("musicProgress", 0);
                     last = new int[musicList.size()];
@@ -117,7 +169,6 @@ public class MusicService extends Service {
             case "isPause":
 
                 playOrPause();
-
                 break;
             case "isPlaying":
                 /*if (MusicService.mediaPlayer == null) {
@@ -242,9 +293,11 @@ public class MusicService extends Service {
     //播放或暂停
     public void playOrPause() {
         audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
+
             createNewNotification(R.drawable.footplay);
             haveFocus = false;
         } else {
@@ -295,6 +348,12 @@ public class MusicService extends Service {
             } else {
                 MusicList.lyricButton.setVisibility(View.VISIBLE);
             }
+        }
+        if ((in.resolveActivity(getPackageManager()) == null)) {
+            if (MusicUtils.enableEqualizer)
+                equalizer.setEnabled(true);
+            else
+                equalizer.setEnabled(false);
         }
     }
 
@@ -377,8 +436,15 @@ public class MusicService extends Service {
             }
         }
 
-        MusicList.lyricView.setVisibility(View.GONE);
-        MusicList.blurBG.setVisibility(View.GONE);
+        if (MusicList.lyricView.getVisibility() == View.VISIBLE)
+            MusicList.setLyric(this);
+
+        if ((in.resolveActivity(getPackageManager()) == null)) {
+            if (MusicUtils.enableEqualizer)
+                equalizer.setEnabled(true);
+            else
+                equalizer.setEnabled(false);
+        }
     }
 
     public void preMusic() {
@@ -387,7 +453,7 @@ public class MusicService extends Service {
         try {
             mediaPlayer.reset();
             if (isRandom) {
-                if (i > 1) {
+                if (i >= 1) {
                     i--;
                     musicPosition = last[i];
                 } else
@@ -451,8 +517,15 @@ public class MusicService extends Service {
                 e.printStackTrace();
             }
         }
-        MusicList.lyricView.setVisibility(View.GONE);
-        MusicList.blurBG.setVisibility(View.GONE);
+        if (MusicList.lyricView.getVisibility() == View.VISIBLE)
+            MusicList.setLyric(this);
+
+        if ((in.resolveActivity(getPackageManager()) == null)) {
+            if (MusicUtils.enableEqualizer)
+                equalizer.setEnabled(true);
+            else
+                equalizer.setEnabled(false);
+        }
     }
 
     private int createRandom() {
@@ -503,8 +576,6 @@ public class MusicService extends Service {
                                         msg.arg2 = swatch.getBodyTextColor();
                                         msg.obj = MusicUtils.messageGood;
 
-                                        notification.createNotification(getBaseContext(), id,
-                                                MusicService.musicList, msg);
                                     } else {
                                         swatch = palette.getMutedSwatch();
                                         if (swatch != null) {
@@ -512,15 +583,12 @@ public class MusicService extends Service {
                                             msg.arg1 = swatch.getTitleTextColor();
                                             msg.arg2 = swatch.getBodyTextColor();
                                             msg.obj = MusicUtils.messageGood;
-
-                                            notification.createNotification(getBaseContext(), id,
-                                                    MusicService.musicList, msg);
                                         } else {
                                             msg.obj = MusicUtils.messageBad;
-                                            notification.createNotification(getBaseContext(), id,
-                                                    MusicService.musicList, msg);
                                         }
                                     }
+                                    notification.createNotification(getBaseContext(), id,
+                                            MusicService.musicList, msg);
                                 }
                             });
                         }
@@ -570,6 +638,7 @@ public class MusicService extends Service {
                 case "NEXT":
                     nextMusic();
                     break;
+
             }
         }
     };

@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -17,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -75,17 +73,20 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
 
+        if (!MusicUtils.enableShuffle)
+            shuffle.setVisibility(View.GONE);
+        else
+            shuffle.setVisibility(View.VISIBLE);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
+        filter.addAction("enableShuffle");
         getActivity().registerReceiver(clickableReceiver, filter);
 
         musicList.clear();
         readMusic(getActivity());
-        Log.d("TAG",musicList.size()+"");
-
-
         musicUtils = new MusicUtils(getActivity());
 
         initView();
@@ -155,7 +156,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
                 ArtistDetailFragment.count = 0;
                 PlaylistDetailFragment.count = 0;
                 musicUtils = new MusicUtils(v.getContext());
-                musicUtils.shufflePlay(musicList);
+                musicUtils.shufflePlay(musicList,6);
             }
         });
     }
@@ -179,14 +180,17 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     private void setClickAction(int position) {
 
         count = 1;
+
         MusicListFragment.count = 0;
+        MusicRecentAddedFragment.count = 0;
         AlbumDetailFragment.count = 0;
         ArtistDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
+        FolderDetailFragment.count = 0;
 
         int progress = 0;
         musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position, musicList, progress);
+        musicUtils.startMusic(position, progress,6);
 
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());
@@ -210,7 +214,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         Cursor cursor;
         cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null, MediaStore.Audio.Media.DATE_ADDED);
-        if (Build.MANUFACTURER.equals("Meizu")){
+        if (MusicUtils.isFlyme){
             if (cursor != null) {
                 if (cursor.moveToLast()) {
                     do {
@@ -282,6 +286,13 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
                     musicAdapter.notifyDataSetChanged();
                     musicList.clear();
                     readMusic(context);
+                    break;
+                case "enableShuffle":
+                    if (!MusicUtils.enableShuffle)
+                        shuffle.setVisibility(View.GONE);
+                    else
+                        shuffle.setVisibility(View.VISIBLE);
+
                     break;
             }
         }

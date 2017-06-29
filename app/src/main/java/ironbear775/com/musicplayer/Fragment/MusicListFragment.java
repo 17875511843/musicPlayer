@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -46,7 +45,7 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
 
 public class MusicListFragment extends android.app.Fragment {
     public static final ArrayList<Music> musicList = new ArrayList<>();
-    public static int pos;
+    public static int pos = 0;
     public static int count = 0;
     public static final Set<Integer> positionSet = new HashSet<>();
     private MusicAdapter musicAdapter;
@@ -79,10 +78,17 @@ public class MusicListFragment extends android.app.Fragment {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
 
+        if (!MusicUtils.enableShuffle)
+            shuffle.setVisibility(View.GONE);
+        else
+            shuffle.setVisibility(View.VISIBLE);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
+        filter.addAction("enableShuffle");
+
         getActivity().registerReceiver(clickableReceiver, filter);
 
         musicList.clear();
@@ -91,8 +97,8 @@ public class MusicListFragment extends android.app.Fragment {
 
         musicUtils = new MusicUtils(MusicList.myContext);
 
-        initView();
         pos = MusicUtils.pos;
+        initView();
 
         if (MusicUtils.launchPage == 1) {
             if (MusicList.flag == 1 && MusicService.mediaPlayer.isPlaying()) {
@@ -137,10 +143,10 @@ public class MusicListFragment extends android.app.Fragment {
                         .placeholder(R.drawable.default_album_art)
                         .into(MusicList.accountHeader.getHeaderBackgroundView());
             }else if (musicList.size() >= 1 && MusicList.flag == 0) {
-                MusicList.footTitle.setText(musicList.get(pos).getTitle());
-                MusicList.footArtist.setText(musicList.get(pos).getArtist());
+                MusicList.footTitle.setText(musicList.get(MusicUtils.pos).getTitle());
+                MusicList.footArtist.setText(musicList.get(MusicUtils.pos).getArtist());
                 MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                musicUtils.getFootAlbumArt(pos, musicList);
+                musicUtils.getFootAlbumArt(MusicUtils.pos, musicList);
             }
         }
 
@@ -200,7 +206,7 @@ public class MusicListFragment extends android.app.Fragment {
                 PlaylistDetailFragment.count = 0;
 
                 musicUtils = new MusicUtils(v.getContext());
-                musicUtils.shufflePlay(musicList);
+                musicUtils.shufflePlay(musicList,1);
             }
         });
     }
@@ -214,9 +220,10 @@ public class MusicListFragment extends android.app.Fragment {
         AlbumDetailFragment.count = 0;
         ArtistDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
+        FolderDetailFragment.count = 0;
 
-        musicUtils = new MusicUtils(this.getActivity());
-        musicUtils.startMusic(position, musicList, progress);
+        musicUtils = new MusicUtils(getActivity());
+        musicUtils.startMusic(position, progress,1);
 
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());
@@ -225,7 +232,9 @@ public class MusicListFragment extends android.app.Fragment {
         musicUtils.getFootAlbumArt(position, musicList);
 
         pos = position;
+
     }
+
 
     private void findView(View view) {
         shuffle = (RelativeLayout) view.findViewById(R.id.shuffle);
@@ -239,26 +248,26 @@ public class MusicListFragment extends android.app.Fragment {
         Cursor cursor;
         cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if (Build.MANUFACTURER.equals("Meizu")){
+        if (MusicUtils.isFlyme){
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
-                            Music music = new Music();
 
-                            music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                            music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
+                        Music music = new Music();
+                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 
-                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                    , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                            music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                            music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                            music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                            music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(
+                                Uri.parse("content://media/external/audio/albumart")
+                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-
-                            if (!music.getUri().contains(".wmv")) {
+                        if (!music.getUri().contains(".wmv")) {
                                 if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
                                     musicList.add(music);
                             }
@@ -271,16 +280,17 @@ public class MusicListFragment extends android.app.Fragment {
                 if (cursor.moveToFirst()) {
                     do {
                         if (cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC) == 17) {
-                            Music music = new Music();
 
+                            Music music = new Music();
                             music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
                             music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 
-                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(
+                                    Uri.parse("content://media/external/audio/albumart")
                                     , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                             music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
                             music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                             music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
@@ -312,6 +322,13 @@ public class MusicListFragment extends android.app.Fragment {
                     musicAdapter.notifyDataSetChanged();
                     musicList.clear();
                     readMusic(context);
+                    break;
+                case "enableShuffle":
+                    if (!MusicUtils.enableShuffle)
+                        shuffle.setVisibility(View.GONE);
+                    else
+                        shuffle.setVisibility(View.VISIBLE);
+
                     break;
             }
         }

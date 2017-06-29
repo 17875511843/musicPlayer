@@ -33,7 +33,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -224,11 +223,6 @@ public class ArtistDetailFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 
         songListView.setLayoutManager(linearLayoutManager);
-        songListView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity())
-                .color(Color.parseColor("#22616161"))
-                .sizeResId(R.dimen.divider)
-                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
-                .build());
         songAdapter = new AlbumDetailAdapter(getActivity(), musicList);
         songListView.setAdapter(songAdapter);
 
@@ -260,7 +254,7 @@ public class ArtistDetailFragment extends Fragment {
                 AlbumDetailFragment.count = 0;
                 count = 1;
                 musicUtils = new MusicUtils(v.getContext());
-                musicUtils.playAll(musicList);
+                musicUtils.playAll(musicList,2);
                 pos = 0;
             }
         });
@@ -268,13 +262,15 @@ public class ArtistDetailFragment extends Fragment {
 
     private void setClickAction(int position) {
 
+        FolderDetailFragment.count=0;
         MusicListFragment.count = 0;
         MusicRecentAddedFragment.count = 0;
         AlbumDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
         count = 1;
+
         musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position, musicList, 0);
+        musicUtils.startMusic(position, 0,2);
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());
         MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);

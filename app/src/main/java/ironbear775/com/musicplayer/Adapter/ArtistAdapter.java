@@ -69,7 +69,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
 
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
         String newFolder = "MusicPlayer/artist";
-        dir = new File(path,newFolder);
+        dir = new File(path, newFolder);
 
         ColorGenerator generator = ColorGenerator.MATERIAL;
         mColor = new int[mList.size()];
@@ -115,34 +115,37 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
         String newKeyWord;
         if (mList.get(position).getArtist().contains("/")) {
             newKeyWord = mList.get(position).getArtist().replace("/", "_");
-        }else {
+        } else {
             newKeyWord = mList.get(position).getArtist();
         }
 
-        File file1 = new File(dir,newKeyWord);
+        File file1 = new File(dir, newKeyWord);
 
-        if (MusicUtils.enableDownload) {
-            if (file1.exists() && MusicUtils.isImageGood(file1)){
+        if (MusicUtils.downloadArtist != 0) {
+            if (file1.exists() && MusicUtils.isImageGood(file1)) {
                 Glide.with(mContext)
                         .load(file1)
                         .asBitmap()
                         .placeholder(drawable)
                         .into(holder.iv);
-            }else {
+            } else {
                 holder.iv.setImageDrawable(drawable);
-                if (MusicUtils.haveWIFI(mContext)) {
+                if ((MusicUtils.haveWIFI(mContext) && MusicUtils.downloadArtist == 2) ||
+                        (MusicUtils.haveData(mContext) && MusicUtils.downloadArtist == 1)||
+                        (MusicUtils.haveWIFI(mContext) && MusicUtils.downloadArtist == 1)) {
                     MusicUtils.artistImage(holder.iv, mContext, mList.get(position).getArtist(),
                             drawable, (Activity) mContext);
                 }
+
             }
-        }else {
-            if (file1.exists() && MusicUtils.isImageGood(file1)){
+        } else {
+            if (file1.exists() && MusicUtils.isImageGood(file1)) {
                 Glide.with(mContext)
                         .load(file1)
                         .asBitmap()
                         .placeholder(drawable)
                         .into(holder.iv);
-            }else {
+            } else {
                 holder.iv.setImageDrawable(drawable);
             }
         }
@@ -171,7 +174,7 @@ class ArtistViewHolder extends RecyclerView.ViewHolder {
 
     public void setData(int position) {
         Set<Integer> positionSet = ArtistListFragment.positionSet;
-        if (MusicUtils.isSelectAll){
+        if (MusicUtils.isSelectAll) {
             positionSet = MusicList.listPositionSet;
         }
         if (positionSet.contains(position)) {

@@ -77,11 +77,17 @@ public class PlaylistDetailFragment extends Fragment {
         toolbar.setTitle(getArguments().getString("title"));
         toolbar.setTitleTextColor(Color.WHITE);
 
+        if (!MusicUtils.enableShuffle)
+            shuffleLayout.setVisibility(View.GONE);
+        else
+            shuffleLayout.setVisibility(View.VISIBLE);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("playlist delete item");
         filter.addAction("playlist swap item");
+        filter.addAction("enableShuffle");
 
         getActivity().registerReceiver(clickableReceiver,filter);
 
@@ -98,7 +104,7 @@ public class PlaylistDetailFragment extends Fragment {
                     AlbumDetailFragment.count = 0;
                     MusicRecentAddedFragment.count = 0;
                     ArtistDetailFragment.count = 0;
-                    musicUtils.shufflePlay(musicList);
+                    musicUtils.shufflePlay(musicList,4);
                 }
             }
         });
@@ -186,6 +192,7 @@ public class PlaylistDetailFragment extends Fragment {
     private void setClickAction(int position) {
         if (isClickable) {
             int progress = 0;
+            FolderDetailFragment.count = 0;
             MusicListFragment.count = 0;
             MusicRecentAddedFragment.count = 0;
             AlbumDetailFragment.count = 0;
@@ -194,7 +201,7 @@ public class PlaylistDetailFragment extends Fragment {
             if (isChange){
                 adapter.notifyDataSetChanged();
             }
-            musicUtils.startMusic(position,musicList, progress);
+            musicUtils.startMusic(position, progress,4);
 
             MusicList.footTitle.setText(musicList.get(position).getTitle());
             MusicList.footArtist.setText(musicList.get(position).getArtist());
@@ -244,6 +251,13 @@ public class PlaylistDetailFragment extends Fragment {
                 case "playlist swap item":
                     musicList = intent.getParcelableArrayListExtra("new list");
                     isChange = true;
+                    break;
+                case "enableShuffle":
+                    if (!MusicUtils.enableShuffle)
+                        shuffleLayout.setVisibility(View.GONE);
+                    else
+                        shuffleLayout.setVisibility(View.VISIBLE);
+
                     break;
             }
         }

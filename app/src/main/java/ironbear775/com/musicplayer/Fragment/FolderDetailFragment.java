@@ -73,10 +73,17 @@ public class FolderDetailFragment extends Fragment {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.close_white);
 
+        if (!MusicUtils.enableShuffle)
+            shuffle.setVisibility(View.GONE);
+        else
+            shuffle.setVisibility(View.VISIBLE);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
+        filter.addAction("enableShuffle");
+
         getActivity().registerReceiver(clickableReceiver, filter);
 
         musicUtils = new MusicUtils(getActivity());
@@ -124,7 +131,7 @@ public class FolderDetailFragment extends Fragment {
                 ArtistDetailFragment.count = 0;
                 PlaylistDetailFragment.count = 0;
                 musicUtils = new MusicUtils(v.getContext());
-                musicUtils.shufflePlay(musicList);
+                musicUtils.shufflePlay(musicList,5);
             }
         });
     }
@@ -177,7 +184,7 @@ public class FolderDetailFragment extends Fragment {
 
         int progress = 0;
         musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position, musicList, progress);
+        musicUtils.startMusic(position, progress,5);
 
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());
@@ -233,6 +240,13 @@ public class FolderDetailFragment extends Fragment {
                         MusicList.toolbar.setTitle(R.string.toolbar_title_folder);
 
                     }
+                    break;
+                case "enableShuffle":
+                    if (!MusicUtils.enableShuffle)
+                        shuffle.setVisibility(View.GONE);
+                    else
+                        shuffle.setVisibility(View.VISIBLE);
+
                     break;
             }
         }

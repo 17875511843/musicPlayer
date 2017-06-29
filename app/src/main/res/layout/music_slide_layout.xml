@@ -172,7 +172,7 @@
             android:layout_alignParentTop="true"
             android:visibility="gone"
             android:background="#77000000"
-            app:lrcAnimationDuration="200"
+            app:lrcAnimationDuration="300"
             app:lrcTextSize="18sp"
             app:lrcNormalTextColor="#66ffffff"
             app:lrcCurrentTextColor="@color/listView_bg_color"

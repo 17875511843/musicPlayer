@@ -106,7 +106,6 @@ public class Notification {
         remoteViews.setOnClickPendingIntent(R.id.noti_last, lastPIntent);
         smallRemoteViews.setOnClickPendingIntent(R.id.noti_last, lastPIntent);
 
-
         Intent intentPlay = new Intent(context, MusicService.class);
         if (MusicService.mediaPlayer.isPlaying()) {
             intentPlay.setAction("isPlaying");
@@ -142,7 +141,12 @@ public class Notification {
                 remoteViews.setTextColor(R.id.noti_others, msg.arg2);
                 smallRemoteViews.setTextColor(R.id.noti_title, msg.arg1);
                 smallRemoteViews.setTextColor(R.id.noti_others, msg.arg2);
-            } else {
+            } else if (MusicUtils.isFlyme){
+                remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
+                remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
+                smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
+                smallRemoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
+            }else {
                 remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.black));
                 remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.black));
                 smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.black));
@@ -158,8 +162,21 @@ public class Notification {
                     musicList.get(musicPosition).getArtist());
 
         }
-        remoteViews.setImageViewResource(R.id.noti_play_pause, id);
-        smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
+        if (MusicUtils.enableColorNotification){
+            remoteViews.setImageViewResource(R.id.noti_play_pause, id);
+            smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
+        }else {
+            if (MusicUtils.isFlyme && id == R.drawable.footplay) {
+                remoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footplaywhite);
+                smallRemoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footplaywhite);
+            } else if (MusicUtils.isFlyme && id == R.drawable.footpause) {
+                remoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footpausewhite);
+                smallRemoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footpausewhite);
+            } else {
+                remoteViews.setImageViewResource(R.id.noti_play_pause, id);
+                smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
+            }
+        }
 
         if (MusicService.mediaPlayer.isPlaying()) {
 
@@ -171,6 +188,13 @@ public class Notification {
                 remoteViews.setImageViewBitmap(R.id.noti_background, image);
                 smallRemoteViews.setImageViewBitmap(R.id.noti_background, image);
                 remoteViews.setImageViewResource(R.id.noti_clear, R.drawable.cancel_black);
+
+                remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
+                remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+
+                smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
+                smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+
                 Glide.with(context.getApplicationContext())
                         .load(MusicService.music.getAlbumArtUri())
                         .asBitmap()
@@ -182,10 +206,23 @@ public class Notification {
                         .placeholder(R.drawable.default_album_art)
                         .into(smallNotificationTarget);
             } else if (msg.obj.equals(MusicUtils.messageNull)) {
-                Bitmap image = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
-                image.eraseColor(Color.WHITE);
-                remoteViews.setImageViewBitmap(R.id.noti_background, image);
-                smallRemoteViews.setImageViewBitmap(R.id.noti_background, image);
+
+                remoteViews.setImageViewResource(R.id.noti_background,R.color.transparent_color);
+                smallRemoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
+
+                if (MusicUtils.isFlyme){
+                    remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
+                    remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
+
+                    smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
+                    smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
+                }else {
+                    remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
+                    remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+
+                    smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
+                    smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+                }
                 remoteViews.setImageViewResource(R.id.noti_clear, R.drawable.noti_clear);
 
                 Glide.with(context.getApplicationContext())
@@ -200,10 +237,23 @@ public class Notification {
                         .into(smallNotificationTarget);
 
             } else {
-                Bitmap image = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
-                image.eraseColor(Color.WHITE);
-                remoteViews.setImageViewBitmap(R.id.noti_background, image);
-                smallRemoteViews.setImageViewBitmap(R.id.noti_background, image);
+                remoteViews.setImageViewResource(R.id.noti_background,R.color.transparent_color);
+                smallRemoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
+
+                if (MusicUtils.isFlyme){
+                    remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
+                    remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
+
+                    smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
+                    smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
+                }else {
+                    remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
+                    remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+
+                    smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
+                    smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+                }
+
                 remoteViews.setImageViewResource(R.id.noti_clear, R.drawable.noti_clear);
 
                 Glide.with(context.getApplicationContext())
@@ -230,11 +280,4 @@ public class Notification {
         manager.notify(1, notification);
     }
 
-    public void setNotificationPlayOrPause(Context context, int id) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_layout);
-        RemoteViews smallRemoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_small_layout);
-
-        remoteViews.setImageViewResource(R.id.noti_play_pause, id);
-        smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
-    }
 }

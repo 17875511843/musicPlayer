@@ -1,18 +1,17 @@
 package ironbear775.com.musicplayer.Util;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
-import android.os.IBinder;
 import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -63,10 +62,6 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class MusicUtils {
 
-    private Activity activity;
-    private static String apiKey = "0c26dc3c5612fd63122ccf5bf11f78f9";
-    private static String path = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
-    private static String hashPath = "http://songsearch.kugou.com/song_search_v2?callback=jQuery19102275292550172583_1493445518059&keyword=";
     private static String newPath = "http://www.kugou.com/yy/index.php?r=play/getdata&hash=";
 
     private static Context mContext;
@@ -74,25 +69,28 @@ public class MusicUtils {
     private static Drawable mPlaceHolder;
     public static String localPath = Environment.getExternalStorageDirectory().getAbsolutePath();
     public static String folder = "MusicPlayer/artist";
-    public static String lyricFolder = "MusicPlayer/lyric";
+    private static String lyricFolder = "MusicPlayer/lyric";
     private static File appDir;
     private static OkHttpClient client;
     private static Request.Builder requestBuilder;
-    public static boolean enableDownload = true;
     public static boolean enableDefaultCover = false;
-    public static boolean enableColorNotification = true;
+    public static boolean enableColorNotification = false;
     public static boolean enableLockscreenNotification = true;
     public static boolean keepScreenOn = false;
     public static boolean loadWebLyric = true;
-    public static int filterNum = 0; // 0,1,2,3,4,5,6 0,15s,20s,30s,40s,50s,60s
+    public static boolean enableEqualizer = false;
+    public static boolean enableShuffle = true;
+    public static boolean isFlyme = false;
+    public static int downloadArtist = 2;//0,1,2 never,data,wifi
+    public static int filterNum = 2; // 0,1,2,3,4,5,6 0,15s,20s,30s,40s,50s,60s
     public static int launchPage = 1;//1,2,3,4,5 music,artist,album,playlist,recent
     public static int pos = 1;
     public static String messageGood = "good";
     public static String messageBad = "error";
     public static String messageNull = "null";
     public static int[] time = {0, 15000, 20000, 30000, 40000, 50000, 60000};
-    private MusicService musicService;
     public static boolean isSelectAll = false;
+    public static int numCount = 0;
 
     public MusicUtils(Context context) {
         mContext = context;
@@ -100,28 +98,17 @@ public class MusicUtils {
         requestBuilder = null;
     }
 
-    public void startMusic(int position, ArrayList<Music> musicList, int progress) {
+    public void startMusic(int position, int progress,int from) {
 
         Intent serviceIntent = new Intent(mContext, MusicService.class);
 
         serviceIntent.setAction("musiclist");
-        serviceIntent.putParcelableArrayListExtra("musicList", musicList);
+        serviceIntent.putExtra("from",from);
         serviceIntent.putExtra("musicPosition", position);
         serviceIntent.putExtra("musicProgress", progress);
 
         mContext.startService(serviceIntent);
     }
-
-    private final ServiceConnection conn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            musicService = ((MusicService.MusicBinder) iBinder).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-        }
-    };
 
     //设置底部栏专辑封面
     public void getFootAlbumArt(int pos1, ArrayList<Music> musicList) {
@@ -151,11 +138,11 @@ public class MusicUtils {
         return randomInt;
     }
 
-    public void shufflePlay(ArrayList<Music> musicList) {
+    public void shufflePlay(ArrayList<Music> musicList,int from) {
         if (musicList.size() >= 1) {
             int pos = createRandom(musicList);
 
-            startMusic(pos, musicList, 0);
+            startMusic(pos, 0,from);
             MusicService.isRandom = true;
             MusicList.footTitle.setText(musicList.get(pos).getTitle());
             MusicList.footArtist.setText(musicList.get(pos).getArtist());
@@ -165,8 +152,8 @@ public class MusicUtils {
         }
     }
 
-    public void playAll(ArrayList<Music> musicList) {
-        startMusic(0, musicList, 0);
+    public void playAll(ArrayList<Music> musicList,int from) {
+        startMusic(0, 0,from);
         MusicService.isRandom = false;
         MusicList.footTitle.setText(musicList.get(0).getTitle());
         MusicList.footArtist.setText(musicList.get(0).getArtist());
@@ -236,7 +223,7 @@ public class MusicUtils {
         editor.putInt("isSingleOrCycle", MusicService.isSingleOrCycle);
 
         editor.putInt("flag", 0);
-        editor.putBoolean("enable", enableDownload);
+        editor.putInt("downloadArtist",downloadArtist);
 
         Gson gson = new Gson();
         String json = gson.toJson(MusicListFragment.musicList);
@@ -250,7 +237,7 @@ public class MusicUtils {
     public static void artistImage(ImageView imageView, final Context context,
                                    final String keyWord, final Drawable placeHolder,
                                    final Activity uiactivity) {
-        if (enableDownload) {
+        if (downloadArtist != 0) {
             mImageView = imageView;
             mContext = context;
             mPlaceHolder = placeHolder;
@@ -271,6 +258,8 @@ public class MusicUtils {
             }
             URL url = null;
             try {
+                String apiKey = "0c26dc3c5612fd63122ccf5bf11f78f9";
+                String path = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=";
                 url = new URL(path + keyWord + "&api_key=" + apiKey + "&format=json");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -294,79 +283,83 @@ public class MusicUtils {
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (response.isSuccessful()) {
-                            String result = response.body().string();
 
-                            final String ImageUrl = parseJson(result);
 
-                            if (!appDir.exists()) {
-                                appDir.mkdirs();
-                            }
+                                String result = response.body().string();
 
-                            if (ImageUrl != null && !ImageUrl.equals("")) {
-                                InputStream is;
+                                final String ImageUrl = parseJson(result);
 
-                                URL url = new URL(ImageUrl);
-                                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                                is = new BufferedInputStream(connection.getInputStream());
+                                if (!appDir.exists()) {
+                                    appDir.mkdirs();
+                                }
 
-                                BitmapFactory.Options opt = new BitmapFactory.Options();
+                                if (ImageUrl != null && !ImageUrl.equals("")) {
+                                    InputStream is;
 
-                                opt.inPreferredConfig = Bitmap.Config.RGB_565;
-                                Bitmap bitmap = BitmapFactory.decodeStream(is, null, opt);
+                                    URL url = new URL(ImageUrl);
+                                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                                    is = new BufferedInputStream(connection.getInputStream());
 
-                                is.close();
+                                    BitmapFactory.Options opt = new BitmapFactory.Options();
 
-                                if (bitmap != null) {
+                                    opt.inPreferredConfig = Bitmap.Config.RGB_565;
+                                    Bitmap bitmap = BitmapFactory.decodeStream(is, null, opt);
 
-                                    FileOutputStream fos = null;
-                                    try {
-                                        fos = new FileOutputStream(file);
-                                        if (bitmap.getByteCount() > 3000000) {
-                                            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, fos);
-                                        } else if (bitmap.getByteCount() > 2500000) {
-                                            bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fos);
-                                        } else if (bitmap.getByteCount() > 2000000) {
-                                            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
-                                        } else if (bitmap.getByteCount() < 1500000) {
-                                            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
-                                        } else if (bitmap.getByteCount() < 1000000) {
-                                            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
-                                        }
-                                        fos.flush();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    } finally {
+                                    is.close();
+
+                                    if (bitmap != null) {
+
+                                        FileOutputStream fos = null;
                                         try {
-                                            if (fos != null) {
-                                                fos.close();
+                                            fos = new FileOutputStream(file);
+                                            if (bitmap.getByteCount() > 3000000) {
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 30, fos);
+                                            } else if (bitmap.getByteCount() > 2500000) {
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 40, fos);
+                                            } else if (bitmap.getByteCount() > 2000000) {
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
+                                            } else if (bitmap.getByteCount() < 1500000) {
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
+                                            } else if (bitmap.getByteCount() < 1000000) {
+                                                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
                                             }
-                                            if (!bitmap.isRecycled()) {
-                                                bitmap.recycle();
-                                            }
+                                            fos.flush();
+                                            numCount--;
                                         } catch (IOException e) {
                                             e.printStackTrace();
+                                        } finally {
+                                            try {
+                                                if (fos != null) {
+                                                    fos.close();
+                                                }
+                                                if (!bitmap.isRecycled()) {
+                                                    bitmap.recycle();
+                                                }
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            uiactivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (mImageView.getTag(R.id.artist_url).equals(keyWord)) {
-                                        if (file.exists()) {
-                                            Glide.with(mContext)
-                                                    .load(file)
-                                                    .asBitmap()
-                                                    .centerCrop()
-                                                    .placeholder(mPlaceHolder)
-                                                    .into(mImageView);
+                                uiactivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (mImageView.getTag(R.id.artist_url).equals(keyWord)) {
+                                            if (file.exists()) {
+                                                Glide.with(mContext)
+                                                        .load(file)
+                                                        .asBitmap()
+                                                        .centerCrop()
+                                                        .placeholder(mPlaceHolder)
+                                                        .into(mImageView);
+                                            }
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
+
                 });
             }
         } else {
@@ -377,21 +370,25 @@ public class MusicUtils {
     public static void updateArtist(ImageView imageView, final Context context,
                                     final String keyWord, final Drawable placeHolder,
                                     final Activity uiactivity) {
-        appDir = new File(localPath, folder);
+        if ((haveWIFI(mContext) && downloadArtist == 2) ||
+                (haveData(mContext) && downloadArtist == 1)||
+                (haveWIFI(mContext) && downloadArtist == 1)) {
+            appDir = new File(localPath, folder);
 
-        String newKeyWord;
-        if (keyWord.contains("/")) {
-            newKeyWord = keyWord.replace("/", "_");
-        } else {
-            newKeyWord = keyWord;
+            String newKeyWord;
+            if (keyWord.contains("/")) {
+                newKeyWord = keyWord.replace("/", "_");
+            } else {
+                newKeyWord = keyWord;
+            }
+
+            final File file = new File(appDir, newKeyWord);
+
+            if (file.exists()) {
+                file.delete();
+            }
+            artistImage(imageView, context, keyWord, placeHolder, uiactivity);
         }
-
-        final File file = new File(appDir, newKeyWord);
-
-        if (file.exists()) {
-            file.delete();
-        }
-        artistImage(imageView, context, keyWord, placeHolder, uiactivity);
     }
 
     public static void closeDownloadArtistImage() {
@@ -439,8 +436,6 @@ public class MusicUtils {
     private static List<String> parseLyricJson(String json) {
         List<String> key = new ArrayList<>();
         String j = json.substring(41, json.length() - 1);
-
-        Log.d("json", j + "");
 
         try {
             JSONObject main = new JSONObject(j);
@@ -495,6 +490,11 @@ public class MusicUtils {
         NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI;
     }
+    public static boolean haveData(Context context){
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_MOBILE;
+    }
 
     public static boolean isImageGood(File file) {
         BitmapFactory.Options options;
@@ -516,6 +516,7 @@ public class MusicUtils {
 
         try {
 
+            String hashPath = "http://songsearch.kugou.com/song_search_v2?callback=jQuery19102275292550172583_1493445518059&keyword=";
             URL u = new URL(hashPath + songTitle + " " + singer
                     + "&page=1&pagesize=30&userid=-1&clientver=&platform=WebFilter&tag=em&filter=2&iscorrection=1&privilege_filter=0&_=1493445518061");
             Request.Builder builder = new Request.Builder().url(u);
@@ -750,4 +751,23 @@ public class MusicUtils {
         return size;
     }
 
+    public static boolean isFlyme(Context context, String packageName)
+    {
+        PackageManager packageManager = context.getPackageManager();
+        List<PackageInfo> packageInfoList = packageManager .getInstalledPackages(0);
+
+        String name;
+        for (int i = 0; i < packageInfoList.size(); i++) {
+            PackageInfo pak = packageInfoList.get(i);
+
+            if ((pak.applicationInfo.flags & pak.applicationInfo.FLAG_SYSTEM) > 0) {
+                name = pak.packageName;
+                if(name.contains(packageName))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

@@ -9,14 +9,13 @@
         android:layout_height="130dp"
         android:scaleType="centerCrop"
         />
-    <ImageButton
+    <ImageView
         android:layout_alignParentTop="true"
         android:id="@+id/noti_album_art"
-        android:scaleType="fitXY"
         android:clickable="true"
-        android:background="@color/transparent_color"
         android:layout_width="130dp"
-        android:layout_height="130dp" />
+        android:layout_height="130dp"
+        android:scaleType="centerCrop" />
 
     <RelativeLayout
         android:paddingBottom="10dp"
@@ -24,8 +23,7 @@
         android:layout_toEndOf="@+id/noti_album_art"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/transparent_color">
+        android:layout_height="wrap_content">
         <ImageButton
             android:layout_toStartOf="@+id/noti_play_pause"
             android:id="@+id/noti_last"
@@ -44,7 +42,7 @@
             android:layout_height="30dp"
             android:src="@drawable/next"
             android:scaleType="centerCrop"
-            android:background="#00000000"/>
+            android:background="@color/transparent_color"/>
 
         <ImageButton
             android:id="@+id/noti_play_pause"
@@ -59,8 +57,8 @@
         android:layout_margin="10dp"
         android:layout_alignParentEnd="true"
         android:id="@+id/noti_clear"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:scaleType="centerCrop"
         android:src="@drawable/noti_clear"
         android:background="@color/transparent_color"
@@ -73,8 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/noti_clear"
-        android:background="@color/transparent_color">
+        android:layout_toStartOf="@+id/noti_clear">
         <TextView
             android:paddingTop="10dp"
             android:layout_alignParentTop="true"

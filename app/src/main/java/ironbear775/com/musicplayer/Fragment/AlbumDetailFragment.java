@@ -207,7 +207,7 @@ public class AlbumDetailFragment extends Fragment {
                 ArtistDetailFragment.count = 0;
                 count = 1;
                 musicUtils = new MusicUtils(v.getContext());
-                musicUtils.playAll(musicList);
+                musicUtils.playAll(musicList,3);
 
             }
         });
@@ -215,6 +215,7 @@ public class AlbumDetailFragment extends Fragment {
 
     private void setClickAction(int position) {
 
+        FolderDetailFragment.count = 0;
         MusicListFragment.count = 0;
         MusicRecentAddedFragment.count = 0;
         ArtistDetailFragment.count = 0;
@@ -223,7 +224,7 @@ public class AlbumDetailFragment extends Fragment {
         int progress = 0;
 
         musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position,musicList, progress);
+        musicUtils.startMusic(position, progress,3);
 
         MusicList.footTitle.setText(musicList.get(position).getTitle());
         MusicList.footArtist.setText(musicList.get(position).getArtist());

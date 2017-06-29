@@ -45,7 +45,7 @@
     <string name="added">已添加</string>
     <string name="already_have">已存在</string>
     <string name="adding">保存中…</string>
-    <string name="delete_download_image">是否删除已下载的图片?</string>
+    <string name="delete_download_image">是否删除已下载的图片？</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="ui">UI</string>
@@ -92,5 +92,11 @@
     <string name="select_local_lyric">选择本地歌词</string>
     <string name="open_failed">只能编辑MP3文件</string>
     <string name="select_all">全选</string>
-
+    <string name="clear_cache_judge">清除缓存？</string>
+    <string name="equalizer">均衡器</string>
+    <string name="reset">重置</string>
+    <string name="enable_shuffle">显示随机播放栏</string>
+    <string name="only_wifi">仅WIFI</string>
+    <string name="always">总是</string>
+    <string name="never">不下载</string>
 </resources>

@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -136,7 +135,7 @@ public class AlbumListFragment extends android.app.Fragment {
         cursor = getActivity().getBaseContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, MediaStore.Audio.Media.ALBUM + "=?", new String[]{albumTag}, MediaStore.Audio.Media.TITLE);
 
-        if (Build.MANUFACTURER.equals("Meizu")) {
+        if (MusicUtils.isFlyme) {
             if (cursor != null) {
                 cursor.moveToFirst();
                 do {

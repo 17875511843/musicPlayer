@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -61,7 +60,7 @@ public class FolderFragment extends android.app.Fragment {
         getActivity().registerReceiver(clickableReceiver, filter);
 
         playlists.clear();
-        readArtist(getActivity());
+        readFolder(getActivity());
 
         musicUtils = new MusicUtils(getActivity());
 
@@ -129,7 +128,7 @@ public class FolderFragment extends android.app.Fragment {
                 new String[]{"%" + foldertTag + "%"},
                 MediaStore.Audio.Media.TITLE);
 
-        if (Build.MANUFACTURER.equals("Meizu")) {
+        if (MusicUtils.isFlyme) {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -229,7 +228,7 @@ public class FolderFragment extends android.app.Fragment {
 
     }
 
-    private void readArtist(Context context) {
+    private void readFolder(Context context) {
         ArrayList<String> name = new ArrayList<>();
         int flag = 0;
         Cursor cursor;
@@ -238,22 +237,29 @@ public class FolderFragment extends android.app.Fragment {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                    int p = data.lastIndexOf("/");
-                    int s = data.substring(0, p).lastIndexOf("/");
-                    if (name.size() > 0) {
-                        for (int i = 0; i < name.size(); i++) {
-                            if (data.substring(0, p).equals(name.get(i))) {
-                                flag = 1;
+                    int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
+
+                    if (duration >= MusicUtils.time[MusicUtils.filterNum]) {
+                        String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+
+                        int p = data.lastIndexOf("/");
+                        int s = data.substring(0, p).lastIndexOf("/");
+
+                        if (name.size() > 0) {
+                            for (int i = 0; i < name.size(); i++) {
+                                if (data.substring(0, p).equals(name.get(i))) {
+                                    flag = 1;
+                                }
                             }
                         }
+                        if (flag == 0) {
+                            Playlist list = new Playlist(data.substring(s + 1, p), data.substring(0, p));
+                            name.add(data.substring(0, p));
+                            playlists.add(list);
+                        } else
+                            flag = 0;
                     }
-                    if (flag == 0) {
-                        Playlist list = new Playlist(data.substring(s + 1, p), data.substring(0, p));
-                        name.add(data.substring(0, p));
-                        playlists.add(list);
-                    } else
-                        flag = 0;
+
 
                 } while (cursor.moveToNext());
                 cursor.close();
