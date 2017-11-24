@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="500dp">
+    android:layout_height="500dp"
+    android:background="?attr/appBg">
     <RelativeLayout
         android:id="@+id/dialog"
         android:layout_width="match_parent"
@@ -17,10 +18,10 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:textSize="30sp"
-            android:textColor="@color/listView_bg_color"
+            android:textColor="?attr/mainTextColor"
             android:gravity="center_vertical"
             android:text="@string/add_to_playlist"
-            android:background="@color/material_gray"/>
+            android:background="?attr/appBg"/>
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/dialog_create_playlist"
@@ -46,6 +47,8 @@
             android:maxLines="1"
             android:background="@null"
             android:hint="@string/input_name"
+            android:textColor="?attr/subTextColor"
+            android:textColorHint="?attr/subTextColor"
             android:textCursorDrawable="@null"
             android:visibility="gone"
             />
@@ -72,12 +75,13 @@
             android:layout_height="50dp"
             android:gravity="center_vertical"
             android:textSize="23sp"
-            android:textColor="@color/black"
+            android:textColor="?attr/mainTextColor"
             android:text="@string/create_new_playlist"/>
 
     </RelativeLayout>
     <ListView
         android:id="@+id/dialog_listView"
+        android:background="?attr/appBg"
         android:layout_below="@+id/dialog_create_playlist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

@@ -11,9 +11,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 
-import com.github.paolorotolo.appintro.AppIntro;
-import com.github.paolorotolo.appintro.AppIntroFragment;
+import com.github.paolorotolo.appintro.AppIntro2;
+import com.github.paolorotolo.appintro.AppIntro2Fragment;
 
+import ironbear775.com.musicplayer.Fragment.IntroDemoFragment;
 import ironbear775.com.musicplayer.Fragment.IntroFragment;
 import ironbear775.com.musicplayer.R;
 
@@ -21,18 +22,23 @@ import ironbear775.com.musicplayer.R;
  * Created by ironbear on 2017/1/29.
  */
 
-public class MyIntroActivity extends AppIntro {
+public class MyIntroActivity extends AppIntro2 {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Fragment fragment = new IntroFragment();
+        Fragment demoFragment = new IntroDemoFragment();
 
-        addSlide(AppIntroFragment.newInstance(getResources().getString(R.string.welcome),
+        addSlide(AppIntro2Fragment.newInstance(getResources().getString(R.string.welcome),
                 getResources().getString(R.string.intro),
                 R.drawable.album, Color.parseColor("#2196f3")));
+        addSlide(AppIntro2Fragment.newInstance(getResources().getString(R.string.feature),
+                getResources().getString(R.string.feature_intro),
+                R.drawable.feature, Color.parseColor("#00BCD4")));
+        addSlide(demoFragment);
         addSlide(fragment);
-        addSlide(AppIntroFragment.newInstance(getResources().getString(R.string.enjoy),
+        addSlide(AppIntro2Fragment.newInstance(getResources().getString(R.string.enjoy),
                 getResources().getString(R.string.alldone),
                 R.drawable.done, Color.parseColor("#00BCD4")));
 

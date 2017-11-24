@@ -21,9 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.bumptech.glide.Glide;
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +29,6 @@ import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Adapter.ArtistAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
-import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 
 /**
@@ -67,29 +63,9 @@ public class ArtistListFragment extends Fragment {
 
         initView();
 
-        if (MusicUtils.launchPage==2) {
-            if (MusicService.mediaPlayer.isPlaying()) {
-                MusicList.footTitle.setText(MusicService.music.getTitle());
-                MusicList.footArtist.setText(MusicService.music.getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.footAlbumArt);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .centerCrop()
-                        .placeholder(R.drawable.default_album_art_land)
-                        .into(MusicList.accountHeader.getHeaderBackgroundView());
-            } else {
-                MusicListFragment.readMusic(getActivity());
-                MusicList.footTitle.setText(MusicListFragment.musicList.get(MusicUtils.pos).getTitle());
-                MusicList.footArtist.setText(MusicListFragment.musicList.get(MusicUtils.pos).getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                musicUtils.getFootAlbumArt(MusicUtils.pos, MusicListFragment.musicList);
-            }
+        if (MusicUtils.launchPage == 2) {
+
+            MusicUtils.setLaunchPage(getActivity(), MusicUtils.FROM_ADAPTER);
         }
 
         return view;
@@ -130,169 +106,72 @@ public class ArtistListFragment extends Fragment {
     private void setClickAction(int position) {
         count = 1;
         AlbumListFragment.count = 1;
+
         String artistTag = artistlist.get(position).getArtist();
-        ArrayList<Music> songMusicList = new ArrayList<>();
-        Cursor cursor = getActivity().getBaseContext().getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                null, MediaStore.Audio.Media.ARTIST + "=?",
-                new String[]{artistTag},
-                MediaStore.Audio.Media.TITLE);
-        if (MusicUtils.isFlyme){
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    do {
-                            Music music = new Music();
-
-                            music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                            music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-
-                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                    , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                            music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                            music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                            music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                            music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-
-                            if (!music.getUri().contains(".wmv")) {
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                    songMusicList.add(music);
-                            }
-                    } while (cursor.moveToNext());
-                }
-                cursor.close();
-            }
-        }else {
-            if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    do {
-                        if (cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC) == 17) {
-                            Music music = new Music();
-
-                            music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                            music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-
-                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                    , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                            music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                            music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                            music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                            music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-
-                            if (!music.getUri().contains(".wmv")) {
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                    songMusicList.add(music);
-                            }
-                        }
-                    } while (cursor.moveToNext());
-                }
-                cursor.close();
-            }
-        }
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Bundle bundle = new Bundle();
-        bundle.putString("artist",artistTag);
-        bundle.putParcelableArrayList("musicList", songMusicList);
+        bundle.putString("artist", artistTag);
 
         if (MusicList.artistFragment != null) {
             transaction.hide(MusicList.artistFragment);
         }
+
         transaction.setCustomAnimations(
                 R.animator.fragment_slide_left_enter,
-                R.animator.fragment_slide_left_exit,
-                R.animator.fragment_slide_right_enter,
-                R.animator.fragment_slide_right_exit);
+                R.animator.fragment_slide_left_exit);
         artistDetailFragment = new ArtistDetailFragment();
         artistDetailFragment.setArguments(bundle);
         transaction.add(R.id.content, artistDetailFragment);
         transaction.commit();
-
+        MusicUtils.fromWhere = MusicUtils.FROM_ARTIST_PAGE;
     }
 
 
     private void findView(View view) {
-        artistView = (FastScrollRecyclerView) view.findViewById(R.id.music_list);
+        artistView = view.findViewById(R.id.music_list);
     }
 
     private void readArtist(Context context) {
-        Music music = new Music();
-        Music music1 = new Music();
-        music.setArtist("");
-        music1.setArtist("");
-
         Cursor cursor;
         cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null, MediaStore.Audio.Media.ARTIST);
+        int flag = 0;
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
+                    Music music = new Music();
+                    music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                    music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
 
-                    if (music.getArtist().equals("")) {
+                    if (artistlist.size() > 0) {
+                        for (int i = 0; i < artistlist.size(); i++) {
+                            if (music.getArtist().equals(artistlist.get(i).getArtist())) {
+                                flag = 1;
+                            }
+                        }
+                    }
+                    if (flag == 0) {
                         music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
                         music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
                         music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                 , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                         music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                         music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                    }
-                    if (!music.getArtist().equals("") && music1.getArtist().equals("")) {
-                        music1.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                        music1.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-                        music1.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                        music1.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                        music1.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                        music1.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                        music1.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                        music1.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                        music1.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                    }
-                    if (!music.getArtist().equals("") && !music1.getArtist().equals("")) {
-
-                        Music musicAlbum = new Music();
-                        if (!music.getArtist().equals(music1.getArtist())) {
-                            musicAlbum.setID(music.getID());
-                            musicAlbum.setSize(music.getSize());
-                            musicAlbum.setDuration(music.getDuration());
-
-                            musicAlbum.setAlbumArtUri(music.getAlbumArtUri());
-                            musicAlbum.setTitle(music.getUri());
-                            musicAlbum.setAlbum_id(music.getAlbum_id());
-                            musicAlbum.setUri(music.getUri());
-                            musicAlbum.setAlbum(music.getAlbum());
-                            musicAlbum.setArtist(music.getArtist());
+                        if (!music.getUri().contains(".wmv"))
                             if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                artistlist.add(musicAlbum);
-                        }
-                        music.setID(music1.getID());
-                        music.setSize(music1.getSize());
-                        music.setDuration(music1.getDuration());
+                                artistlist.add(music);
 
-                        music.setAlbumArtUri(music1.getAlbumArtUri());
-                        music.setTitle(music1.getUri());
-                        music.setAlbum_id(music1.getAlbum_id());
-                        music.setUri(music1.getUri());
-                        music.setAlbum(music1.getAlbum());
-                        music.setArtist(music1.getArtist());
+                    } else
+                        flag = 0;
 
-                        music1.setArtist("");
-                    }
                 } while (cursor.moveToNext());
                 cursor.close();
-            }
-            if (!music.getArtist().equals("")) {
-                artistlist.add(music);
             }
         }
     }
@@ -300,16 +179,19 @@ public class ArtistListFragment extends Fragment {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "SetClickable_True":
-                    artistAdapter.setClickable(true);
-                    break;
-                case "SetClickable_False":
-                    artistAdapter.setClickable(false);
-                    break;
-                case "notifyDataSetChanged":
-                    artistAdapter.notifyDataSetChanged();
-                    break;
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case "SetClickable_True":
+                        artistAdapter.setClickable(true);
+                        break;
+                    case "SetClickable_False":
+                        artistAdapter.setClickable(false);
+                        break;
+                    case "notifyDataSetChanged":
+                        artistAdapter.notifyDataSetChanged();
+                        break;
+                }
             }
         }
     };

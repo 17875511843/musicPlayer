@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -16,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,9 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
-
-import com.bumptech.glide.Glide;
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,7 +33,6 @@ import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Adapter.MusicAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
-import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 
 /**
@@ -44,7 +40,7 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  */
 
 public class MusicListFragment extends android.app.Fragment {
-    public static final ArrayList<Music> musicList = new ArrayList<>();
+    public static ArrayList<Music> musicList = new ArrayList<>();
     public static int pos = 0;
     public static int count = 0;
     public static final Set<Integer> positionSet = new HashSet<>();
@@ -73,7 +69,8 @@ public class MusicListFragment extends android.app.Fragment {
         }
 
 
-        MusicList.toolbar.setVisibility(View.GONE);
+        getActivity().sendBroadcast(new Intent("set toolbar gone"));
+
         toolbar.setTitle(R.string.toolbar_title_music_player);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
@@ -88,6 +85,7 @@ public class MusicListFragment extends android.app.Fragment {
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
         filter.addAction("enableShuffle");
+        filter.addAction("refresh adapter");
 
         getActivity().registerReceiver(clickableReceiver, filter);
 
@@ -95,59 +93,25 @@ public class MusicListFragment extends android.app.Fragment {
 
         readMusic(getActivity());
 
-        musicUtils = new MusicUtils(MusicList.myContext);
-
-        pos = MusicUtils.pos;
         initView();
 
+        musicUtils = new MusicUtils(getActivity());
+
+        pos = MusicUtils.pos;
+
         if (MusicUtils.launchPage == 1) {
-            if (MusicList.flag == 1 && MusicService.mediaPlayer.isPlaying()) {
-                MusicList.footTitle.setText(MusicService.music.getTitle());
-                MusicList.footArtist.setText(MusicService.music.getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.footAlbumArt);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .centerCrop()
-                        .placeholder(R.drawable.default_album_art_land)
-                        .into(MusicList.accountHeader.getHeaderBackgroundView());
-            } else if (MusicList.flag == 1) {
-                MusicList.footTitle.setText(MusicService.music.getTitle());
-                MusicList.footArtist.setText(MusicService.music.getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.footAlbumArt);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .centerCrop()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.accountHeader.getHeaderBackgroundView());
-            }else if (MusicService.mediaPlayer.isPlaying()){
-                MusicList.footTitle.setText(MusicService.music.getTitle());
-                MusicList.footArtist.setText(MusicService.music.getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.footAlbumArt);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .centerCrop()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.accountHeader.getHeaderBackgroundView());
-            }else if (musicList.size() >= 1 && MusicList.flag == 0) {
-                MusicList.footTitle.setText(musicList.get(MusicUtils.pos).getTitle());
-                MusicList.footArtist.setText(musicList.get(MusicUtils.pos).getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                musicUtils.getFootAlbumArt(MusicUtils.pos, musicList);
+            if (MusicList.first) {
+                MusicList.list = musicList;
+                MusicList.shufflelist = musicList;
+                getActivity();
+                SharedPreferences.Editor ed = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE).edit();
+                ed.putBoolean("firstTime", false);
+                ed.apply();
+                ed.commit();
+                MusicUtils.saveArray(getActivity(), MusicList.list);
+                MusicUtils.saveShuffleArray(getActivity(), MusicList.shufflelist);
             }
+            MusicUtils.setLaunchPage(getActivity(),MusicUtils.FROM_ADAPTER);
         }
 
         return view;
@@ -162,17 +126,13 @@ public class MusicListFragment extends android.app.Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                MusicList.slideDrawer.openDrawer();
+                getActivity().sendBroadcast(new Intent("open drawer"));
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
-    private void initView() {
 
-        musicView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        musicView.setLayoutManager(layoutManager);
-
+    private void initAdapter(){
         musicAdapter = new MusicAdapter(getActivity(), musicList);
         musicView.setAdapter(musicAdapter);
 
@@ -195,19 +155,26 @@ public class MusicListFragment extends android.app.Fragment {
                 }
             }
         });
+    }
+    private void initView() {
 
-        shuffle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                count = 1;
-                MusicRecentAddedFragment.count = 0;
-                AlbumDetailFragment.count = 0;
-                ArtistDetailFragment.count = 0;
-                PlaylistDetailFragment.count = 0;
+        musicView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        musicView.setLayoutManager(layoutManager);
 
-                musicUtils = new MusicUtils(v.getContext());
-                musicUtils.shufflePlay(musicList,1);
-            }
+        initAdapter();
+
+        shuffle.setOnClickListener(v -> {
+            count = 1;
+            MusicRecentAddedFragment.count = 0;
+            AlbumDetailFragment.count = 0;
+            ArtistDetailFragment.count = 0;
+            PlaylistDetailFragment.count = 0;
+            FolderDetailFragment.count = 0;
+            MusicList.count = 0;
+
+            musicUtils = new MusicUtils(v.getContext());
+            musicUtils.shufflePlay(musicList, 1);
         });
     }
 
@@ -221,15 +188,20 @@ public class MusicListFragment extends android.app.Fragment {
         ArtistDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
         FolderDetailFragment.count = 0;
+        MusicList.count = 0;
 
         musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position, progress,1);
+        musicUtils.startMusic(position, progress, 1);
 
-        MusicList.footTitle.setText(musicList.get(position).getTitle());
-        MusicList.footArtist.setText(musicList.get(position).getArtist());
-        MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
+        Intent intent = new Intent("set footBar");
+        Intent intent1 = new Intent("set PlayOrPause");
+        intent.putExtra("footTitle",musicList.get(position).getTitle());
+        intent.putExtra("footArtist",musicList.get(position).getArtist());
+        intent1.putExtra("PlayOrPause",R.drawable.footplaywhite);
+        getActivity().sendBroadcast(intent);
+        getActivity().sendBroadcast(intent1);
 
-        musicUtils.getFootAlbumArt(position, musicList);
+        musicUtils.getFootAlbumArt(position, musicList,MusicUtils.FROM_ADAPTER);
 
         pos = position;
 
@@ -237,9 +209,9 @@ public class MusicListFragment extends android.app.Fragment {
 
 
     private void findView(View view) {
-        shuffle = (RelativeLayout) view.findViewById(R.id.shuffle);
-        toolbar = (Toolbar) view.findViewById(R.id.music_toolbar);
-        musicView = (FastScrollRecyclerView) view.findViewById(R.id.music_list);
+        shuffle = view.findViewById(R.id.shuffle);
+        toolbar = view.findViewById(R.id.music_toolbar);
+        musicView = view.findViewById(R.id.music_list);
     }
 
     //获取音乐各种信息
@@ -248,7 +220,7 @@ public class MusicListFragment extends android.app.Fragment {
         Cursor cursor;
         cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if (MusicUtils.isFlyme){
+        if (MusicUtils.isFlyme) {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -262,20 +234,20 @@ public class MusicListFragment extends android.app.Fragment {
                                 , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                         music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                         music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                         music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                         music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                         music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
                         if (!music.getUri().contains(".wmv")) {
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                    musicList.add(music);
-                            }
+                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                                musicList.add(music);
+                        }
                     } while (cursor.moveToNext());
                     cursor.close();
                 }
             }
-        }else {
+        } else {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -290,7 +262,7 @@ public class MusicListFragment extends android.app.Fragment {
                                     , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                             music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                             music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                            music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                             music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
@@ -310,26 +282,32 @@ public class MusicListFragment extends android.app.Fragment {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "SetClickable_True":
-                    musicAdapter.setClickable(true);
-                    break;
-                case "SetClickable_False":
-                    musicAdapter.setClickable(false);
-                    break;
-                case "notifyDataSetChanged":
-                    Log.d("NOTI","Receive");
-                    musicAdapter.notifyDataSetChanged();
-                    musicList.clear();
-                    readMusic(context);
-                    break;
-                case "enableShuffle":
-                    if (!MusicUtils.enableShuffle)
-                        shuffle.setVisibility(View.GONE);
-                    else
-                        shuffle.setVisibility(View.VISIBLE);
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case "SetClickable_True":
+                        if (musicAdapter != null)
+                        musicAdapter.setClickable(true);
+                        break;
+                    case "SetClickable_False":
+                        musicAdapter.setClickable(false);
+                        break;
+                    case "notifyDataSetChanged":
+                        musicAdapter.notifyDataSetChanged();
+                        musicList.clear();
+                        readMusic(context);
+                        break;
+                    case "enableShuffle":
+                        if (!MusicUtils.enableShuffle)
+                            shuffle.setVisibility(View.GONE);
+                        else
+                            shuffle.setVisibility(View.VISIBLE);
 
-                    break;
+                        break;
+                    case "refresh adapter":
+                        //initView();
+                        break;
+                }
             }
         }
     };

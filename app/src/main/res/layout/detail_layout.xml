@@ -8,20 +8,35 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:background="?android:attr/selectableItemBackground"
         tools:targetApi="lollipop">
 
-        <ImageView
-            android:id="@+id/detail_album_art"
+        <RelativeLayout
+            android:id="@+id/detail"
             android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:padding="15dp" />
+            android:layout_height="80dp">
+            <TextView
+                android:id="@+id/detail_track"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:padding="15dp"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="?attr/mainTextColor"
+                android:gravity="center"/>
+
+            <ImageView
+                android:id="@+id/detail_album_art"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:padding="15dp" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_toStartOf="@+id/detail_item_menu"
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:layout_toEndOf="@+id/detail_album_art">
+            android:layout_toEndOf="@+id/detail">
 
             <TextView
                 android:id="@+id/detail_title"
@@ -31,11 +46,11 @@
                 android:layout_marginStart="3dp"
                 android:ellipsize="marquee"
                 android:gravity="center_vertical"
-                android:maxLines="1"
                 android:paddingBottom="5dp"
                 android:paddingTop="10dp"
-                android:textColor="@color/black"
-                android:textStyle="bold" />
+                android:textColor="?attr/mainTextColor"
+                android:textStyle="bold"
+                android:singleLine="true" />
 
             <TextView
                 android:id="@+id/detail_time"
@@ -45,8 +60,8 @@
                 android:layout_marginStart="3dp"
                 android:ellipsize="marquee"
                 android:gravity="center_vertical"
-                android:maxLines="1"
-                android:textColor="@color/black" />
+                android:textColor="?attr/subTextColor"
+                android:singleLine="true" />
 
         </RelativeLayout>
         <ImageView

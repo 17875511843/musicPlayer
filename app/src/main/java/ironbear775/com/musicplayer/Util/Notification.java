@@ -1,5 +1,6 @@
 package ironbear775.com.musicplayer.Util;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,21 +9,23 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.NotificationTarget;
+import com.bumptech.glide.signature.StringSignature;
 
-import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
 
 import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Service.MusicService;
-
-import static ironbear775.com.musicplayer.Service.MusicService.musicPosition;
 
 
 /**
@@ -30,22 +33,18 @@ import static ironbear775.com.musicplayer.Service.MusicService.musicPosition;
  */
 
 public class Notification {
-    private NotificationTarget notificationTarget;
-    private NotificationTarget smallNotificationTarget;
     private final MusicService musicService;
+    private static final String CHANNEL_ID = "MUSIC_CHANNEL_ID";
 
     public Notification(MusicService musicService) {
         this.musicService = musicService;
     }
 
-    public void createNotification(final Context context, int id, ArrayList<Music> musicList, Message msg) {
+    public void createNotification(final Context context, int id,
+                                   Music music, Message msg, Bitmap bitmap) {
 
-        final NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-
-        final android.support.v7.app.NotificationCompat.MediaStyle mediaStyle = new android.support.v7.app.NotificationCompat.MediaStyle(builder);
-
-        mediaStyle.setShowActionsInCompactView(0, 1);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
 
         Intent intent = new Intent(context, MusicList.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
@@ -54,57 +53,11 @@ public class Notification {
 
         final RemoteViews smallRemoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_small_layout);
 
-        if (MusicUtils.enableLockscreenNotification) {
-            builder.setCustomBigContentView(remoteViews)
-                    .setContent(smallRemoteViews)
-                    .setStyle(mediaStyle)
-                    .setContentIntent(pendingIntent)
-                    .setPriority(android.app.Notification.PRIORITY_MAX)
-                    .setOngoing(true)
-                    .setAutoCancel(false)
-                    .setShowWhen(false)
-                    .setOnlyAlertOnce(true)
-                    .setCategory(android.app.Notification.CATEGORY_SERVICE)
-                    .setSmallIcon(R.drawable.notification_icon)
-                    .setColor(Color.BLACK);
-        } else {
-            builder.setCustomBigContentView(remoteViews)
-                    .setContent(smallRemoteViews)
-                    .setStyle(mediaStyle)
-                    .setContentIntent(pendingIntent)
-                    .setPriority(android.app.Notification.PRIORITY_MAX)
-                    .setVisibility(NotificationCompat.VISIBILITY_SECRET)
-                    .setOngoing(true)
-                    .setAutoCancel(false)
-                    .setShowWhen(false)
-                    .setOnlyAlertOnce(true)
-                    .setCategory(android.app.Notification.CATEGORY_SERVICE)
-                    .setSmallIcon(R.drawable.notification_icon)
-                    .setColor(Color.BLACK);
-        }
-        final android.app.Notification notification = builder.build();
-        notification.priority = android.app.Notification.PRIORITY_MAX;
-        notification.flags |= android.app.Notification.FLAG_ONGOING_EVENT;
-
-        notificationTarget = new NotificationTarget(
-                context,
-                remoteViews,
-                R.id.noti_album_art,
-                notification,
-                1);
-
-        smallNotificationTarget = new NotificationTarget(
-                context,
-                smallRemoteViews,
-                R.id.noti_album_art,
-                notification,
-                1);
-
         Intent intentLast = new Intent(context, MusicService.class);
         intentLast.setAction("PreMusic");
-        PendingIntent lastPIntent = PendingIntent.getService(context, 0, intentLast, 0);
-        remoteViews.setOnClickPendingIntent(R.id.noti_last, lastPIntent);
-        smallRemoteViews.setOnClickPendingIntent(R.id.noti_last, lastPIntent);
+        PendingIntent LastPIntent = PendingIntent.getService(context, 0, intentLast, 0);
+        remoteViews.setOnClickPendingIntent(R.id.noti_last, LastPIntent);
+        smallRemoteViews.setOnClickPendingIntent(R.id.noti_last, LastPIntent);
 
         Intent intentPlay = new Intent(context, MusicService.class);
         if (MusicService.mediaPlayer.isPlaying()) {
@@ -134,38 +87,65 @@ public class Notification {
         PendingIntent ClearPIntent = PendingIntent.getService(context, 3, intentClear, 0);
         remoteViews.setOnClickPendingIntent(R.id.noti_clear, ClearPIntent);
 
-        if (musicList.size() >= 1) {
+        builder.setCustomBigContentView(remoteViews)
+                .setContent(smallRemoteViews)
+                .setContentIntent(pendingIntent)
+                .setPriority(android.app.Notification.PRIORITY_DEFAULT)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setShowWhen(false)
+                .setOnlyAlertOnce(true)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setColor(Color.BLACK);
 
-            if (MusicUtils.enableColorNotification && msg.obj.equals(MusicUtils.messageGood)) {
-                remoteViews.setTextColor(R.id.noti_title, msg.arg1);
-                remoteViews.setTextColor(R.id.noti_others, msg.arg2);
-                smallRemoteViews.setTextColor(R.id.noti_title, msg.arg1);
-                smallRemoteViews.setTextColor(R.id.noti_others, msg.arg2);
-            } else if (MusicUtils.isFlyme){
-                remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
-                remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
-                smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
-                smallRemoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
-            }else {
-                remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.black));
-                remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.black));
-                smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.black));
-                smallRemoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.black));
-            }
 
-            remoteViews.setTextViewText(R.id.noti_title, musicList.get(musicPosition).getTitle());
-            smallRemoteViews.setTextViewText(R.id.noti_title, musicList.get(musicPosition).getTitle());
-            remoteViews.setTextViewText(R.id.noti_others,
-                    musicList.get(musicPosition).getArtist());
+        final android.app.Notification notification = builder.build();
+        notification.flags |= android.app.Notification.FLAG_ONGOING_EVENT;
 
-            smallRemoteViews.setTextViewText(R.id.noti_others,
-                    musicList.get(musicPosition).getArtist());
+        NotificationTarget notificationTarget = new NotificationTarget(
+                context,
+                remoteViews,
+                R.id.noti_album_art,
+                notification,
+                1);
 
+        NotificationTarget smallNotificationTarget = new NotificationTarget(
+                context,
+                smallRemoteViews,
+                R.id.noti_album_art,
+                notification,
+                1);
+
+
+        if (MusicUtils.enableColorNotification && msg.obj.equals(MusicUtils.messageGood)) {
+            remoteViews.setTextColor(R.id.noti_title, msg.arg1);
+            remoteViews.setTextColor(R.id.noti_others, msg.arg2);
+            smallRemoteViews.setTextColor(R.id.noti_title, msg.arg1);
+            smallRemoteViews.setTextColor(R.id.noti_others, msg.arg2);
+        } else if (MusicUtils.isFlyme) {
+            remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
+            remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
+            smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
+            smallRemoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
+        } else {
+            remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.black));
+            remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.black));
+            smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.black));
+            smallRemoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.black));
         }
-        if (MusicUtils.enableColorNotification){
+
+        remoteViews.setTextViewText(R.id.noti_title, music.getTitle());
+        smallRemoteViews.setTextViewText(R.id.noti_title, music.getTitle());
+        remoteViews.setTextViewText(R.id.noti_others,
+                music.getArtist());
+
+        smallRemoteViews.setTextViewText(R.id.noti_others,
+                music.getArtist());
+
+        if (MusicUtils.enableColorNotification) {
             remoteViews.setImageViewResource(R.id.noti_play_pause, id);
             smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
-        }else {
+        } else {
             if (MusicUtils.isFlyme && id == R.drawable.footplay) {
                 remoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footplaywhite);
                 smallRemoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footplaywhite);
@@ -176,6 +156,14 @@ public class Notification {
                 remoteViews.setImageViewResource(R.id.noti_play_pause, id);
                 smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
             }
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if (bitmap != null) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            Log.d("TAG", "createNotification:not null");
+        } else {
+            stream = null;
         }
 
         if (MusicService.mediaPlayer.isPlaying()) {
@@ -195,58 +183,40 @@ public class Notification {
                 smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
                 smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
 
-                Glide.with(context.getApplicationContext())
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(notificationTarget);
-                Glide.with(context.getApplicationContext())
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(smallNotificationTarget);
-            } else if (msg.obj.equals(MusicUtils.messageNull)) {
-
-                remoteViews.setImageViewResource(R.id.noti_background,R.color.transparent_color);
-                smallRemoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
-
-                if (MusicUtils.isFlyme){
-                    remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
-                    remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
-
-                    smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
-                    smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
-                }else {
-                    remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
-                    remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
-
-                    smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
-                    smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
+                if (stream != null) {
+                    Glide.with(context.getApplicationContext())
+                            .load(stream.toByteArray())
+                            .asBitmap()
+                            .centerCrop()
+                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .into(notificationTarget);
+                    Glide.with(context.getApplicationContext())
+                            .load(stream.toByteArray())
+                            .asBitmap()
+                            .centerCrop()
+                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .into(smallNotificationTarget);
+                } else {
+                    Glide.with(context.getApplicationContext())
+                            .load(R.drawable.default_album_art)
+                            .asBitmap()
+                            .into(notificationTarget);
+                    Glide.with(context.getApplicationContext())
+                            .load(R.drawable.default_album_art)
+                            .asBitmap()
+                            .into(smallNotificationTarget);
                 }
-                remoteViews.setImageViewResource(R.id.noti_clear, R.drawable.noti_clear);
-
-                Glide.with(context.getApplicationContext())
-                        .load(R.drawable.default_album_art)
-                        .asBitmap()
-                        .error(R.drawable.default_album_art)
-                        .into(notificationTarget);
-                Glide.with(context.getApplicationContext())
-                        .load(R.drawable.default_album_art)
-                        .asBitmap()
-                        .error(R.drawable.default_album_art)
-                        .into(smallNotificationTarget);
-
             } else {
-                remoteViews.setImageViewResource(R.id.noti_background,R.color.transparent_color);
+                remoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
                 smallRemoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
 
-                if (MusicUtils.isFlyme){
+                if (MusicUtils.isFlyme) {
                     remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
                     remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
 
                     smallRemoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
                     smallRemoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
-                }else {
+                } else {
                     remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next);
                     remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous);
 
@@ -256,28 +226,130 @@ public class Notification {
 
                 remoteViews.setImageViewResource(R.id.noti_clear, R.drawable.noti_clear);
 
-                Glide.with(context.getApplicationContext())
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .error(R.drawable.default_album_art)
-                        .into(notificationTarget);
-                Glide.with(context.getApplicationContext())
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .error(R.drawable.default_album_art)
-                        .into(smallNotificationTarget);
-
+                if (stream != null) {
+                    Glide.with(context)
+                            .load(stream.toByteArray())
+                            .asBitmap()
+                            .centerCrop()
+                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .into(notificationTarget);
+                    Glide.with(context)
+                            .load(stream.toByteArray())
+                            .asBitmap()
+                            .centerCrop()
+                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .into(smallNotificationTarget);
+                } else {
+                    Glide.with(context.getApplicationContext())
+                            .load(R.drawable.default_album_art)
+                            .asBitmap()
+                            .into(notificationTarget);
+                    Glide.with(context.getApplicationContext())
+                            .load(R.drawable.default_album_art)
+                            .asBitmap()
+                            .into(smallNotificationTarget);
+                }
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setCategory(android.app.Notification.CATEGORY_SERVICE);
+
+        musicService.startForeground(1, builder.build());
+
+        if (notificationManager != null) {
+            notificationManager.notify(1, builder.build());
+        }
+    }
+
+    public void createNotification(Context context, int id,
+                                   Music music, Bitmap bitmap) {
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
+
+        Intent intent = new Intent(context, MusicList.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
+        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_layout);
+
+        final RemoteViews smallRemoteViews = new RemoteViews(context.getPackageName(), R.layout.notification_small_layout);
+
+        Intent intentLast = new Intent(context, MusicService.class);
+        intentLast.setAction("PreMusic");
+        PendingIntent LastPIntent = PendingIntent.getService(context, 0, intentLast, 0);
+        remoteViews.setOnClickPendingIntent(R.id.noti_last, LastPIntent);
+        smallRemoteViews.setOnClickPendingIntent(R.id.noti_last, LastPIntent);
+
+        Intent intentPlay = new Intent(context, MusicService.class);
+        if (MusicService.mediaPlayer.isPlaying()) {
+            intentPlay.setAction("isPlaying");
+        } else {
+            intentPlay.setAction("isPause");
+        }
+        PendingIntent PlayPIntent = PendingIntent.getService(context, 1, intentPlay, 0);
+        remoteViews.setOnClickPendingIntent(R.id.noti_play_pause, PlayPIntent);
+        smallRemoteViews.setOnClickPendingIntent(R.id.noti_play_pause, PlayPIntent);
+
+        Intent intentAlbumArt = new Intent(context, MusicList.class);
+        PendingIntent AlbumArtPIntent = PendingIntent.getActivity(context, 4, intentAlbumArt, 0);
+        remoteViews.setOnClickPendingIntent(R.id.noti_album_art, AlbumArtPIntent);
+        smallRemoteViews.setOnClickPendingIntent(R.id.album_art, AlbumArtPIntent);
+
+        Intent intentNext = new Intent(context, MusicService.class);
+        intentNext.setAction("NextMusic");
+        PendingIntent NextPIntent = PendingIntent.getService(context, 2, intentNext, 0);
+        remoteViews.setOnClickPendingIntent(R.id.noti_next, NextPIntent);
+        smallRemoteViews.setOnClickPendingIntent(R.id.noti_next, NextPIntent);
+
+        Intent intentClear = new Intent(context, MusicService.class);
+        intentClear.setAction("ClearMusic");
+        PendingIntent ClearPIntent = PendingIntent.getService(context, 3, intentClear, 0);
+        remoteViews.setOnClickPendingIntent(R.id.noti_clear, ClearPIntent);
+
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.notification_icon)
+                .addAction(R.drawable.previous_white, "Previous", LastPIntent) // #0
+                .addAction(id, "Pause", PlayPIntent)  // #1
+                .addAction(R.drawable.next_white, "Next", NextPIntent)     // #2
+                .addAction(R.drawable.ic_close_white_24dp,"Clear",ClearPIntent)
+                .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setMediaSession(new MediaSessionCompat(context, "das").getSessionToken())
+                        .setShowActionsInCompactView(0, 1, 2))
+                .setShowWhen(false)
+                .setContentIntent(pendingIntent)
+                .setContentTitle(music.getTitle())
+                .setContentText(music.getArtist())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setLargeIcon(bitmap);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(context, notificationManager);
         }
 
+        musicService.startForeground(1, builder.build());
 
-        musicService.startForeground(1, notification);
+        if (notificationManager != null) {
+            notificationManager.notify(1, builder.build());
+        }
 
-        manager.notify(1, notification);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel(Context context, NotificationManager notificationManager) {
+        if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+            NotificationChannel notificationChannel =
+                    new NotificationChannel(CHANNEL_ID,
+                            context.getString(R.string.app_name),
+                            NotificationManager.IMPORTANCE_LOW);
+
+            notificationChannel.setDescription(context.getString(R.string.app_name));
+
+            notificationChannel.enableVibration(false);
+            notificationChannel.enableLights(false);
+            notificationChannel.setShowBadge(false);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
     }
 
 }

@@ -22,7 +22,7 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  * Created by ironbear on 2017/6/24.
  */
 
-public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeListener,Switch.OnCheckedChangeListener {
+public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeListener, Switch.OnCheckedChangeListener {
     private Toolbar toolbar;
     private Button reset;
     private Switch equalizerSwitch;
@@ -36,6 +36,7 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
     private int min_level = 0;
     private int max_level = 100;
     private int save[] = new int[Max];
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,40 +83,35 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
         }
         if (equalizerSwitch.isChecked()) {
             equalizer.setEnabled(true);
-            for (int i = 0; i < num; i++)
-            {
+            for (int i = 0; i < num; i++) {
                 seekBar[i].setEnabled(true);
             }
-        }else {
+        } else {
             equalizer.setEnabled(false);
-            for (int i = 0; i < num; i++)
-            {
+            for (int i = 0; i < num; i++) {
                 seekBar[i].setEnabled(false);
             }
         }
         updateUI();
     }
-    public void updateUI ()
-    {
+
+    public void updateUI() {
         updateSeekBars();
     }
 
-    public void updateSeekBars ()
-    {
-        for (int i = 0; i < num; i++)
-        {
+    public void updateSeekBars() {
+        for (int i = 0; i < num; i++) {
             int level;
             if (equalizer != null)
-                level = equalizer.getBandLevel ((short)i);
+                level = equalizer.getBandLevel((short) i);
             else
                 level = 0;
             int pos = 100 * level / (max_level - min_level) + 50;
-            seekBar[i].setProgress (pos);
+            seekBar[i].setProgress(pos);
         }
     }
 
-    public String milliHzToString (int milliHz)
-    {
+    public String milliHzToString(int milliHz) {
         if (milliHz < 1000) return "";
         if (milliHz < 1000000)
             return "" + (milliHz / 1000) + "Hz";
@@ -124,52 +120,48 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
     }
 
     private void findView() {
-        toolbar = (Toolbar) findViewById(R.id.equalizer_toolbar);
-        reset = (Button) findViewById(R.id.reset_equalizer);
-        equalizerSwitch = (Switch) findViewById(R.id.equalizer_switch);
+        toolbar = findViewById(R.id.equalizer_toolbar);
+        reset = findViewById(R.id.reset_equalizer);
+        equalizerSwitch = findViewById(R.id.equalizer_switch);
         equalizerSwitch.setOnCheckedChangeListener(this);
-        reset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!equalizerSwitch.isChecked()) {
-                    equalizerSwitch.setChecked(true);
-                }
+        reset.setOnClickListener(v -> {
+            if (!equalizerSwitch.isChecked()) {
+                equalizerSwitch.setChecked(true);
+            }
 
-                for (int i = 0; i < num; i++)
-                {
-                    seekBar[i].setProgress(50);
-                }
+            for (int i = 0; i < num; i++) {
+                seekBar[i].setProgress(50);
             }
         });
-        seekBar[0] = (SeekBar) findViewById(R.id.equalizer1);
-        minLable[0] = (TextView) findViewById(R.id.min1);
-        maxLable[0] = (TextView) findViewById(R.id.max1);
-        layout[0] = (RelativeLayout) findViewById(R.id.layout1);
+        seekBar[0] = findViewById(R.id.equalizer1);
+        minLable[0] = findViewById(R.id.min1);
+        maxLable[0] = findViewById(R.id.max1);
+        layout[0] = findViewById(R.id.layout1);
 
-        seekBar[1] = (SeekBar) findViewById(R.id.equalizer2);
-        minLable[1] = (TextView) findViewById(R.id.min2);
-        maxLable[1] = (TextView) findViewById(R.id.max2);
-        layout[1] = (RelativeLayout) findViewById(R.id.layout2);
+        seekBar[1] = findViewById(R.id.equalizer2);
+        minLable[1] = findViewById(R.id.min2);
+        maxLable[1] = findViewById(R.id.max2);
+        layout[1] = findViewById(R.id.layout2);
 
-        seekBar[2] = (SeekBar) findViewById(R.id.equalizer3);
-        minLable[2] = (TextView) findViewById(R.id.min3);
-        maxLable[2] = (TextView) findViewById(R.id.max3);
-        layout[2] = (RelativeLayout) findViewById(R.id.layout3);
+        seekBar[2] = findViewById(R.id.equalizer3);
+        minLable[2] = findViewById(R.id.min3);
+        maxLable[2] = findViewById(R.id.max3);
+        layout[2] = findViewById(R.id.layout3);
 
-        seekBar[3] = (SeekBar) findViewById(R.id.equalizer4);
-        minLable[3] = (TextView) findViewById(R.id.min4);
-        maxLable[3] = (TextView) findViewById(R.id.max4);
-        layout[3] = (RelativeLayout) findViewById(R.id.layout4);
+        seekBar[3] = findViewById(R.id.equalizer4);
+        minLable[3] = findViewById(R.id.min4);
+        maxLable[3] = findViewById(R.id.max4);
+        layout[3] = findViewById(R.id.layout4);
 
-        seekBar[4] = (SeekBar) findViewById(R.id.equalizer5);
-        minLable[4] = (TextView) findViewById(R.id.min5);
-        maxLable[4] = (TextView) findViewById(R.id.max5);
-        layout[4] = (RelativeLayout) findViewById(R.id.layout5);
+        seekBar[4] = findViewById(R.id.equalizer5);
+        minLable[4] = findViewById(R.id.min5);
+        maxLable[4] = findViewById(R.id.max5);
+        layout[4] = findViewById(R.id.layout5);
 
-        seekBar[5] = (SeekBar) findViewById(R.id.equalizer6);
-        minLable[5] = (TextView) findViewById(R.id.min6);
-        maxLable[5] = (TextView) findViewById(R.id.max6);
-        layout[5] = (RelativeLayout) findViewById(R.id.layout6);
+        seekBar[5] = findViewById(R.id.equalizer6);
+        minLable[5] = findViewById(R.id.min6);
+        maxLable[5] = findViewById(R.id.max6);
+        layout[5] = findViewById(R.id.layout6);
 
     }
 
@@ -191,8 +183,7 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
             }
         } else {
             equalizer.setEnabled(false);
-            for (int i = 0; i < num; i++)
-            {
+            for (int i = 0; i < num; i++) {
                 seekBar[i].setEnabled(false);
             }
         }
@@ -200,23 +191,20 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
 
     @Override
     public void onProgressChanged(SeekBar seek, int progress, boolean fromUser) {
-        if (equalizer != null && equalizerSwitch.isChecked())
-        {
+        if (equalizer != null && equalizerSwitch.isChecked()) {
             SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
 
             int new_level = min_level + (max_level - min_level) * progress / 100;
 
-            for (int i = 0; i < num; i++)
-            {
-                if ( seek == seekBar[i])
-                {
-                    equalizer.setBandLevel ((short)i, (short)new_level);
+            for (int i = 0; i < num; i++) {
+                if (seek == seekBar[i]) {
+                    equalizer.setBandLevel((short) i, (short) new_level);
                     break;
                 }
             }
-            for (int i = 0;i<num;i++){
-                save[i] = equalizer.getBandLevel((short)i);
-                editor.putInt("equalizer"+i,save[i]);
+            for (int i = 0; i < num; i++) {
+                save[i] = equalizer.getBandLevel((short) i);
+                editor.putInt("equalizer" + i, save[i]);
                 editor.apply();
             }
             editor.commit();

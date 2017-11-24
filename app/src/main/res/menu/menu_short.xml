@@ -11,6 +11,6 @@
         android:id="@+id/search_song"
         android:icon="@drawable/ic_search_white_24dp"
         android:orderInCategory="90"
-        android:title="search"
+        android:title="@string/searching_lyric"
         app:showAsAction="ifRoom" />
 </menu>

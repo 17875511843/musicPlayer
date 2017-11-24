@@ -1,25 +1,30 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorAccent">@color/material_gray</item>
-        <item name="colorPrimaryDark">@color/material_gray_dark</item>
-        <item name="colorPrimary">@color/material_gray</item>
+        <item name="colorAccent">?attr/colorAccent</item>
+        <item name="colorPrimaryDark">?attr/colorPrimaryDark</item>
+        <item name="colorPrimary">?attr/colorPrimary</item>
 
         <item name="android:windowTranslucentStatus">false</item>
-        <item name="android:windowTranslucentNavigation" >false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
         <item name="windowActionModeOverlay">true</item>
 
-        <item name="actionModeBackground">@color/material_gray</item>
-        <item name="colorControlActivated">@color/material_gray_dark</item>
+    </style>
 
-        <item name="colorControlNormal">@color/listView_bg_color</item>
+    <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
+        <item name="background">?attr/colorPrimary</item>
+        <item name="titleTextStyle">@style/CustomeActionModeTextStyle</item>
+    </style>
 
+    <style name="CustomeActionModeTextStyle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="tagTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -34,9 +39,7 @@
         <item name="colorControlActivated">@color/material_gray_dark</item>
 
         <item name="colorControlNormal">@color/listView_bg_color</item>
-
     </style>
-
 
     <style name="SleepTimerTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowFrame">@null</item>
@@ -50,14 +53,480 @@
         //dialog会自适应
     </style>
 
+    <style name="MaterialThemeDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:colorControlNormal">?attr/subTextColor</item>
+    </style>
+
+    <style name="DefaultAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="mainTextColor">@color/lightMainTextColor</item>
+        <item name="subTextColor">@color/lightSubTextColor</item>
+        <item name="appBg">@color/lightBg</item>
+        <item name="appBgDark">@color/lightBgDark</item>
+        <item name="slideMainTextColor">@color/white</item>
+
+        <item name="floatingActionButtonColor">@color/white</item>
+
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeCloseDrawable">@drawable/close_white</item>
+        <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
+
+    <style name="DefaultAppTheme.NoChangeMainWindowColor" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="mainTextColor">@color/lightMainTextColor</item>
+        <item name="subTextColor">@color/lightSubTextColor</item>
+        <item name="appBg">@color/lightBg</item>
+        <item name="appBgDark">@color/lightBgDark</item>
+        <item name="slideMainTextColor">@color/material_gray_dark</item>
+
+        <item name="floatingActionButtonColor">@color/nightColorAccent</item>
+        <item name="slideMainColor">@color/slide_layout_control_bg_color</item>
+        <item name="slideSubColor">@color/slide_layout_middle_color</item>
+        <item name="slideSubTextColor">@color/lightSubTextColor</item>
+        <item name="slideTopColor">@color/slide_layout_control_bg_color</item>
+        <item name="seekBarPassColor">@color/lightSeekBarNextColor</item>
+        <item name="seekBarNextColor">@color/lightSeekBarPassColor</item>
+
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeCloseDrawable">@drawable/close_white</item>
+        <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
+    <style name="DefaultAppThemeIndigo" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryIndigo</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkIndigo</item>
+        <item name="colorAccent">@color/ColorAccentIndigo</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryIndigo</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkIndigo</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightIndigo</item>
+        <item name="slideTopColor">@color/SlideTopColorIndigo</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassIndigo</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextIndigo</item>
+
+    </style>
+
+    <style name="DefaultAppThemeIndigoNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryIndigo</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkIndigo</item>
+        <item name="colorAccent">@color/ColorAccentIndigo</item>
+    </style>
+
+    <style name="DefaultAppThemeGreen" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryGreen</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkGreen</item>
+        <item name="colorAccent">@color/ColorAccentGreen</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryGreen</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkGreen</item>
+        <item name="slideTopColor">@color/SlideTopColorGreen</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightGreen</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassGreen</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextGreen</item>
+    </style>
+
+    <style name="DefaultAppThemeGreenNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryGreen</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkGreen</item>
+        <item name="colorAccent">@color/ColorAccentGreen</item>
+    </style>
+
+    <style name="DefaultAppThemePink" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryPink</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryPink</item>
+        <item name="colorAccent">@color/ColorAccentPink</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryPink</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkPink</item>
+        <item name="slideTopColor">@color/SlideTopColorPink</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightPink</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassPink</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextPink</item>
+    </style>
+
+    <style name="DefaultAppThemePinkNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryPink</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryPink</item>
+        <item name="colorAccent">@color/ColorAccentPink</item>
+    </style>
+
+    <style name="DefaultAppThemePurple" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryPurple</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkPurple</item>
+        <item name="colorAccent">@color/ColorAccentPurple</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryPurple</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkPurple</item>
+        <item name="slideTopColor">@color/SlideTopColorPurple</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightPurple</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassPurple</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextPurple</item>
+    </style>
+
+    <style name="DefaultAppThemePurpleNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryPurple</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkPurple</item>
+        <item name="colorAccent">@color/ColorAccentPurple</item>
+    </style>
+
+    <style name="DefaultAppThemeRed" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryRed</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkRed</item>
+        <item name="colorAccent">@color/ColorAccentRed</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryRed</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkRed</item>
+        <item name="slideTopColor">@color/SlideTopColorRed</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightRed</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassRed</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextRed</item>
+    </style>
+
+    <style name="DefaultAppThemeRedNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryRed</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkRed</item>
+        <item name="colorAccent">@color/ColorAccentRed</item>
+    </style>
+
+    <style name="DefaultAppThemeBlue" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryBlue</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBlue</item>
+        <item name="colorAccent">@color/ColorAccentBlue</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryBlue</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkBlue</item>
+        <item name="slideTopColor">@color/SlideTopColorBlue</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightBlue1</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassBlue</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextBlue</item>
+    </style>
+
+    <style name="DefaultAppThemeBlueNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryBlue</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBlue</item>
+        <item name="colorAccent">@color/ColorAccentBlue</item>
+    </style>
+
+    <style name="DefaultAppThemeLightBlue" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryLightBlue</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkLightBlue</item>
+        <item name="colorAccent">@color/ColorAccentLightBlue</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryLightBlue</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkLightBlue</item>
+        <item name="slideTopColor">@color/SlideTopColorLightBlue</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightLightBlue</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassLightBlue</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextLightBlue</item>
+    </style>
+
+    <style name="DefaultAppThemeLightBlueNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryLightBlue</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkLightBlue</item>
+        <item name="colorAccent">@color/ColorAccentLightBlue</item>
+    </style>
+
+    <style name="DefaultAppThemeTeal" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryTeal</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkTeal</item>
+        <item name="colorAccent">@color/ColorAccentTeal</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryTeal</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkTeal</item>
+        <item name="slideTopColor">@color/SlideTopColorTeal</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightTeal</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassTeal</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextTeal</item>
+    </style>
+
+    <style name="DefaultAppThemeTealNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryTeal</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkTeal</item>
+        <item name="colorAccent">@color/ColorAccentTeal</item>
+    </style>
+
+    <style name="DefaultAppThemeLime" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryLime</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkLime</item>
+        <item name="colorAccent">@color/ColorAccentLime</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryLime</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkLime</item>
+        <item name="slideTopColor">@color/SlideTopColorLime</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightLime</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassLime</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextLime</item>
+    </style>
+
+    <style name="DefaultAppThemeLimeNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryLime</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkLime</item>
+        <item name="colorAccent">@color/ColorAccentLime</item>
+    </style>
+
+    <style name="DefaultAppThemeOrange" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryOrange</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkOrange</item>
+        <item name="colorAccent">@color/ColorAccentOrange</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryOrange</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkOrange</item>
+        <item name="slideTopColor">@color/SlideTopColorOrange</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightOrange</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassOrange</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextOrange</item>
+    </style>
+
+    <style name="DefaultAppThemeOrangeNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryOrange</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkOrange</item>
+        <item name="colorAccent">@color/ColorAccentOrange</item>
+    </style>
+
+    <style name="DefaultAppThemeDeepOrange" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryDeepOrange</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkDeepOrange</item>
+        <item name="colorAccent">@color/ColorAccentDeepOrange</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryDeepOrange</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkDeepOrange</item>
+        <item name="slideTopColor">@color/SlideTopColorDeepOrange</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightDeepOrange</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassDeepOrange</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextDeepOrange</item>
+    </style>
+
+    <style name="DefaultAppThemeDeepOrangeNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryDeepOrange</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkDeepOrange</item>
+        <item name="colorAccent">@color/ColorAccentDeepOrange</item>
+    </style>
+
+    <style name="DefaultAppThemeAmber" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryAmber</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkAmber</item>
+        <item name="colorAccent">@color/ColorAccentAmber</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryAmber</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkAmber</item>
+        <item name="slideTopColor">@color/SlideTopColorAmber</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightAmber</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassAmber</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextAmber</item>
+    </style>
+
+    <style name="DefaultAppThemeAmberNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryAmber</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkAmber</item>
+        <item name="colorAccent">@color/ColorAccentAmber</item>
+    </style>
+
+    <style name="DefaultAppThemeBrown" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryBrown</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBrown</item>
+        <item name="colorAccent">@color/ColorAccentBrown</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryBrown</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkBrown</item>
+        <item name="slideTopColor">@color/SlideTopColorBrown</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightBrown</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassBrown</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextBrown</item>
+    </style>
+
+    <style name="DefaultAppThemeBrownNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryBrown</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBrown</item>
+        <item name="colorAccent">@color/ColorAccentBrown</item>
+    </style>
+
+    <style name="DefaultAppThemeGrey" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryGrey</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkGrey</item>
+        <item name="colorAccent">@color/ColorAccentGrey</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryGrey</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkGrey</item>
+        <item name="slideTopColor">@color/SlideTopColorGrey</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightGrey</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassGrey</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextGrey</item>
+    </style>
+
+    <style name="DefaultAppThemeGreyNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryGrey</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkGrey</item>
+        <item name="colorAccent">@color/ColorAccentGrey</item>
+    </style>
+
+    <style name="DefaultAppThemeBlueGrey" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryBlueGrey</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBlueGrey</item>
+        <item name="colorAccent">@color/ColorAccentBlueGrey</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryBlueGrey</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkBlueGrey</item>
+        <item name="slideTopColor">@color/SlideTopColorBlueGrey</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightBlueGrey</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassBlueGrey</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextBlueGrey</item>
+    </style>
+
+    <style name="DefaultAppThemeBlueGreyNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryBlueGrey</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBlueGrey</item>
+        <item name="colorAccent">@color/ColorAccentBlueGrey</item>
+    </style>
+
+    <style name="DefaultAppThemeCarmine" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryCarmine</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkCarmine</item>
+        <item name="colorAccent">@color/ColorAccentCarmine</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryCarmine</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkCarmine</item>
+        <item name="slideTopColor">@color/SlideTopColorCarmine</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightCarmine</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassCarmine</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextCarmine</item>
+    </style>
+
+    <style name="DefaultAppThemeCarmineNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryCarmine</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkCarmine</item>
+        <item name="colorAccent">@color/ColorAccentCarmine</item>
+    </style>
+
+    <style name="DefaultAppThemeDarkBlue" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryDarkBlue1</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkDarkBlue1</item>
+        <item name="colorAccent">@color/ColorAccentDarkBlue1</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryDarkBlue1</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkDarkBlue1</item>
+        <item name="slideTopColor">@color/SlideTopColorDarkBlue1</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightDarkBlue1</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassDarkBlue1</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextDarkBlue1</item>
+    </style>
+
+    <style name="DefaultAppThemeDarkBlueNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryDarkBlue1</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkDarkBlue1</item>
+        <item name="colorAccent">@color/ColorAccentDarkBlue1</item>
+    </style>
+
+    <style name="DefaultAppThemeSandalwood" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimarySandalwood</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkSandalwood</item>
+        <item name="colorAccent">@color/ColorAccentSandalwood</item>
+
+        <item name="slideMainColor">@color/ColorPrimarySandalwood</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkSandalwood</item>
+        <item name="slideTopColor">@color/SlideTopColorSandalwood</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightSandalwood</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassSandalwood</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextSandalwood</item>
+    </style>
+
+    <style name="DefaultAppThemeSandalwoodNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimarySandalwood</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkSandalwood</item>
+        <item name="colorAccent">@color/ColorAccentSandalwood</item>
+    </style>
+
+    <style name="DefaultAppThemeBambooGreen" parent="DefaultAppTheme">
+        <item name="colorPrimary">@color/ColorPrimaryBambooGreen</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBambooGreen</item>
+        <item name="colorAccent">@color/ColorAccentBambooGreen</item>
+
+        <item name="slideMainColor">@color/ColorPrimaryBambooGreen</item>
+        <item name="slideSubColor">@color/ColorPrimaryDarkBambooGreen</item>
+        <item name="slideTopColor">@color/SlideTopColorBambooGreen</item>
+        <item name="slideSubTextColor">@color/ColorPrimaryLightBambooGreen</item>
+        <item name="seekBarPassColor">@color/ColorSeekBarPassBambooGreen</item>
+        <item name="seekBarNextColor">@color/ColorSeekBarNextBambooGreen</item>
+
+    </style>
+
+    <style name="DefaultAppThemeBambooGreenNoChangeMainWindowColor" parent="DefaultAppTheme.NoChangeMainWindowColor">
+        <item name="colorPrimary">@color/ColorPrimaryBambooGreen</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDarkBambooGreen</item>
+        <item name="colorAccent">@color/ColorAccentBambooGreen</item>
+    </style>
+
+    <style name="MaterialDrawerThemeNight" parent="MaterialTheme">
+        <!-- Here we setting appcompat’s actionBarStyle -->
+        <item name="drawerArrowStyle">@style/MaterialDrawer.DrawerArrowStyle</item>
+
+        <!-- ...and here we setting appcompat’s color theming attrs -->
+        <item name="colorPrimary">@color/nightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/nightColorPrimaryDark</item>
+        <item name="colorAccent">@color/nightColorAccent</item>
+
+        <item name="floatingActionButtonColor">@color/nightColorAccent</item>
+        <item name="slideMainTextColor">@color/nightMainTextColor</item>
+        <item name="slideSubTextColor">@color/nightColorPrimaryLight</item>
+        <item name="slideMainColor">@color/nightSlideControlColor</item>
+        <item name="slideTopColor">@color/nightSeekBarNextColor</item>
+        <item name="slideSubColor">@color/nightSlideMiddleColor</item>
+        <item name="seekBarPassColor">@color/nightSeekBarPassColor</item>
+        <item name="seekBarNextColor">@color/nightSeekBarNextColor</item>
+
+        <item name="mainTextColor">@color/nightMainTextColor</item>
+        <item name="subTextColor">@color/nightSubTextColor</item>
+        <item name="appBg">@color/nightBg</item>
+        <item name="appBgDark">@color/nightBgDark</item>
+
+
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeCloseDrawable">@drawable/close_white</item>
+        <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="colorControlNormal">@android:color/white</item>
+
+        <!-- MaterialDrawer specific values -->
+        <item name="material_drawer_background">@color/nightBg</item>
+        <item name="material_drawer_primary_text">@color/material_drawer_dark_primary_text</item>
+        <item name="material_drawer_primary_icon">@color/material_drawer_dark_primary_icon</item>
+        <item name="material_drawer_secondary_text">@color/material_drawer_dark_secondary_text
+        </item>
+        <item name="material_drawer_hint_text">@color/material_drawer_dark_hint_text</item>
+        <item name="material_drawer_hint_icon">@color/material_drawer_dark_hint_icon</item>
+        <item name="material_drawer_divider">@color/material_drawer_dark_divider</item>
+        <item name="material_drawer_selected">@color/material_drawer_dark_selected</item>
+        <item name="material_drawer_selected_text">@color/material_drawer_dark_selected_text</item>
+        <item name="material_drawer_header_selection_text">
+            @color/material_drawer_header_selection_text
+        </item>
+    </style>
+
     <style name="IntroTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorAccent">@color/material_gray</item>
-        <item name="colorPrimaryDark">@color/material_gray_dark</item>
-        <item name="colorPrimary">@color/material_gray</item>
-
+        <item name="colorPrimary">@color/lightColorPrimary</item>
+        <item name="colorPrimaryDark">@color/lightColorPrimaryDark</item>
+        <item name="colorAccent">@color/lightColorAccent</item>
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation" >false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -65,8 +534,13 @@
     </style>
 
     <style name="SearchEditText" parent="Theme.AppCompat.Light">
-        <item name="colorControlNormal">@color/material_gray_dark</item>
-        <item name="colorControlActivated">@color/material_gray_dark</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">?attr/mainTextColor</item>
+    </style>
+
+    <style name="SearchEditText2" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">?attr/subTextColor</item>
+        <item name="colorControlActivated">?attr/mainTextColor</item>
     </style>
 
     <style name="FilePickerTheme" parent="NNF_BaseTheme">
@@ -84,4 +558,5 @@
         <item name="colorPrimaryDark">@color/material_gray_dark</item>
         <item name="colorAccent">@color/material_gray</item>
     </style>
+
 </resources>

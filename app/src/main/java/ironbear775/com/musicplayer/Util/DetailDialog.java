@@ -34,13 +34,13 @@ public class DetailDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.detail_dialog_layout);
-        TextView filename = (TextView) findViewById(R.id.filename);
-        TextView filepath = (TextView) findViewById(R.id.filePath);
-        TextView fileDuration = (TextView) findViewById(R.id.fileduration);
-        TextView fileArtist = (TextView) findViewById(R.id.fileArtist);
-        TextView fileAlbum = (TextView) findViewById(R.id.fileAlbum);
-        TextView fileBitrate = (TextView) findViewById(R.id.bit);
-        TextView fileSamplingRate = (TextView) findViewById(R.id.rate);
+        TextView filename = findViewById(R.id.filename);
+        TextView filepath = findViewById(R.id.filePath);
+        TextView fileDuration = findViewById(R.id.fileduration);
+        TextView fileArtist = findViewById(R.id.fileArtist);
+        TextView fileAlbum = findViewById(R.id.fileAlbum);
+        TextView fileBitrate = findViewById(R.id.bit);
+        TextView fileSamplingRate = findViewById(R.id.rate);
 
         SimpleDateFormat time = new SimpleDateFormat("m:ss");
 
@@ -55,13 +55,15 @@ public class DetailDialog extends Dialog {
                 String duration = time.format(file.getLengthInMilliseconds()) + "";
                 fileDuration.setText(duration);
 
-                fileSamplingRate.setText("" + file.getSampleRate() + " Hz");
-                fileBitrate.setText("" + file.getBitrate() + "kb/s");
+                String t = "" + file.getSampleRate() + " Hz";
+                fileSamplingRate.setText(t);
+                t = "" + file.getBitrate() + "kb/s";
+                fileBitrate.setText(t);
 
             } catch (IOException | UnsupportedTagException | InvalidDataException e) {
                 e.printStackTrace();
             }
-        }else {
+        } else {
             fileDuration.setText("-");
             fileSamplingRate.setText("-");
             fileBitrate.setText("-");

@@ -2,12 +2,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/footBar_color">
+    android:layout_height="wrap_content">
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:foreground="?android:attr/selectableItemBackground">
+
         <ImageView
             android:layout_alignParentTop="true"
             android:padding="15dp"
@@ -35,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="@color/black"/>
+                android:textColor="?attr/mainTextColor"/>
             <TextView
                 android:layout_below="@+id/tv_title"
                 android:layout_width="match_parent"
@@ -46,7 +47,7 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:textSize="13sp"
-                android:textColor="@color/material_gray_dark"/>
+                android:textColor="?attr/subTextColor"/>
         </RelativeLayout>
         <ImageView
             android:id="@+id/item_menu"

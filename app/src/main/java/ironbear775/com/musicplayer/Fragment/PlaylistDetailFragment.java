@@ -49,8 +49,6 @@ public class PlaylistDetailFragment extends Fragment {
     public static boolean isChange = false;
     public static String name;
     private RelativeLayout shuffleLayout;
-    private PlaylistDbHelper dbHelper;
-    private SQLiteDatabase database;
     private boolean isClickable = true;
     private MusicUtils musicUtils;
     private Toolbar toolbar;
@@ -60,6 +58,7 @@ public class PlaylistDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.playlist_detail_layout, container, false);
+
         name = getArguments().getString("name");
         musicList.clear();
 
@@ -73,7 +72,7 @@ public class PlaylistDetailFragment extends Fragment {
         }
 
 
-        MusicList.toolbar.setVisibility(View.GONE);
+        getActivity().sendBroadcast(new Intent("set toolbar gone"));
         toolbar.setTitle(getArguments().getString("title"));
         toolbar.setTitleTextColor(Color.WHITE);
 
@@ -95,26 +94,25 @@ public class PlaylistDetailFragment extends Fragment {
 
         musicUtils = new MusicUtils(getActivity());
 
-        shuffleLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(musicList.size() > 0) {
-                    count = 1;
-                    MusicListFragment.count = 0;
-                    AlbumDetailFragment.count = 0;
-                    MusicRecentAddedFragment.count = 0;
-                    ArtistDetailFragment.count = 0;
-                    musicUtils.shufflePlay(musicList,4);
-                }
+        shuffleLayout.setOnClickListener(v -> {
+            if(musicList.size() > 0) {
+                count = 1;
+                MusicListFragment.count = 0;
+                AlbumDetailFragment.count = 0;
+                MusicRecentAddedFragment.count = 0;
+                ArtistDetailFragment.count = 0;
+                FolderDetailFragment.count = 0;
+                MusicList.count = 0;
+                musicUtils.shufflePlay(musicList,4);
             }
         });
         return view;
     }
 
     private void findView(View view) {
-        toolbar = (Toolbar) view.findViewById(R.id.playlist_toolbar);
-        shuffleLayout = (RelativeLayout) view.findViewById(R.id.shuffle_playlist);
-        FastScrollRecyclerView listView = (FastScrollRecyclerView) view.findViewById(R.id.playlist_detail_listView);
+        toolbar = view.findViewById(R.id.playlist_toolbar);
+        shuffleLayout = view.findViewById(R.id.shuffle_playlist);
+        FastScrollRecyclerView listView = view.findViewById(R.id.playlist_detail_listView);
         adapter = new PlaylistDetaiNewlAdapter(getActivity().getApplicationContext(), musicList,name);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -123,12 +121,7 @@ public class PlaylistDetailFragment extends Fragment {
         listView.setAdapter(adapter);
         listView.hasFixedSize();
 
-        adapter.setOnItemClickListener(new PlaylistDetaiNewlAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                setClickAction(position);
-            }
-        });
+        adapter.setOnItemClickListener((view1, position) -> setClickAction(position));
 
         ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(adapter,true,false,true);
         ItemTouchHelper helper  = new ItemTouchHelper(callback);
@@ -146,26 +139,23 @@ public class PlaylistDetailFragment extends Fragment {
         switch (item.getItemId()) {
             case android.R.id.home:
                 if (isChange) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            PlaylistDbHelper dbHelper = new PlaylistDbHelper(getActivity(),
-                                    PlaylistDetailFragment.name + ".db", "");
-                            SQLiteDatabase database = dbHelper.getWritableDatabase();
-                            database.delete(PlaylistDetailFragment.name, null, null);
-                            for (int i = 0; i < PlaylistDetailFragment.musicList.size(); i++) {
-                                ContentValues values = new ContentValues();
+                    new Thread(() -> {
+                        PlaylistDbHelper dbHelper = new PlaylistDbHelper(getActivity(),
+                                PlaylistDetailFragment.name + ".db", "");
+                        SQLiteDatabase database = dbHelper.getWritableDatabase();
+                        database.delete(PlaylistDetailFragment.name, null, null);
+                        for (int i = 0; i < PlaylistDetailFragment.musicList.size(); i++) {
+                            ContentValues values = new ContentValues();
 
-                                values.put("title", PlaylistDetailFragment.musicList.get(i).getTitle());
-                                values.put("artist", PlaylistDetailFragment.musicList.get(i).getArtist());
-                                values.put("albumArtUri", PlaylistDetailFragment.musicList.get(i).getAlbumArtUri());
-                                values.put("album", PlaylistDetailFragment.musicList.get(i).getAlbum());
-                                values.put("uri", PlaylistDetailFragment.musicList.get(i).getUri());
-                                database.insert(PlaylistDetailFragment.name, null, values);
-                            }
-                            database.close();
-                            PlaylistDetailFragment.isChange = false;
+                            values.put("title", PlaylistDetailFragment.musicList.get(i).getTitle());
+                            values.put("artist", PlaylistDetailFragment.musicList.get(i).getArtist());
+                            values.put("albumArtUri", PlaylistDetailFragment.musicList.get(i).getAlbumArtUri());
+                            values.put("album", PlaylistDetailFragment.musicList.get(i).getAlbum());
+                            values.put("uri", PlaylistDetailFragment.musicList.get(i).getUri());
+                            database.insert(PlaylistDetailFragment.name, null, values);
                         }
+                        database.close();
+                        PlaylistDetailFragment.isChange = false;
                     }).start();
                 }
                 FragmentManager fragmentManager = getFragmentManager();
@@ -181,9 +171,10 @@ public class PlaylistDetailFragment extends Fragment {
                 transaction.show(MusicList.playlistFragment);
                 transaction.commit();
                 getActivity().getWindow().setStatusBarColor(0);
-                MusicList.toolbar.setBackgroundColor(0);
-                MusicList.toolbar.setVisibility(View.VISIBLE);
-                MusicList.toolbar.setTitle(R.string.toolbar_title_playlist);
+
+                Intent intent = new Intent("set toolbar text");
+                intent.putExtra("title",R.string.toolbar_title_playlist);
+                getActivity().sendBroadcast(intent);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -197,17 +188,23 @@ public class PlaylistDetailFragment extends Fragment {
             MusicRecentAddedFragment.count = 0;
             AlbumDetailFragment.count = 0;
             ArtistDetailFragment.count = 0;
+            MusicList.count = 0;
             count = 1;
+
             if (isChange){
                 adapter.notifyDataSetChanged();
             }
             musicUtils.startMusic(position, progress,4);
 
-            MusicList.footTitle.setText(musicList.get(position).getTitle());
-            MusicList.footArtist.setText(musicList.get(position).getArtist());
-            MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
+            Intent intent = new Intent("set footBar");
+            Intent intent1 = new Intent("set PlayOrPause");
+            intent.putExtra("footTitle",musicList.get(position).getTitle());
+            intent.putExtra("footArtist",musicList.get(position).getArtist());
+            intent1.putExtra("PlayOrPause",R.drawable.footplaywhite);
+            getActivity().sendBroadcast(intent);
+            getActivity().sendBroadcast(intent1);
 
-            musicUtils.getFootAlbumArt(position,musicList);
+            musicUtils.getFootAlbumArt(position,musicList,MusicUtils.FROM_ADAPTER);
 
             pos = position;
         }
@@ -217,8 +214,8 @@ public class PlaylistDetailFragment extends Fragment {
 
         Cursor cursor;
         String db = "";
-        dbHelper = new PlaylistDbHelper(getActivity(), name + ".db", db);
-        database = dbHelper.getWritableDatabase();
+        PlaylistDbHelper dbHelper = new PlaylistDbHelper(getActivity(), name + ".db", db);
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
         cursor = database.query(name, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             do {
@@ -239,26 +236,29 @@ public class PlaylistDetailFragment extends Fragment {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()){
-                case "SetClickable_True":
-                    isClickable = true;
-                    shuffleLayout.setClickable(true);
-                    break;
-                case "SetClickable_False":
-                    isClickable = false;
-                    shuffleLayout.setClickable(false);
-                    break;
-                case "playlist swap item":
-                    musicList = intent.getParcelableArrayListExtra("new list");
-                    isChange = true;
-                    break;
-                case "enableShuffle":
-                    if (!MusicUtils.enableShuffle)
-                        shuffleLayout.setVisibility(View.GONE);
-                    else
-                        shuffleLayout.setVisibility(View.VISIBLE);
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action){
+                    case "SetClickable_True":
+                        isClickable = true;
+                        shuffleLayout.setClickable(true);
+                        break;
+                    case "SetClickable_False":
+                        isClickable = false;
+                        shuffleLayout.setClickable(false);
+                        break;
+                    case "playlist swap item":
+                        musicList = intent.getParcelableArrayListExtra("new list");
+                        isChange = true;
+                        break;
+                    case "enableShuffle":
+                        if (!MusicUtils.enableShuffle)
+                            shuffleLayout.setVisibility(View.GONE);
+                        else
+                            shuffleLayout.setVisibility(View.VISIBLE);
 
-                    break;
+                        break;
+                }
             }
         }
     };

@@ -21,6 +21,8 @@
                 android:id="@+id/search_edit"
                 android:theme="@style/SearchEditText"
                 android:background="@null"
+                android:textColor="@color/white"
+                android:textColorHint="?attr/subTextColor"
                 android:hint="@string/search_input_hint"/>
         </android.support.v7.widget.Toolbar>
 
@@ -34,21 +36,23 @@
         android:textSize="20sp"
         android:paddingTop="30dp"
         android:gravity="center_horizontal"
+        android:textColor="?attr/mainTextColor"
+        android:background="?attr/appBg"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         />
     <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
         android:id="@+id/search_result_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/listView_bg_color"
+        android:background="?attr/appBg"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:fastScrollPopupBackgroundSize="56dp"
         app:fastScrollPopupTextSize="24sp"
         app:fastScrollAutoHide="true"
         app:fastScrollAutoHideDelay="500"
-        app:fastScrollPopupBgColor="@color/material_gray_dark"
-        app:fastScrollPopupTextColor="@android:color/primary_text_dark"
-        app:fastScrollThumbColor="@color/material_gray_dark_light"
-        app:fastScrollTrackColor="@color/material_gray"
+        app:fastScrollPopupBgColor="?attr/colorPrimary"
+        app:fastScrollPopupTextColor="?attr/colorAccent"
+        app:fastScrollThumbColor="?attr/colorPrimary"
+        app:fastScrollTrackColor="?attr/colorControlHighlight"
         android:visibility="gone"/>
 </android.support.design.widget.CoordinatorLayout>

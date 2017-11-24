@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -20,7 +19,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import java.util.ArrayList;
 
@@ -93,7 +91,7 @@ public class SearchActivity extends BaseActivity {
                                 music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                         , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                                 music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                                music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                                 music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                                 music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                                 music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
@@ -123,7 +121,7 @@ public class SearchActivity extends BaseActivity {
                                     music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                             , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                                     music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                    music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                                    music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                                     music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                                     music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                                     music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
@@ -153,7 +151,7 @@ public class SearchActivity extends BaseActivity {
                                         music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                                 , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                                         music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                                         music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                                         music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                                         music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
@@ -184,7 +182,7 @@ public class SearchActivity extends BaseActivity {
                                         music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                                 , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                                         music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                        music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                                         music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                                         music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                                         music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
@@ -222,16 +220,12 @@ public class SearchActivity extends BaseActivity {
     }
 
     private void findView() {
-        toolbar = (Toolbar) findViewById(R.id.search_toolbar);
-        searchEdit = (EditText) findViewById(R.id.search_edit);
-        listview = (FastScrollRecyclerView) findViewById(R.id.search_result_list);
+        toolbar =  findViewById(R.id.search_toolbar);
+        searchEdit = findViewById(R.id.search_edit);
+        listview =  findViewById(R.id.search_result_list);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         listview.setLayoutManager(manager);
-        listview.addItemDecoration(new HorizontalDividerItemDecoration.Builder(this)
-                .color(Color.parseColor("#22616161"))
-                .sizeResId(R.dimen.divider)
-                .marginResId(R.dimen.leftmargin, R.dimen.rightmargin)
-                .build());
+
         adapter = new MusicAdapter(this, musicList);
         listview.setAdapter(adapter);
 
@@ -259,6 +253,8 @@ public class SearchActivity extends BaseActivity {
 
         musicUtils.startMusic(position, 0, 7);
 
+        Intent intent = new Intent("update_cover");
+        sendBroadcast(intent);
     }
 
     @Override
@@ -267,6 +263,7 @@ public class SearchActivity extends BaseActivity {
             Intent intent = new Intent("search_play");
             sendBroadcast(intent);
         }
+        unregisterReceiver(clickableReceiver);
         super.onDestroy();
     }
 
@@ -281,10 +278,13 @@ public class SearchActivity extends BaseActivity {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "notifyDataSetChanged":
-                    adapter.notifyDataSetChanged();
-                    break;
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case "notifyDataSetChanged":
+                        adapter.notifyDataSetChanged();
+                        break;
+                }
             }
         }
     };

@@ -90,20 +90,14 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
 
         holder.setData(position);
         if (mOnItemClickListener != null) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isClickable) {
-                        mOnItemClickListener.onItemClick(holder.itemView, position);
-                    }
+            holder.itemView.setOnClickListener(v -> {
+                if (isClickable) {
+                    mOnItemClickListener.onItemClick(holder.itemView, position);
                 }
             });
-            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    mOnItemClickListener.onItemLongClick(holder.itemView, position);
-                    return false;
-                }
+            holder.itemView.setOnLongClickListener(v -> {
+                mOnItemClickListener.onItemLongClick(holder.itemView, position);
+                return false;
             });
         }
 
@@ -168,8 +162,8 @@ class ArtistViewHolder extends RecyclerView.ViewHolder {
 
     ArtistViewHolder(View itemView) {
         super(itemView);
-        iv = (ImageView) itemView.findViewById(R.id.artist_iv_image);
-        tv_title = (TextView) itemView.findViewById(R.id.artist_tv_title);
+        iv =  itemView.findViewById(R.id.artist_iv_image);
+        tv_title = itemView.findViewById(R.id.artist_tv_title);
     }
 
     public void setData(int position) {
@@ -180,7 +174,7 @@ class ArtistViewHolder extends RecyclerView.ViewHolder {
         if (positionSet.contains(position)) {
             itemView.setBackgroundResource(R.color.items_selected_bg_color);
         } else {
-            itemView.setBackgroundResource(R.color.listView_bg_color);
+            itemView.setBackground(null);
         }
     }
 }

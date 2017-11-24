@@ -2,5 +2,5 @@
 <resources>
 
     <item name="artist_url" type="id"/>
-
+    <item name="item_url" type="id"/>
 </resources>

@@ -24,9 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.bumptech.glide.Glide;
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +32,6 @@ import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Adapter.MusicAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
-import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 
 /**
@@ -67,8 +63,8 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
+        getActivity().sendBroadcast(new Intent("set toolbar gone"));
 
-        MusicList.toolbar.setVisibility(View.GONE);
         toolbar.setTitle(R.string.toolbar_title_recent_added);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
@@ -92,28 +88,8 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         initView();
 
         if (MusicUtils.launchPage == 5) {
-            if (MusicService.mediaPlayer.isPlaying()) {
-                MusicList.footTitle.setText(MusicService.music.getTitle());
-                MusicList.footArtist.setText(MusicService.music.getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.footAlbumArt);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .centerCrop()
-                        .placeholder(R.drawable.default_album_art_land)
-                        .into(MusicList.accountHeader.getHeaderBackgroundView());
-            } else {
-                MusicListFragment.readMusic(getActivity());
-                MusicList.footTitle.setText(MusicListFragment.musicList.get(MusicUtils.pos).getTitle());
-                MusicList.footArtist.setText(MusicListFragment.musicList.get(MusicUtils.pos).getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                musicUtils.getFootAlbumArt(MusicUtils.pos, MusicListFragment.musicList);
-            }
+
+            MusicUtils.setLaunchPage(getActivity(),MusicUtils.FROM_ADAPTER);
         }
 
         return view;
@@ -147,17 +123,17 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
             }
         });
 
-        shuffle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                count = 1;
-                MusicListFragment.count = 0;
-                AlbumDetailFragment.count = 0;
-                ArtistDetailFragment.count = 0;
-                PlaylistDetailFragment.count = 0;
-                musicUtils = new MusicUtils(v.getContext());
-                musicUtils.shufflePlay(musicList,6);
-            }
+        shuffle.setOnClickListener(v -> {
+            count = 1;
+            MusicListFragment.count = 0;
+            AlbumDetailFragment.count = 0;
+            ArtistDetailFragment.count = 0;
+            PlaylistDetailFragment.count = 0;
+            FolderDetailFragment.count = 0;
+            MusicList.count = 0;
+
+            musicUtils = new MusicUtils(v.getContext());
+            musicUtils.shufflePlay(musicList,6);
         });
     }
 
@@ -171,7 +147,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                MusicList.slideDrawer.openDrawer();
+                getActivity().sendBroadcast(new Intent("open drawer"));
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -182,30 +158,34 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         count = 1;
 
         MusicListFragment.count = 0;
-        MusicRecentAddedFragment.count = 0;
         AlbumDetailFragment.count = 0;
         ArtistDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
         FolderDetailFragment.count = 0;
+        MusicList.count = 0;
 
         int progress = 0;
         musicUtils = new MusicUtils(getActivity());
         musicUtils.startMusic(position, progress,6);
 
-        MusicList.footTitle.setText(musicList.get(position).getTitle());
-        MusicList.footArtist.setText(musicList.get(position).getArtist());
-        MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
+        Intent intent = new Intent("set footBar");
+        Intent intent1 = new Intent("set PlayOrPause");
+        intent.putExtra("footTitle",musicList.get(position).getTitle());
+        intent.putExtra("footArtist",musicList.get(position).getArtist());
+        intent1.putExtra("PlayOrPause",R.drawable.footplaywhite);
+        getActivity().sendBroadcast(intent);
+        getActivity().sendBroadcast(intent1);
 
-        musicUtils.getFootAlbumArt(position, musicList);
+        musicUtils.getFootAlbumArt(position, musicList,MusicUtils.FROM_ADAPTER);
 
         pos = position;
 
     }
 
     private void findView(View view) {
-        shuffle = (RelativeLayout) view.findViewById(R.id.shuffle);
-        toolbar = (Toolbar) view.findViewById(R.id.music_toolbar);
-        musicView = (FastScrollRecyclerView) view.findViewById(R.id.music_list);
+        shuffle = view.findViewById(R.id.shuffle);
+        toolbar = view.findViewById(R.id.music_toolbar);
+        musicView = view.findViewById(R.id.music_list);
     }
 
     //获取音乐各种信息
@@ -227,7 +207,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
                                     , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                             music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                             music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                            music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                             music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
@@ -255,7 +235,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
                                     , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
                             music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                             music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                            music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
                             music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
@@ -275,25 +255,28 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "SetClickable_True":
-                    musicAdapter.setClickable(true);
-                    break;
-                case "SetClickable_False":
-                    musicAdapter.setClickable(false);
-                    break;
-                case "notifyDataSetChanged":
-                    musicAdapter.notifyDataSetChanged();
-                    musicList.clear();
-                    readMusic(context);
-                    break;
-                case "enableShuffle":
-                    if (!MusicUtils.enableShuffle)
-                        shuffle.setVisibility(View.GONE);
-                    else
-                        shuffle.setVisibility(View.VISIBLE);
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case "SetClickable_True":
+                        musicAdapter.setClickable(true);
+                        break;
+                    case "SetClickable_False":
+                        musicAdapter.setClickable(false);
+                        break;
+                    case "notifyDataSetChanged":
+                        musicAdapter.notifyDataSetChanged();
+                        musicList.clear();
+                        readMusic(context);
+                        break;
+                    case "enableShuffle":
+                        if (!MusicUtils.enableShuffle)
+                            shuffle.setVisibility(View.GONE);
+                        else
+                            shuffle.setVisibility(View.VISIBLE);
 
-                    break;
+                        break;
+                }
             }
         }
     };

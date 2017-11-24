@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Class.OpenSourceItem;
 import ironbear775.com.musicplayer.R;
 
@@ -37,8 +38,8 @@ public class OpenSourceAdapter extends ArrayAdapter<OpenSourceItem> {
         if (convertView == null) {
             view = LayoutInflater.from(getContext()).inflate(resourceId, null);
             viewHolder = new ViewHolder();
-            viewHolder.name = (TextView) view.findViewById(R.id.open_source_name);
-            viewHolder.detail = (TextView) view.findViewById(R.id.open_source_url);
+            viewHolder.name = view.findViewById(R.id.open_source_name);
+            viewHolder.detail = view.findViewById(R.id.open_source_url);
 
             view.setTag(viewHolder);
         } else {
@@ -47,6 +48,8 @@ public class OpenSourceAdapter extends ArrayAdapter<OpenSourceItem> {
         }
         if (item != null) {
             viewHolder.name.setText(item.getName());
+            if (BaseActivity.isNight)
+                viewHolder.detail.setTextColor(view.getResources().getColor(R.color.nightSubTextColor));
             viewHolder.detail.setText(item.getDetail());
         }
         return view;

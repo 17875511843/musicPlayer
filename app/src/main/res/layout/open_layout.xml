@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="270dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/round_bg">
+    android:background="?attr/appBg">
 
     <TextView
         android:padding="10dp"
@@ -21,17 +21,22 @@
         android:maxLines="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <ironbear775.com.musicplayer.Util.SquareImageView
+        android:id="@+id/open_image"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
     <SeekBar
+        android:padding="10dp"
         android:id="@+id/open_seekbar"
         android:progressTint="@color/material_gray"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <ImageView
-        android:layout_margin="10dp"
+        android:padding="10dp"
         android:id="@+id/open_control"
         android:layout_gravity="center"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:src="@drawable/footplay"/>
 </LinearLayout>

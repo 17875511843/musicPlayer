@@ -10,7 +10,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 
 import com.beaglebuddy.mp3.MP3;
@@ -85,14 +84,14 @@ public class TagEditActivty extends BaseActivity{
         return super.onOptionsItemSelected(item);
     }
     private void findView() {
-        save = (FloatingActionButton) findViewById(R.id.save_change);
-        toolbar = (Toolbar) findViewById(R.id.tag_edit_toolbar);
-        songTitle = (EditText) findViewById(R.id.song_edit_text);
-        albumTitle = (EditText) findViewById(R.id.album_edit_text);
-        artistTitle = (EditText) findViewById(R.id.artist_edit_text);
-        trackTitle = (EditText) findViewById(R.id.genre_edit_text);
-        yearTitle = (EditText) findViewById(R.id.year_edit_text);
-        lyricTitle = (EditText) findViewById(R.id.lyric_edit_text);
+        save = findViewById(R.id.save_change);
+        toolbar = findViewById(R.id.tag_edit_toolbar);
+        songTitle = findViewById(R.id.song_edit_text);
+        albumTitle = findViewById(R.id.album_edit_text);
+        artistTitle = findViewById(R.id.artist_edit_text);
+        trackTitle = findViewById(R.id.genre_edit_text);
+        yearTitle = findViewById(R.id.year_edit_text);
+        lyricTitle = findViewById(R.id.lyric_edit_text);
 
         save.hide();
 
@@ -200,28 +199,32 @@ public class TagEditActivty extends BaseActivity{
             }
         });
 
-        save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        save.setOnClickListener(v -> {
 
-                saveExifData();
+            saveExifData();
 
-                Snackbar.make(save, R.string.set_success, Snackbar.LENGTH_LONG).show();
-            }
+            Snackbar.make(save, R.string.set_success, Snackbar.LENGTH_LONG).show();
         });
 
     }
 
 
     private void setTextFields(ID3v2 tag) {
-        songTitle.setText(tag.getTitle());
-        artistTitle.setText(tag.getArtist());
-        albumTitle.setText(tag.getAlbum());
-        yearTitle.setText(tag.getYear());
-        trackTitle.setText(tag.getTrack());
-        lyricTitle.setText(tag.getLyrics());
+        if (tag!=null) {
+            if (tag.getTitle() != null)
+                songTitle.setText(tag.getTitle());
+            if (tag.getArtist() != null)
+                artistTitle.setText(tag.getArtist());
+            if (tag.getAlbum() != null)
+                albumTitle.setText(tag.getAlbum());
+            if (tag.getYear() != null)
+                yearTitle.setText(tag.getYear());
+            if (tag.getTrack() != null)
+                trackTitle.setText(tag.getTrack());
+            if (tag.getLyrics() != null)
+                lyricTitle.setText(tag.getLyrics());
 
-
+        }
     }
 
     private void saveExifData() {

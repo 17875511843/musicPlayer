@@ -8,8 +8,6 @@ import android.graphics.BitmapFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ironbear775.com.musicplayer.R;
-
 
 /**
  * Created by ironbear on 2016/12/28.
@@ -35,7 +33,7 @@ public class GetAlbumArt {
                 e.printStackTrace();
             }
         }else {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album_art,options);
+            bitmap = null;
         }
         return bitmap;
     }

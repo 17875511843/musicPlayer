@@ -78,20 +78,14 @@ public class AlbumGridAdapter extends RecyclerView.Adapter<AlbumGridViewHolder>
     public void onBindViewHolder(final AlbumGridViewHolder holder, final int position) {
         holder.item_info.setBackgroundColor(ContextCompat.getColor(mContext,R.color.material_gray_dark));
         if (mOnItemClickListener != null) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isClickable) {
-                        mOnItemClickListener.onItemClick(holder.itemView, position);
-                    }
+            holder.itemView.setOnClickListener(v -> {
+                if (isClickable) {
+                    mOnItemClickListener.onItemClick(holder.itemView, position);
                 }
             });
-            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    mOnItemClickListener.onItemLongClick(holder.itemView, position);
-                    return false;
-                }
+            holder.itemView.setOnLongClickListener(v -> {
+                mOnItemClickListener.onItemLongClick(holder.itemView, position);
+                return false;
             });
         }
         holder.setData(position);
@@ -106,31 +100,27 @@ public class AlbumGridAdapter extends RecyclerView.Adapter<AlbumGridViewHolder>
                     @Override
                     public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
 
-                        Palette.from(resource).generate(new Palette.PaletteAsyncListener() {
-                            @Override
-                            public void onGenerated(Palette palette) {
-                                Palette.Swatch swatch = palette.getVibrantSwatch();
+                        Palette.from(resource).generate(palette -> {
+                            Palette.Swatch swatch = palette.getVibrantSwatch();
+                            if (swatch != null) {
+                                holder.item_info.setBackgroundColor(swatch.getRgb());
+                                holder.tv_title.setTextColor(swatch.getTitleTextColor());
+                                holder.tv_others.setTextColor(swatch.getBodyTextColor());
+                            } else {
+                                swatch = palette.getMutedSwatch();
                                 if (swatch != null) {
                                     holder.item_info.setBackgroundColor(swatch.getRgb());
                                     holder.tv_title.setTextColor(swatch.getTitleTextColor());
                                     holder.tv_others.setTextColor(swatch.getBodyTextColor());
-                                } else {
-                                    swatch = palette.getMutedSwatch();
-                                    if (swatch != null) {
-                                        holder.item_info.setBackgroundColor(swatch.getRgb());
-                                        holder.tv_title.setTextColor(swatch.getTitleTextColor());
-                                        holder.tv_others.setTextColor(swatch.getBodyTextColor());
-                                    }
                                 }
                             }
                         });
                     }
                 });
+        holder.iv.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
 
-        Glide.with(mContext)
-                .load(albumArtUri)
-                .placeholder(R.drawable.default_album_art)
-                .into(holder.iv);
+        MusicUtils musicUtils = new MusicUtils(mContext);
+        musicUtils.setAlbumCoverToAdapter(mList.get(position),holder.iv,MusicUtils.FROM_ADAPTER);
     }
 
     @Override
@@ -151,10 +141,10 @@ class AlbumGridViewHolder extends RecyclerView.ViewHolder {
     AlbumGridViewHolder(View itemView) {
         super(itemView);
         iv = (SquareImageView) itemView.findViewById(R.id.iv_grid_image);
-        tv_others = (TextView) itemView.findViewById(R.id.tv_others);
-        tv_title = (TextView) itemView.findViewById(R.id.tv_title);
-        item_info = (RelativeLayout) itemView.findViewById(R.id.item_info);
-        bg = (ImageView) itemView.findViewById(R.id.bg_imageView);
+        tv_others =  itemView.findViewById(R.id.tv_others);
+        tv_title = itemView.findViewById(R.id.tv_title);
+        item_info = itemView.findViewById(R.id.item_info);
+        bg = itemView.findViewById(R.id.bg_imageView);
     }
 
     public void setData(int position) {

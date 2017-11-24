@@ -34,7 +34,7 @@ public class PlaylistAdapter extends ArrayAdapter<Playlist> {
         if (convertView == null) {
             view = LayoutInflater.from(getContext()).inflate(resourceId, null);
             viewHolder = new ViewHolder();
-            viewHolder.name =(TextView) view.findViewById(R.id.item_name);
+            viewHolder.name = view.findViewById(R.id.item_name);
             view.setTag(viewHolder);
         } else {
             view = convertView;

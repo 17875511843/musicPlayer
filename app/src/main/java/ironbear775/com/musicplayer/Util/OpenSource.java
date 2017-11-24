@@ -28,6 +28,7 @@ public class OpenSource extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.open_source_layout);
+
         OpenSourceItem item =new OpenSourceItem();
         item.setName("Glide");
         item.setDetail(getContext().getResources().getString(R.string.project_code) + "https://github.com/bumptech/glide"
@@ -95,8 +96,7 @@ public class OpenSource extends Dialog {
         openSource.add(10,item10);
 
 
-
-        ListView listView = (ListView) findViewById(R.id.open_source_iv);
+        ListView listView = findViewById(R.id.open_source_iv);
 
         OpenSourceAdapter adapter = new OpenSourceAdapter(getContext(),R.layout.open_source_item,openSource);
         listView.setAdapter(adapter);

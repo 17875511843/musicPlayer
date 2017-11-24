@@ -3,14 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/footBar_color">
+    android:background="?attr/appBg"
+    android:orientation="vertical">
 
-
-    <RelativeLayout
+    <ironbear775.com.musicplayer.Util.FootBarRelativeLayout
         android:id="@+id/footBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="65dp"
         android:orientation="horizontal"
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
@@ -30,14 +29,6 @@
             android:layout_toStartOf="@+id/blank1"
             android:orientation="vertical"
             tools:targetApi="lollipop">
-            <ProgressBar
-                android:id="@+id/music_progressbar"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:layout_alignParentTop="true"
-                android:progressTint="@color/material_gray"
-                style="?android:attr/progressBarStyleHorizontal"
-                />
             <TextView
                 android:id="@+id/footTitle"
                 android:layout_width="wrap_content"
@@ -46,8 +37,9 @@
                 android:layout_marginTop="5dp"
                 android:ellipsize="marquee"
                 android:gravity="center_vertical"
-                android:maxLines="1"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textColor="?attr/mainTextColor"
+                android:singleLine="true" />
 
             <TextView
                 android:id="@+id/footArtist"
@@ -57,6 +49,7 @@
                 android:layout_marginStart="15dp"
                 android:gravity="center_vertical"
                 android:maxLines="1"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="14sp" />
         </RelativeLayout>
 
@@ -65,6 +58,6 @@
             android:layout_width="80dp"
             android:layout_height="0dp"
             android:layout_alignParentEnd="true" />
-    </RelativeLayout>
+    </ironbear775.com.musicplayer.Util.FootBarRelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

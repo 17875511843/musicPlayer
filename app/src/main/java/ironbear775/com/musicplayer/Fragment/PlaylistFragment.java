@@ -7,27 +7,22 @@ import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +31,6 @@ import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Adapter.PlaylistAdapter;
 import ironbear775.com.musicplayer.Class.Playlist;
 import ironbear775.com.musicplayer.R;
-import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.PlaylistDbHelper;
 
@@ -66,39 +60,17 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.play_list_layout, container, false);
         list.clear();
 
-        MusicUtils musicUtils = new MusicUtils(getActivity());
-
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
-        getActivity().registerReceiver(clickableReceiver,filter);
+        getActivity().registerReceiver(clickableReceiver, filter);
 
         readList();
         findView(view);
 
-        if (MusicUtils.launchPage==4) {
-            if (MusicService.mediaPlayer.isPlaying()) {
-                MusicList.footTitle.setText(MusicService.music.getTitle());
-                MusicList.footArtist.setText(MusicService.music.getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footpausewhite);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .placeholder(R.drawable.default_album_art)
-                        .into(MusicList.footAlbumArt);
-                Glide.with(this)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .asBitmap()
-                        .centerCrop()
-                        .placeholder(R.drawable.default_album_art_land)
-                        .into(MusicList.accountHeader.getHeaderBackgroundView());
-            } else {
-                MusicListFragment.readMusic(getActivity());
-                MusicList.footTitle.setText(MusicListFragment.musicList.get(MusicUtils.pos).getTitle());
-                MusicList.footArtist.setText(MusicListFragment.musicList.get(MusicUtils.pos).getArtist());
-                MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
-                musicUtils.getFootAlbumArt(MusicUtils.pos, MusicListFragment.musicList);
-            }
+        if (MusicUtils.launchPage == 4) {
+
+            MusicUtils.setLaunchPage(getActivity(), MusicUtils.FROM_ADAPTER);
         }
 
         return view;
@@ -125,92 +97,80 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
     }
 
     private void findView(final View view) {
-        icon = (ImageView) view.findViewById(R.id.create_playlist_icon);
-        createText = (TextView) view.findViewById(R.id.create_new);
-        input = (EditText) view.findViewById(R.id.create_input);
-        cancel = (ImageView) view.findViewById(R.id.create_cancel);
-        submit = (ImageView) view.findViewById(R.id.create_submit);
-        createNew = (RelativeLayout) view.findViewById(R.id.create_playlist);
-        ListView playlist = (ListView) view.findViewById(R.id.playlist_listView);
+        icon = view.findViewById(R.id.create_playlist_icon);
+        createText = view.findViewById(R.id.create_new);
+        input = view.findViewById(R.id.create_input);
+        cancel = view.findViewById(R.id.create_cancel);
+        submit = view.findViewById(R.id.create_submit);
+        createNew = view.findViewById(R.id.create_playlist);
+        ListView playlist = view.findViewById(R.id.playlist_listView);
         adapter = new PlaylistAdapter(getActivity(), R.layout.playlist_item_layout, list);
         playlist.setAdapter(adapter);
-        playlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (isClickable) {
-                    String name = list.get(position).getName();
-                    StringBuilder table = new StringBuilder();
-                    table.append("table");
-                    for (char a : name.toCharArray()) {
-                        table.append((int) a);
-                    }
-
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("name", table.toString());
-                    bundle.putString("title",name);
-
-                    if (MusicList.playlistFragment != null) {
-                        transaction.hide(MusicList.playlistFragment);
-                    }
-
-                    transaction.setCustomAnimations(
-                            R.animator.fragment_slide_left_enter,
-                            R.animator.fragment_slide_left_exit,
-                            R.animator.fragment_slide_right_enter,
-                            R.animator.fragment_slide_right_exit);
-
-                    playlistDetailFragment = new PlaylistDetailFragment();
-                    playlistDetailFragment.setArguments(bundle);
-                    transaction.add(R.id.content, playlistDetailFragment);
-                    transaction.commit();
+        playlist.setOnItemClickListener((parent, view1, position, id) -> {
+            if (isClickable) {
+                String name = list.get(position).getName();
+                StringBuilder table = new StringBuilder();
+                table.append("table");
+                for (char a : name.toCharArray()) {
+                    table.append((int) a);
                 }
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                Bundle bundle = new Bundle();
+                bundle.putString("name", table.toString());
+                bundle.putString("title", name);
+
+                if (MusicList.playlistFragment != null) {
+                    transaction.hide(MusicList.playlistFragment);
+                }
+
+                transaction.setCustomAnimations(
+                        R.animator.fragment_slide_left_enter,
+                        R.animator.fragment_slide_left_exit,
+                        R.animator.fragment_slide_right_enter,
+                        R.animator.fragment_slide_right_exit);
+
+                playlistDetailFragment = new PlaylistDetailFragment();
+                playlistDetailFragment.setArguments(bundle);
+                transaction.add(R.id.content, playlistDetailFragment);
+                transaction.commit();
             }
         });
-        playlist.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position, long id) {
-                final String name = list.get(position).getName();
-                if (isClickable) {
-                    final StringBuilder t = new StringBuilder();
-                    t.append("table");
-                    for (char a : name.toCharArray()) {
-                        t.append((int) a);
-                    }
-
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-                    dialog.setTitle(R.string.delete_alert);
-                    dialog.setMessage(name);
-
-                    dialog.setCancelable(true);
-                    dialog.setPositiveButton(R.string.delete_confrim, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            dbHelper1 = new PlaylistDbHelper(getActivity(), "playlist.db", name);
-                            database = dbHelper1.getWritableDatabase();
-                            database.delete("playlist", "title = ?", new String[]{name});
-
-                            database.close();
-                            dbHelper1.close();
-                            list.remove(position);
-                            adapter.notifyDataSetChanged();
-
-                            getActivity().deleteDatabase(t.toString()+".db");
-
-                        }
-                    });
-                    dialog.setNegativeButton(R.string.delete_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-                    dialog.show();
+        playlist.setOnItemLongClickListener((parent, view12, position, id) -> {
+            final String name = list.get(position).getName();
+            if (isClickable) {
+                final StringBuilder t = new StringBuilder();
+                t.append("table");
+                for (char a : name.toCharArray()) {
+                    t.append((int) a);
                 }
-                return true;
+
+                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                dialog.setTitle(R.string.delete_alert);
+                dialog.setMessage(name);
+
+                dialog.setCancelable(true);
+                dialog.setPositiveButton(R.string.delete_confrim, (dialog1, which) -> {
+
+                    dbHelper1 = new PlaylistDbHelper(getActivity(), "playlist.db", name);
+                    database = dbHelper1.getWritableDatabase();
+                    database.delete("playlist", "title = ?", new String[]{name});
+
+                    database.close();
+                    dbHelper1.close();
+                    list.remove(position);
+                    adapter.notifyDataSetChanged();
+
+                    getActivity().deleteDatabase(t.toString() + ".db");
+
+                });
+                dialog.setNegativeButton(R.string.delete_cancel, (dialog12, which) -> {
+
+                });
+                dialog.show();
             }
+            return true;
         });
         createNew.setOnClickListener(this);
         cancel.setOnClickListener(this);
@@ -223,9 +183,10 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
             case R.id.create_submit:
                 String name = input.getText().toString();
                 if (name.equals("")) {
-                    Snackbar.make(getView(), getResources().getString(R.string.must_have_name), Snackbar.LENGTH_SHORT)
-                            .setDuration(1000)
-                            .show();
+
+                    Intent intent1 = new Intent("show snackBar");
+                    intent1.putExtra("text id", R.string.must_have_name);
+                    getActivity().sendBroadcast(intent1);
                 } else {
                     input.setText("");
                     for (int i = 0; i < list.size(); i++) {
@@ -246,7 +207,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                         for (char a : name.toCharArray()) {
                             table.append((int) a);
                         }
-                        Log.d("TABLE",table.toString());
+                        Log.d("TABLE", table.toString());
                         String db = "create table " + table.toString() + " ("
                                 + "id integer primary key autoincrement, "
                                 + "title text,"
@@ -295,15 +256,18 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()){
-                case "SetClickable_True":
-                    isClickable = true;
-                    createNew.setClickable(true);
-                    break;
-                case "SetClickable_False":
-                    isClickable = false;
-                    createNew.setClickable(false);
-                    break;
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case "SetClickable_True":
+                        isClickable = true;
+                        createNew.setClickable(true);
+                        break;
+                    case "SetClickable_False":
+                        isClickable = false;
+                        createNew.setClickable(false);
+                        break;
+                }
             }
         }
     };

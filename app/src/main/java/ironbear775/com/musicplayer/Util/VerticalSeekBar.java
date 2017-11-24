@@ -43,6 +43,12 @@ public class VerticalSeekBar extends android.support.v7.widget.AppCompatSeekBar 
         super.setProgress(progress);
         onSizeChanged(getWidth(), getHeight(), 0, 0);
     }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled())
@@ -51,7 +57,8 @@ public class VerticalSeekBar extends android.support.v7.widget.AppCompatSeekBar 
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_UP:
-                int i=0;
+                performClick();
+                int i;
                 i = getMax()-(int)(getMax()*event.getY()/getHeight());
                 setProgress(i);
                 onSizeChanged(getWidth(),getHeight(),0,0);

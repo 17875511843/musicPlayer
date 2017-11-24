@@ -1,25 +1,20 @@
 package ironbear775.com.musicplayer.Adapter;
 
-import android.content.Context;
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
@@ -37,6 +32,7 @@ import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
 import ironbear775.com.musicplayer.Fragment.ArtistDetailFragment;
 import ironbear775.com.musicplayer.Fragment.ArtistListFragment;
 import ironbear775.com.musicplayer.R;
+import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.DetailDialog;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 import ironbear775.com.musicplayer.Util.PlaylistDialog;
@@ -48,7 +44,7 @@ import ironbear775.com.musicplayer.Util.PlaylistDialog;
 public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHolder>
         implements FastScrollRecyclerView.SectionedAdapter {
     private final LayoutInflater mInflater;
-    private final Context mContext;
+    private final Activity mActivity;
     private final ArrayList<Music> mList;
     private boolean isClickable = true;
     private final SimpleDateFormat time = new SimpleDateFormat("m:ss");
@@ -75,10 +71,10 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHold
         this.isClickable = click;
     }
 
-    public AlbumDetailAdapter(Context context, ArrayList<Music> list) {
+    public AlbumDetailAdapter(Activity activity, ArrayList<Music> list) {
         this.mList = list;
-        this.mContext = context;
-        this.mInflater = LayoutInflater.from(context);
+        this.mActivity = activity;
+        this.mInflater = LayoutInflater.from(activity);
     }
 
     @Override
@@ -91,137 +87,139 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHold
     public void onBindViewHolder(final AlbumDetailViewHolder holder, final int position) {
         holder.setData(position);
         if (mOnItemClickListener != null) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isClickable) {
-                        mOnItemClickListener.onItemClick(holder.itemView, position);
-                    }
+            holder.itemView.setOnClickListener(v -> {
+                if (isClickable) {
+                    mOnItemClickListener.onItemClick(holder.itemView, position);
                 }
             });
-            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    mOnItemClickListener.onItemLongClick(holder.itemView, position);
-                    return false;
-                }
+            holder.itemView.setOnLongClickListener(v -> {
+                mOnItemClickListener.onItemLongClick(holder.itemView, position);
+                return false;
             });
         }
-        String albumArtUri = mList.get(position).getAlbumArtUri();
-        Glide.with(mContext)
-                .load(albumArtUri)
-                .placeholder(R.drawable.default_album_art)
-                .into(holder.iv);
+        if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_DETAIl_PAGE
+                || MusicUtils.fromWhere == MusicUtils.FROM_ALBUM_PAGE) {
+            holder.item_image.setVisibility(View.GONE);
+            String track = mList.get(position).getTrack();
+            if (track.equals("0"))
+                track = "-";
+            holder.track.setText(track);
+        }
+        holder.item_image.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
+
         holder.tv_title.setText(mList.get(position).getTitle());
         holder.tv_time.setText(time.format(mList.get(position).getDuration()));
 
-        holder.item_menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final PopupMenu popupMenu = new PopupMenu(mContext, holder.item_menu);
-                popupMenu.inflate(R.menu.new_menu);
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.menu_add:
-                                Set<Integer> listPositionSet = new HashSet<>();
-                                switch (MusicList.Mod) {
-                                    case 2:
-                                        listPositionSet = ArtistDetailFragment.positionSet;
-                                        break;
-                                    case 3:
-                                        listPositionSet = AlbumDetailFragment.positionSet;
-                                        break;
-                                }
-                                listPositionSet.add(position);
-                                PlaylistDialog dialog = new PlaylistDialog(mContext, listPositionSet, mList);
-                                dialog.show();
+        holder.item_menu.setOnClickListener(v -> {
+            final PopupMenu popupMenu = new PopupMenu(mActivity, holder.item_menu);
+            popupMenu.inflate(R.menu.new_menu);
+            popupMenu.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case R.id.menu_add:
+                        Set<Integer> listPositionSet = new HashSet<>();
+                        switch (MusicList.Mod) {
+                            case 2:
+                                listPositionSet = ArtistDetailFragment.positionSet;
                                 break;
-                            case R.id.menu_delete:
-                                Log.d("tag", mList.get(position).getUri());
-                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-                                alertDialog.setTitle(R.string.delete_alert_title);
-                                alertDialog.setMessage(mList.get(position).getTitle());
-                                alertDialog.setCancelable(true);
-                                alertDialog.setNegativeButton(R.string.delete_cancel, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                });
-                                alertDialog.setPositiveButton(R.string.delete_confrim, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        String uri = mList.get(position).getUri();
-                                        String artist = mList.get(position).getArtist();
-                                        int pos = 0;
-                                        mContext.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                                MediaStore.Audio.Media.DATA + "=?",
-                                                new String[]{uri});
-                                        File file = new File(uri);
-                                        if (file.isFile()) {
-                                            if (file.delete()) {
-                                                Intent intent = new Intent("notifyDataSetChanged");
-                                                switch (MusicList.Mod) {
-                                                    case 2:
-                                                        if (ArtistDetailFragment.musicList.size() == 1){
-                                                            for (int i = 0; i< ArtistListFragment.artistlist.size(); i++){
-                                                                if (ArtistListFragment.artistlist.get(i).getArtist().equals(artist)){
-                                                                    pos = i;
-                                                                    break;
-                                                                }
-                                                            }
-                                                            ArtistListFragment.artistlist.remove(pos);
-                                                        }
-                                                        ArtistDetailFragment.musicList.remove(position);
-                                                        break;
-                                                    case 3:
-                                                        if (AlbumDetailFragment.musicList.size() == 1){
-                                                            for (int i = 0; i< AlbumListFragment.albumlist.size(); i++){
-                                                                if ( AlbumListFragment.albumlist.get(i).getArtist().equals(artist)){
-                                                                    pos = i;
-                                                                    break;
-                                                                }
-                                                            }
-                                                            AlbumListFragment.albumlist.remove(pos);
-                                                        }
-                                                        AlbumDetailFragment.musicList.remove(position);
-                                                        break;
-                                                }
-                                                mContext.sendBroadcast(intent);
-                                                Snackbar.make(MusicList.PlayOrPause, R.string.success, Snackbar.LENGTH_SHORT)
-                                                        .setDuration(1000)
-                                                        .show();
-                                            } else {
-                                                Snackbar.make(MusicList.PlayOrPause, R.string.failed, Snackbar.LENGTH_SHORT)
-                                                        .setDuration(1000)
-                                                        .show();
-                                            }
-                                        }
-                                    }
-                                });
-                                alertDialog.show();
-                                break;
-                            case R.id.menu_detail:
-                                DetailDialog detailDialog = new DetailDialog(mContext, mList, position);
-                                detailDialog.show();
-                                break;
-                            case R.id.tag_edit:
-                                if (mList.get(position).getUri().contains(".mp3")) {
-                                    Intent intent = new Intent(mContext, TagEditActivty.class);
-                                    intent.putExtra("music", (Parcelable) mList.get(position));
-                                    mContext.startActivity(intent);
-                                }else {
-                                    Toast.makeText(mContext,R.string.open_failed,Toast.LENGTH_SHORT).show();
-                                }
+                            case 3:
+                                listPositionSet = AlbumDetailFragment.positionSet;
                                 break;
                         }
-                        return false;
-                    }
-                });
-                popupMenu.show();
-            }
+                        listPositionSet.add(position);
+                        PlaylistDialog dialog = new PlaylistDialog(mActivity, listPositionSet, mList);
+                        dialog.show();
+                        break;
+                    case R.id.menu_delete:
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mActivity);
+                        alertDialog.setTitle(R.string.delete_alert_title);
+                        alertDialog.setMessage(mList.get(position).getTitle());
+                        alertDialog.setCancelable(true);
+                        alertDialog.setNegativeButton(R.string.delete_cancel, (dialog1, which) -> {
+
+                        });
+                        alertDialog.setPositiveButton(R.string.delete_confrim, (dialog12, which) -> {
+                            String uri = mList.get(position).getUri();
+                            String artist = mList.get(position).getArtist();
+                            int pos = 0;
+                            mActivity.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                    MediaStore.Audio.Media.DATA + "=?",
+                                    new String[]{uri});
+                            File file = new File(uri);
+                            if (file.isFile()) {
+                                if (file.delete()) {
+                                    if (MusicService.musicService != null
+                                            &&MusicService.mediaPlayer.isPlaying()
+                                            &&mList.get(position).getUri().equals(MusicService.music.getUri())) {
+                                        Intent intentNext = new Intent("delete current music success");
+                                        mActivity.sendBroadcast(intentNext);
+                                    }
+                                    Intent intent = new Intent("notifyDataSetChanged");
+                                    switch (MusicList.Mod) {
+                                        case 2:
+                                            if (ArtistDetailFragment.musicList.size() == 1) {
+                                                for (int i = 0; i < ArtistListFragment.artistlist.size(); i++) {
+                                                    if (ArtistListFragment.artistlist.get(i).getArtist().equals(artist)) {
+                                                        pos = i;
+                                                        break;
+                                                    }
+                                                }
+                                                ArtistListFragment.artistlist.remove(pos);
+                                            }
+                                            ArtistDetailFragment.musicList.remove(position);
+                                            break;
+                                        case 3:
+                                            if (AlbumDetailFragment.musicList.size() == 1) {
+                                                for (int i = 0; i < AlbumListFragment.albumlist.size(); i++) {
+                                                    if (AlbumListFragment.albumlist.get(i).getArtist().equals(artist)) {
+                                                        pos = i;
+                                                        break;
+                                                    }
+                                                }
+                                                AlbumListFragment.albumlist.remove(pos);
+                                            }
+                                            AlbumDetailFragment.musicList.remove(position);
+                                            break;
+                                    }
+                                    mActivity.sendBroadcast(intent);
+
+                                    Intent intent1 = new Intent("show snackBar");
+                                    intent1.putExtra("text id",R.string.success);
+                                    mActivity.sendBroadcast(intent1);
+                                } else {
+
+                                    Intent intent1 = new Intent("show snackBar");
+                                    intent1.putExtra("text id",R.string.failed);
+                                    mActivity.sendBroadcast(intent1);
+                                }
+                            }
+                        });
+                        alertDialog.show();
+                        break;
+                    case R.id.play_next:
+                        Intent intent1 = new Intent("play next");
+                        intent1.putExtra("from",1);
+                        intent1.putExtra("uri",mList.get(position).getUri());
+                        mActivity.sendBroadcast(intent1);
+                        break;
+                    case R.id.menu_detail:
+                        DetailDialog detailDialog = new DetailDialog(mActivity, mList, position);
+                        detailDialog.show();
+                        break;
+                    case R.id.tag_edit:
+                        if (mList.get(position).getUri().contains(".mp3")
+                                || mList.get(position).getUri().contains(".MP3")) {
+                            Intent intent = new Intent(mActivity, TagEditActivty.class);
+                            intent.putExtra("music", (Parcelable) mList.get(position));
+                            mActivity.startActivity(intent);
+                        } else {
+                            Toast.makeText(mActivity, R.string.open_failed, Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+
+                }
+                return false;
+            });
+            popupMenu.show();
         });
 
     }
@@ -235,35 +233,32 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHold
 class AlbumDetailViewHolder extends RecyclerView.ViewHolder {
     final TextView tv_title;
     final TextView tv_time;
-    final ImageView iv;
+    final TextView track;
+    final ImageView item_image;
     final ImageView item_menu;
 
     AlbumDetailViewHolder(View itemView) {
         super(itemView);
-        iv = (ImageView) itemView.findViewById(R.id.detail_album_art);
-        tv_time = (TextView) itemView.findViewById(R.id.detail_time);
-        tv_title = (TextView) itemView.findViewById(R.id.detail_title);
-        item_menu = (ImageView) itemView.findViewById(R.id.detail_item_menu);
+        track = itemView.findViewById(R.id.detail_track);
+        tv_time = itemView.findViewById(R.id.detail_time);
+        tv_title =  itemView.findViewById(R.id.detail_title);
+        item_menu = itemView.findViewById(R.id.detail_item_menu);
+        item_image =  itemView.findViewById(R.id.detail_album_art);
     }
-    public void setData(int position){
-        Set<Integer> positionSet = new HashSet<>();
-        if (MusicUtils.isSelectAll){
-            positionSet = MusicList.listPositionSet;
-        }else {
-            switch (MusicList.Mod) {
-                case 2:
-                    positionSet = ArtistDetailFragment.positionSet;
-                    break;
-                case 3:
-                    positionSet = AlbumDetailFragment.positionSet;
-                    break;
+
+    public void setData(int position) {
+        Set<Integer> positionSet;
+            if (MusicUtils.isSelectAll) {
+                positionSet = MusicList.listPositionSet;
+            } else {
+                positionSet = AlbumDetailFragment.positionSet;
             }
-        }
-        if (positionSet.contains(position)){
-            itemView.setBackgroundResource(R.color.items_selected_bg_color);
-        }else {
-            itemView.setBackgroundResource(R.color.listView_bg_color);
-        }
+            if (positionSet.contains(position)) {
+                itemView.setBackgroundResource(R.color.items_selected_bg_color);
+            } else {
+                itemView.setBackground(null);
+            }
+
     }
 }
 

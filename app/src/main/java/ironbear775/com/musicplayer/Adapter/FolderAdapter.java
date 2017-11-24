@@ -24,7 +24,6 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderViewHolder>{
     private final LayoutInflater mInflater;
     private final ArrayList<Playlist> mList;
     private boolean isClickable = true;
-    private Context mContext;
 
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
@@ -42,7 +41,6 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderViewHolder>{
 
     public FolderAdapter(Context context, ArrayList<Playlist> list){
         mList = list;
-        mContext = context;
         this.mInflater = LayoutInflater.from(context);
     }
 
@@ -57,12 +55,9 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderViewHolder>{
     public void onBindViewHolder(FolderViewHolder holder, int position) {
         holder.setData(position);
         if (mOnItemClickListener != null) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isClickable) {
-                        mOnItemClickListener.onItemClick(holder.itemView, position);
-                    }
+            holder.itemView.setOnClickListener(v -> {
+                if (isClickable) {
+                    mOnItemClickListener.onItemClick(holder.itemView, position);
                 }
             });
         }
@@ -83,8 +78,8 @@ class FolderViewHolder extends RecyclerView.ViewHolder {
 
     FolderViewHolder(View itemView) {
         super(itemView);
-        tv_title = (TextView) itemView.findViewById(R.id.folder_tv_title);
-        tv_count = (TextView) itemView.findViewById(R.id.folder_tv_count);
+        tv_title = itemView.findViewById(R.id.folder_tv_title);
+        tv_count = itemView.findViewById(R.id.folder_tv_count);
     }
 
     public void setData(int position) {
@@ -95,7 +90,7 @@ class FolderViewHolder extends RecyclerView.ViewHolder {
         if (positionSet.contains(position)) {
             itemView.setBackgroundResource(R.color.items_selected_bg_color);
         } else {
-            itemView.setBackgroundResource(R.color.listView_bg_color);
+            itemView.setBackground(null);
         }
     }
 }

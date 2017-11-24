@@ -4,5 +4,8 @@
     <item
         android:id="@+id/re_download_artist"
         android:title="@string/update_artist" />
+    <item
+        android:id="@+id/load_local_artist"
+        android:title="@string/update_artist_from_local" />
 
 </menu>

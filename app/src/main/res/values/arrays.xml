@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="menu_main">
+        <item>@string/add_to_playlist</item>
+        <item>@string/tag_editor</item>
+        <item>@string/select_local_album_cover</item>
+    </string-array>
+    <string-array name="menu_lyric">
+        <item>@string/select_local_lyric</item>
+        <item>@string/update_lyric</item>
+        <item>@string/accurate_update</item>
+        <item>@string/embed_lyric</item>
+    </string-array>
+</resources>

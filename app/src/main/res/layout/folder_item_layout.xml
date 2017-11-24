@@ -10,7 +10,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
         tools:targetApi="lollipop">
 
         <ImageView
@@ -34,11 +33,11 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginStart="3dp"
                 android:ellipsize="marquee"
-                android:maxLines="1"
                 android:paddingBottom="5dp"
                 android:paddingTop="10dp"
-                android:textColor="@color/black"
-                android:textSize="20sp"/>
+                android:textColor="?attr/mainTextColor"
+                android:textSize="20sp"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_below="@+id/folder_tv_title"
@@ -47,11 +46,11 @@
                 android:layout_height="40dp"
                 android:layout_marginStart="3dp"
                 android:ellipsize="marquee"
-                android:maxLines="1"
                 android:paddingBottom="5dp"
                 android:paddingTop="10dp"
-                android:textColor="@color/black"
-                android:textSize="15sp"/>
+                android:textColor="?attr/subTextColor"
+                android:textSize="15sp"
+                android:singleLine="true" />
         </RelativeLayout>
 
     </RelativeLayout>

@@ -15,13 +15,14 @@ public class Music implements Parcelable, Serializable {
     private long size;
 
     private int duration;
-    private int album_id;
+    private String album_id;
 
     private String title;
     private String album;
     private String artist;
     private String uri;
     private String albumArtUri;
+    private String track;
 
     public Music() {
 
@@ -31,12 +32,13 @@ public class Music implements Parcelable, Serializable {
         ID = in.readLong();
         size = in.readLong();
         duration = in.readInt();
-        album_id = in.readInt();
+        album_id = in.readString();
         title = in.readString();
         album = in.readString();
         artist = in.readString();
         uri = in.readString();
         albumArtUri = in.readString();
+        track = in.readString();
     }
 
     public long getID() {
@@ -95,11 +97,11 @@ public class Music implements Parcelable, Serializable {
         this.uri = uri;
     }
 
-    public int getAlbum_id() {
+    public String getAlbum_id() {
         return album_id;
     }
 
-    public void setAlbum_id(int id) {
+    public void setAlbum_id(String id) {
         this.album_id = id;
     }
 
@@ -110,18 +112,25 @@ public class Music implements Parcelable, Serializable {
     public void setAlbumArtUri(String albumArtUri) {
         this.albumArtUri = albumArtUri;
     }
+    public String getTrack() {
+        return track;
+    }
 
+    public void setTrack(String track1) {
+        this.track = track1;
+    }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(ID);
         dest.writeLong(size);
         dest.writeInt(duration);
-        dest.writeInt(album_id);
+        dest.writeString(album_id);
         dest.writeString(title);
         dest.writeString(album);
         dest.writeString(artist);
         dest.writeString(uri);
         dest.writeString(albumArtUri);
+        dest.writeString(track);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

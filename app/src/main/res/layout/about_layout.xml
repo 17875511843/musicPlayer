@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:theme="@style/AppTheme">
+    android:background="?attr/appBgDark">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/about_toolbar"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/about_appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:background="@color/material_gray"
-        android:minHeight="?attr/actionBarSize"
-        app:popupTheme="@style/Theme.AppCompat.Light" />
+        android:layout_height="wrap_content">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/about_toolbar"
-        android:foreground="@drawable/bottom_shadow" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/about_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"/>
+
+    </android.support.design.widget.AppBarLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/about_toolbar">
+        android:layout_below="@id/about_appbar">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -37,7 +34,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:clickable="true"
-                android:background="?android:attr/selectableItemBackground">
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/version"
@@ -47,7 +45,7 @@
                     android:layout_marginTop="15dp"
                     android:gravity="center_vertical"
                     android:text="@string/version"
-                    android:textColor="@color/material_gray_dark"
+                    android:textColor="?attr/mainTextColor"
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
@@ -59,6 +57,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
+                    android:textColor="?attr/subTextColor"
                     android:gravity="center_vertical" />
             </RelativeLayout>
 
@@ -75,7 +74,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/line4"
                 android:clickable="true"
-                android:background="?android:attr/selectableItemBackground">
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/developer"
@@ -86,6 +86,7 @@
                     android:layout_marginTop="15dp"
                     android:gravity="center_vertical"
                     android:text="@string/developer"
+                    android:textColor="?attr/mainTextColor"
                     android:textSize="15sp"
                     android:textStyle="bold"/>
 
@@ -98,6 +99,7 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:gravity="center_vertical"
+                    android:textColor="?attr/subTextColor"
                     android:text="@string/developer_name" />
             </RelativeLayout>
 
@@ -119,6 +121,7 @@
                 android:gravity="center_vertical"
                 android:text="@string/open_source"
                 android:textSize="15sp"
+                android:textColor="?attr/mainTextColor"
                 android:textStyle="bold" />
 
             <ImageView
@@ -134,7 +137,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/line6"
                 android:clickable="true"
-                android:background="?android:attr/selectableItemBackground">
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true">
 
                 <TextView
                     android:id="@+id/about_main"
@@ -146,6 +150,7 @@
                     android:gravity="center_vertical"
                     android:text="@string/about"
                     android:textSize="15sp"
+                    android:textColor="?attr/mainTextColor"
                     android:textStyle="bold" />
 
                 <TextView
@@ -157,6 +162,7 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginStart="15dp"
                     android:gravity="center_vertical"
+                    android:textColor="?attr/subTextColor"
                     android:text="@string/about_music_player" />
             </RelativeLayout>
 

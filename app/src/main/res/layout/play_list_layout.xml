@@ -13,8 +13,9 @@
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/material_gray"
-            android:clickable="true">
+            android:background="?attr/colorPrimary"
+            android:clickable="true"
+            android:focusable="true">
 
             <ImageView
                 android:id="@+id/create_cancel"
@@ -39,6 +40,8 @@
                 android:ellipsize="end"
                 android:background="@null"
                 android:hint="@string/input_name"
+                android:textColor="@color/white"
+                android:textColorHint="?attr/subTextColor"
                 android:textCursorDrawable="@null"
                 android:visibility="gone"
                 />
@@ -64,7 +67,8 @@
                 android:layout_marginStart="14dp"
                 android:layout_marginTop="10dp"
                 android:src="@drawable/add_white"
-                android:clickable="true"/>
+                android:clickable="true"
+                android:focusable="true" />
             <TextView
                 android:id="@+id/create_new"
                 android:layout_width="wrap_content"
@@ -76,7 +80,7 @@
                 android:layout_toEndOf="@+id/create_playlist_icon"
                 android:gravity="center_vertical"
                 android:text="@string/create_new_playlist"
-                android:textColor="@color/listView_bg_color"
+                android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -85,6 +89,7 @@
 
     <ListView
         android:id="@+id/playlist_listView"
+        android:background="?attr/appBg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" >

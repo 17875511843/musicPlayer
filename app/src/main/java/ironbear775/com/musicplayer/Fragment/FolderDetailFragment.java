@@ -20,8 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +44,6 @@ public class FolderDetailFragment extends Fragment {
     private MusicUtils musicUtils;
     private Toolbar toolbar;
     private RelativeLayout shuffle;
-    private String folderTitle;
     private String folderPath;
 
     @Nullable
@@ -56,7 +53,7 @@ public class FolderDetailFragment extends Fragment {
 
         musicList.clear();
         musicList = getArguments().getParcelableArrayList("musicList");
-        folderTitle = getArguments().getString("folder");
+        String folderTitle = getArguments().getString("folder");
         folderPath = getArguments().getString("folderPath");
 
         findView(view);
@@ -68,7 +65,7 @@ public class FolderDetailFragment extends Fragment {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        MusicList.toolbar.setVisibility(View.GONE);
+        getActivity().sendBroadcast(new Intent("set toolbar gone"));
         toolbar.setTitle(folderTitle);
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.close_white);
@@ -121,18 +118,17 @@ public class FolderDetailFragment extends Fragment {
             }
         });
 
-        shuffle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                count = 1;
-                MusicListFragment.count = 0;
-                MusicRecentAddedFragment.count = 0;
-                AlbumDetailFragment.count = 0;
-                ArtistDetailFragment.count = 0;
-                PlaylistDetailFragment.count = 0;
-                musicUtils = new MusicUtils(v.getContext());
-                musicUtils.shufflePlay(musicList,5);
-            }
+        shuffle.setOnClickListener(v -> {
+            count = 1;
+            MusicListFragment.count = 0;
+            MusicRecentAddedFragment.count = 0;
+            AlbumDetailFragment.count = 0;
+            ArtistDetailFragment.count = 0;
+            PlaylistDetailFragment.count = 0;
+            MusicList.count = 0;
+
+            musicUtils = new MusicUtils(v.getContext());
+            musicUtils.shufflePlay(musicList,5);
         });
     }
 
@@ -148,7 +144,7 @@ public class FolderDetailFragment extends Fragment {
                     MusicList.actionMode = null;
                     FolderDetailFragment.positionSet.clear();
                     getActivity().getWindow().setStatusBarColor(0);
-                    MusicList.toolbar.setBackgroundColor(0);
+                    getActivity().sendBroadcast(new Intent("set toolbar clear"));
                     getActivity().sendBroadcast(in);
                 } else {
                     FragmentManager fragmentManager = getFragmentManager();
@@ -164,9 +160,9 @@ public class FolderDetailFragment extends Fragment {
                     transaction.commit();
 
                     getActivity().getWindow().setStatusBarColor(0);
-                    MusicList.toolbar.setBackgroundColor(0);
-                    MusicList.toolbar.setVisibility(View.VISIBLE);
-                    MusicList.toolbar.setTitle(R.string.toolbar_title_folder);
+                    Intent intent = new Intent("set toolbar text");
+                    intent.putExtra("title",R.string.toolbar_title_folder);
+                    getActivity().sendBroadcast(intent);
                 }
                 break;
         }
@@ -181,73 +177,82 @@ public class FolderDetailFragment extends Fragment {
         AlbumDetailFragment.count = 0;
         ArtistDetailFragment.count = 0;
         PlaylistDetailFragment.count = 0;
+        MusicList.count = 0;
 
         int progress = 0;
         musicUtils = new MusicUtils(getActivity());
         musicUtils.startMusic(position, progress,5);
 
-        MusicList.footTitle.setText(musicList.get(position).getTitle());
-        MusicList.footArtist.setText(musicList.get(position).getArtist());
-        MusicList.PlayOrPause.setImageResource(R.drawable.footplaywhite);
+        Intent intent = new Intent("set footBar");
+        Intent intent1 = new Intent("set PlayOrPause");
+        intent.putExtra("footTitle",musicList.get(position).getTitle());
+        intent.putExtra("footArtist",musicList.get(position).getArtist());
+        intent1.putExtra("PlayOrPause",R.drawable.footplaywhite);
+        getActivity().sendBroadcast(intent);
+        getActivity().sendBroadcast(intent1);
 
-        musicUtils.getFootAlbumArt(position, musicList);
+        musicUtils.getFootAlbumArt(position, musicList,MusicUtils.FROM_ADAPTER);
 
         pos = position;
 
     }
 
     private void findView(View view) {
-        shuffle = (RelativeLayout) view.findViewById(R.id.shuffle);
-        toolbar = (Toolbar) view.findViewById(R.id.music_toolbar);
-        musicView = (FastScrollRecyclerView) view.findViewById(R.id.music_list);
+        shuffle = view.findViewById(R.id.shuffle);
+        toolbar = view.findViewById(R.id.music_toolbar);
+        musicView = view.findViewById(R.id.music_list);
     }
 
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case "SetClickable_True":
-                    musicAdapter.setClickable(true);
-                    break;
-                case "SetClickable_False":
-                    musicAdapter.setClickable(false);
-                    break;
-                case "notifyDataSetChanged":
-                    musicAdapter.notifyDataSetChanged();
-                    if (musicList.size() == 0){
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case "SetClickable_True":
+                        musicAdapter.setClickable(true);
+                        break;
+                    case "SetClickable_False":
+                        musicAdapter.setClickable(false);
+                        break;
+                    case "notifyDataSetChanged":
+                        musicAdapter.notifyDataSetChanged();
+                        if (musicList.size() == 0){
 
-                        Intent remove = new Intent("remove");
-                        remove.putExtra("folderName",folderPath);
+                            Intent remove = new Intent("remove");
+                            remove.putExtra("folderName",folderPath);
 
-                        MusicList.myContext.sendBroadcast(remove);
+                            getActivity().sendBroadcast(remove);
 
-                        FragmentManager fragmentManager = getFragmentManager();
-                        FragmentTransaction transaction;
+                            FragmentManager fragmentManager = getFragmentManager();
+                            FragmentTransaction transaction;
 
-                        transaction = fragmentManager.beginTransaction();
-                        if (FolderFragment.folderDetailFragment != null)
-                            transaction.hide(FolderFragment.folderDetailFragment);
-                        transaction.setCustomAnimations(
-                                R.animator.fragment_slide_right_enter,
-                                R.animator.fragment_slide_right_exit,
-                                R.animator.fragment_slide_left_enter,
-                                R.animator.fragment_slide_left_exit
-                        );
-                        transaction.show(MusicList.folderFragment);
-                        transaction.commit();
-                        FolderFragment.folderDetailFragment = null;
-                        MusicList.toolbar.setVisibility(View.VISIBLE);
-                        MusicList.toolbar.setTitle(R.string.toolbar_title_folder);
+                            transaction = fragmentManager.beginTransaction();
+                            if (FolderFragment.folderDetailFragment != null)
+                                transaction.hide(FolderFragment.folderDetailFragment);
+                            transaction.setCustomAnimations(
+                                    R.animator.fragment_slide_right_enter,
+                                    R.animator.fragment_slide_right_exit,
+                                    R.animator.fragment_slide_left_enter,
+                                    R.animator.fragment_slide_left_exit
+                            );
+                            transaction.show(MusicList.folderFragment);
+                            transaction.commit();
+                            FolderFragment.folderDetailFragment = null;
+                            Intent intent1 = new Intent("set toolbar text");
+                            intent1.putExtra("title",R.string.toolbar_title_folder);
+                            getActivity().sendBroadcast(intent1);
 
-                    }
-                    break;
-                case "enableShuffle":
-                    if (!MusicUtils.enableShuffle)
-                        shuffle.setVisibility(View.GONE);
-                    else
-                        shuffle.setVisibility(View.VISIBLE);
+                        }
+                        break;
+                    case "enableShuffle":
+                        if (!MusicUtils.enableShuffle)
+                            shuffle.setVisibility(View.GONE);
+                        else
+                            shuffle.setVisibility(View.VISIBLE);
 
-                    break;
+                        break;
+                }
             }
         }
     };

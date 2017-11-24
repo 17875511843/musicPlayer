@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:theme="@style/AppTheme"
     android:fitsSystemWindows="true"
     skin:enable="true" >
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:background="@color/transparent_color">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -28,8 +28,7 @@
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:background="@color/material_gray"
-                    app:popupTheme="@style/Theme.AppCompat.Light"/>
+                    android:background="?attr/colorPrimary"/>
 
             </android.support.design.widget.AppBarLayout>
 
@@ -40,21 +39,30 @@
                 android:layout_below="@+id/appbar">
                 <FrameLayout
                     android:id="@+id/content"
+                    android:background="?attr/appBg"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
                 </FrameLayout>
             </RelativeLayout>
 
+            <ImageView
+                android:layout_above="@+id/bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shadow"/>
             <RelativeLayout
                 android:id="@+id/bottom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true">
+                android:layout_alignParentBottom="true"
+                android:background="@color/transparent_color">
 
                 <include
+                    android:id="@+id/include"
                     layout="@layout/main_bottom_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+
             </RelativeLayout>
 
         </RelativeLayout>
@@ -66,14 +74,14 @@
             android:layout_alignParentEnd="true"
             android:layout_marginBottom="34dp"
             android:layout_marginEnd="20dp"
-            android:backgroundTint="@color/material_gray"
+            android:backgroundTint="?attr/colorPrimary"
             app:borderWidth="0dp"
             app:elevation="5dp"
             app:fabSize="normal"
             app:layout_anchor="@id/blank1"
             app:layout_anchorGravity="bottom|right"
             app:pressedTranslationZ="10dp"
-            app:rippleColor="@color/material_gray_dark_light" />
+            app:rippleColor="?attr/colorPrimaryDark" />
     </android.support.design.widget.CoordinatorLayout>
 
     <include layout="@layout/music_slide_layout"

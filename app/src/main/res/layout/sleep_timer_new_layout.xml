@@ -1,54 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="270dp"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/round_bg">
-    <RelativeLayout
+
+    <TextView
+        android:id="@+id/sleepTimer_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:padding="20dp"
+        android:gravity="center_horizontal"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:text="@string/sleep_timer"/>
+    <com.sdsmdg.harjot.crollerTest.Croller
         android:id="@+id/picker"
-        android:layout_width="270dp"
-        android:layout_height="wrap_content">
-        <ironbear775.com.musicplayer.Util.TimePickerView
-            android:id="@+id/minute_pv"
-            android:layout_width="80dp"
-            android:layout_height="160dp" />
-
-        <TextView
-            android:id="@+id/minute_tv"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/minute_pv"
-            android:text="@string/minute"
-            android:textColor="@color/material_gray_dark"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
-        <ironbear775.com.musicplayer.Util.TimePickerView
-            android:id="@+id/second_pv"
-            android:layout_width="80dp"
-            android:layout_height="160dp"
-            android:layout_toEndOf="@id/minute_tv" />
-
-        <TextView
-            android:id="@+id/second_tv"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/second_pv"
-            android:text="@string/second"
-            android:layout_marginEnd="10dp"
-            android:textColor="@color/material_gray_dark"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
-    </RelativeLayout>
+        android:layout_below="@+id/sleepTimer_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:indicator_color="?attr/slideSubTextColor"
+        app:indicator_width="10"
+        app:is_continuous="true"
+        app:label_color="?attr/mainTextColor"
+        app:main_circle_color="?attr/colorPrimary"
+        app:back_circle_color="?attr/colorAccent"
+        app:max="120"
+        app:progress="30"
+        app:progress_primary_color="?attr/colorPrimary"
+        app:progress_primary_circle_size="10"
+        app:progress_primary_stroke_width="15"
+        app:progress_secondary_color="?attr/subTextColor"
+        app:progress_secondary_circle_size="10"
+        app:progress_secondary_stroke_width="15"
+        app:start_offset="45" />
 
     <RelativeLayout
-        android:paddingTop="10dp"
+        android:paddingTop="20dp"
         android:layout_below="@+id/picker"
-        android:orientation="horizontal"
         android:layout_width="260dp"
         android:layout_height="wrap_content">
         <TextView
@@ -56,10 +47,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/sleepCancel"
-            android:layout_centerInParent="true"
-            android:paddingTop="10dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="20dp"
+            android:padding="10dp"
+            android:layout_centerVertical="true"
             android:gravity="center_vertical"
             android:textStyle="bold" />
         <Button
@@ -67,14 +56,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/sleepStart"
+            android:layout_centerVertical="true"
             android:background="?android:attr/selectableItemBackground"
+            android:textColor="?attr/colorPrimary"
+            android:gravity="center"
             android:text="@string/sleep_timer_cancel"/>
         <Button
             android:id="@+id/sleepStart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:background="?android:attr/selectableItemBackground"
+            android:textColor="?attr/colorPrimary"
+            android:gravity="center"
             android:text="@string/sleep_timer_start"/>
     </RelativeLayout>
 

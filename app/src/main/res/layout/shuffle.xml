@@ -3,7 +3,7 @@
     android:id="@+id/shuffle"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/material_gray"
+    android:background="?attr/colorPrimary"
     android:foreground="?android:attr/selectableItemBackground"
     android:layout_below="@id/toolbar"
     android:orientation="horizontal"
@@ -17,8 +17,9 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="14dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/shuffle_white"
-        android:clickable="true"/>
+        android:background="@drawable/shuffle_all"
+        android:clickable="true"
+        android:focusable="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,7 +31,7 @@
         android:layout_toEndOf="@+id/image1"
         android:gravity="center_vertical"
         android:text="@string/shuffle_all"
-        android:textColor="@color/listView_bg_color"
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold" />
 </RelativeLayout>

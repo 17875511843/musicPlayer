@@ -9,12 +9,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import ironbear775.com.musicplayer.Activity.ActivityCollector;
-import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
-import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
-import ironbear775.com.musicplayer.Fragment.ArtistDetailFragment;
-import ironbear775.com.musicplayer.Fragment.MusicListFragment;
-import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
-import ironbear775.com.musicplayer.Fragment.PlaylistDetailFragment;
 
 /**
  * Created by ironbear on 2016/12/19.
@@ -26,7 +20,7 @@ public class SleepService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final int totalTime = intent.getIntExtra("time", 0) * 1000;
+        final int totalTime = intent.getIntExtra("time", 0) * 1000 * 60;
         countDownTimer = new CountDownTimer(totalTime, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -35,74 +29,16 @@ public class SleepService extends Service {
 
             @Override
             public void onFinish() {
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.cancel(1);
-                SharedPreferences.Editor editor;
-                editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                if (MusicService.mediaPlayer!=null) {
+                    sendBroadcast(new Intent("clear"));
+                    SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
 
-                if (MusicService.mediaPlayer.isPlaying()) {
-                    for (int i = 0; i < MusicListFragment.musicList.size(); i++) {
-                        if (MusicListFragment.musicList.get(i).getUri()
-                                .equals(MusicService.musicList
-                                        .get(MusicService.musicPosition).getUri())) {
-                            editor.putInt("position", i);
-                            break;
-                        }
-                    }
-                } else if (MusicListFragment.count == 1) {
-                    editor.putInt("position", MusicListFragment.pos);
-                } else if (ArtistDetailFragment.count == 1) {
-                    for (int i = 0; i < MusicListFragment.musicList.size(); i++) {
-                        if (MusicListFragment.musicList.get(i).getUri()
-                                .equals(ArtistDetailFragment.musicList
-                                        .get(ArtistDetailFragment.pos).getUri())) {
-                            editor.putInt("position", i);
-                            break;
-                        }
-                    }
-                } else if (AlbumDetailFragment.count == 1) {
-                    for (int i = 0; i < MusicListFragment.musicList.size(); i++) {
-                        if (MusicListFragment.musicList.get(i).getUri()
-                                .equals(AlbumDetailFragment.musicList
-                                        .get(AlbumListFragment.pos).getUri())) {
-                            editor.putInt("position", i);
-                            break;
-                        }
-                    }
-                } else if (PlaylistDetailFragment.count == 1) {
-                    for (int i = 0; i < MusicListFragment.musicList.size(); i++) {
-                        if (MusicListFragment.musicList.get(i).getUri()
-                                .equals(PlaylistDetailFragment.musicList
-                                        .get(PlaylistDetailFragment.pos).getUri())) {
-                            editor.putInt("position", i);
-                            break;
-                        }
-                    }
-                } else if (MusicRecentAddedFragment.count == 1) {
-                    for (int i = 0; i < MusicListFragment.musicList.size(); i++) {
-                        if (MusicListFragment.musicList.get(i).getUri()
-                                .equals(MusicRecentAddedFragment.musicList
-                                        .get(MusicRecentAddedFragment.pos).getUri())) {
-                            editor.putInt("position", i);
-                            break;
-                        }
-                    }
-                } else {
-                    editor.putInt("position", MusicListFragment.pos);
+                    editor.putInt("progress", MusicService.mediaPlayer.getCurrentPosition());
+                    editor.putInt("flag", 0);
+                    editor.apply();
+                    editor.commit();
                 }
-
-                MusicService.mediaPlayer.pause();
-                int progress = MusicService.mediaPlayer.getCurrentPosition();
-                Intent intent1 = new Intent(SleepService.this, MusicService.class);
-                stopService(intent1);
-
-                editor.putInt("progress", progress);
-                editor.putInt("flag", 0);
-                editor.apply();
-                editor.commit();
                 stopSelf();
-                ActivityCollector.finishAll();
-                System.exit(0);
             }
         };
         countDownTimer.start();

@@ -1,43 +1,51 @@
 package ironbear775.com.musicplayer.Activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 /**
- * Created by ironbear on 2017/1/29.
+ * Created by ironbear on 2017/11/6.
  */
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences SharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SharedPreferences getPrefs = PreferenceManager
-                        .getDefaultSharedPreferences(getBaseContext());
+        boolean isFirstStart = SharedPreferences.getBoolean("firstStart", true);
 
-                boolean isFirstStart = getPrefs.getBoolean("firstStart", true);
+        try {
+            int versionCode = getPackageManager().getPackageInfo(getPackageName(), 0)
+                    .versionCode;
+            int oldVersionCode = SharedPreferences.getInt("versionCode", 0);
 
-                if (isFirstStart) {
+            SharedPreferences.Editor editor = SharedPreferences.edit();
+            editor.putInt("versionCode", versionCode);
+            editor.apply();
 
-                    Intent i = new Intent(MainActivity.this,MyIntroActivity.class);
-                    startActivity(i);
+            if (isFirstStart) {
+                editor.putBoolean("firstStart", false);
+                editor.apply();
 
-                    SharedPreferences.Editor e = getPrefs.edit();
+                Intent i = new Intent(MainActivity.this, MyIntroActivity.class);
+                startActivity(i);
+            } else {
+                Intent intent = new Intent(MainActivity.this, MusicList.class);
+                if (oldVersionCode < versionCode)
+                    intent.putExtra("IS_NEW_VERSION", true);
+                else
+                    intent.putExtra("IS_NEW_VERSION", false);
 
-                    e.putBoolean("firstStart", false);
-                    e.apply();
-                }
+                startActivity(intent);
             }
-        });
-        t.start();
-        Intent intent = new Intent(MainActivity.this,MusicList.class);
-        startActivity(intent);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
-
-
 }

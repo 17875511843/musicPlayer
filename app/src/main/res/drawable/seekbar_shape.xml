@@ -3,20 +3,20 @@
 
     <item android:id="@android:id/background">
         <shape>
-            <solid android:color="@color/seekBar_bg_color" />
+            <solid android:color="?attr/seekBarNextColor" />
         </shape>
     </item>
     <item android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
-                <solid android:color="@color/seekBar_bg_color" />
+                <solid android:color="?attr/seekBarPassColor" />
             </shape>
         </clip>
     </item>
     <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <solid android:color="@color/seekBar_progress_color" />
+                <solid android:color="?attr/seekBarPassColor" />
             </shape>
         </clip>
     </item>

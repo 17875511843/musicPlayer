@@ -3,6 +3,7 @@
     <color name="material_gray_dark">#757575</color>
     <color name="material_gray_dark_light">#616161</color>
     <color name="material_gray_hard">#212121</color>
+
     <color name="listView_bg_color">#fafafa</color>
     <color name="black">#000000</color>
     <color name="footBar_color">#eeeeee</color>
@@ -11,4 +12,194 @@
     <color name="slide_layout_control_bg_color">#e0e0e0</color>
     <color name="slide_layout_bg_color">#e2e2e2</color>
     <color name="items_selected_bg_color">#dcdcdc</color>
+
+    <color name="white">#ffffff</color>
+    <color name="white_trans">#99ffffff</color>
+
+    <color name="gray">#bbbbbb</color>
+    <color name="gray_dark">#999999</color>
+    <color name="gray_trans">#44999999</color>
+    <color name="gray_light">#dcdcdc</color>
+
+    <!-- theme color -->
+
+    <color name="lightBg">#fafafa</color>
+    <color name="lightBgDark">#ffffff</color>
+    <color name="lightColorPrimary">#2196f3</color>
+    <color name="lightColorPrimaryDark">#1976D2</color>
+    <color name="lightColorAccent">#00bcd4</color>
+    <color name="lightMainTextColor">#000000</color>
+    <color name="lightSubTextColor">#757575</color>
+    <color name="lightSlideMiddleColor">#bdbdbd</color>
+    <color name="lightSlideControlColor">#e0e0e0</color>
+    <color name="lightSeekBarPassColor">#9c9c9c</color>
+    <color name="lightSeekBarNextColor">#bdbdbd</color>
+
+    <color name="nightBg">#303030</color>
+    <color name="nightBgDark">#202020</color>
+    <color name="nightColorPrimary">#000000</color>
+    <color name="nightColorPrimaryDark">#000000</color>
+    <color name="nightColorPrimaryLight">#cccccc</color>
+    <color name="nightColorAccent">#191919</color>
+    <color name="nightColorAccentDark">#0c0c0c</color>
+    <color name="nightMainTextColor">#c1c1c1</color>
+    <color name="nightSubTextColor">#757575</color>
+    <color name="nightSlideMiddleColor">#424242</color>
+    <color name="nightSlideControlColor">#515151</color>
+    <color name="nightSeekBarPassColor">#404040</color>
+    <color name="nightSeekBarNextColor">#424242</color>
+
+    <color name="ColorPrimaryRed">#F44336</color>
+    <color name="ColorPrimaryDarkRed">#D32F2F</color>
+    <color name="ColorPrimaryLightRed">#ffcdd2</color>
+    <color name="ColorAccentRed">#ff5252</color>
+    <color name="SlideTopColorRed">#e73526</color>
+    <color name="ColorSeekBarNextRed">#db3c30</color>
+    <color name="ColorSeekBarPassRed">#c3352b</color>
+
+    <color name="ColorPrimaryPink">#E91E63</color>
+    <color name="ColorPrimaryDarkPink">#C2185B</color>
+    <color name="ColorPrimaryLightPink">#F8BBD0</color>
+    <color name="ColorAccentPink">#ff4081</color>
+    <color name="SlideTopColorPink">#d81558</color>
+    <color name="ColorSeekBarNextPink">#ba184f</color>
+    <color name="ColorSeekBarPassPink">#d11b59</color>
+
+    <color name="ColorPrimaryPurple">#9C27B0</color>
+    <color name="ColorPrimaryDarkPurple">#7b1fa2</color>
+    <color name="ColorPrimaryLightPurple">#E1BEE7</color>
+    <color name="ColorAccentPurple">#e040fb</color>
+    <color name="SlideTopColorPurple">#89229b</color>
+    <color name="ColorSeekBarNextPurple">#7b3188</color>
+    <color name="ColorSeekBarPassPurple">#89229b</color>
+
+    <color name="ColorPrimaryIndigo">#3F51B5</color>
+    <color name="ColorPrimaryDarkIndigo">#303F9F</color>
+    <color name="ColorPrimaryLightIndigo">#c5cae9</color>
+    <color name="ColorAccentIndigo">#536dfe</color>
+    <color name="SlideTopColorIndigo">#3849a2</color>
+    <color name="ColorSeekBarNextIndigo">#2d3ca7</color>
+    <color name="ColorSeekBarPassIndigo">#283593</color>
+
+    <color name="ColorPrimaryBlue">#2196F3</color>
+    <color name="ColorPrimaryDarkBlue">#1976D2</color>
+    <color name="ColorPrimaryLightBlue1">#bbdefb</color>
+    <color name="ColorAccentBlue">#448aff</color>
+    <color name="SlideTopColorBlue">#1e88e5</color>
+    <color name="ColorSeekBarNextBlue">#1976d2</color>
+    <color name="ColorSeekBarPassBlue">#0c7cd5</color>
+
+    <color name="ColorPrimaryLightBlue">#03A9F4</color>
+    <color name="ColorPrimaryDarkLightBlue">#0288D1</color>
+    <color name="ColorPrimaryLightLightBlue">#b3e5fc</color>
+    <color name="ColorAccentLightBlue">#40c4ff</color>
+    <color name="SlideTopColorLightBlue">#0398db</color>
+    <color name="ColorSeekBarNextLightBlue">#0298db</color>
+    <color name="ColorSeekBarPassLightBlue">#0398db</color>
+
+    <color name="ColorPrimaryTeal">#009688</color>
+    <color name="ColorPrimaryDarkTeal">#00796B</color>
+    <color name="ColorPrimaryLightTeal">#b2dfdb</color>
+    <color name="ColorAccentTeal">#64ffda</color>
+    <color name="SlideTopColorTeal">#007d71</color>
+    <color name="ColorSeekBarNextTeal">#00877a</color>
+    <color name="ColorSeekBarPassTeal">#007d71</color>
+
+    <color name="ColorPrimaryGreen">#4CAF50</color>
+    <color name="ColorPrimaryDarkGreen">#388E3C</color>
+    <color name="ColorPrimaryLightGreen">#c8e6c9</color>
+    <color name="ColorAccentGreen">#69f0ae</color>
+    <color name="SlideTopColorGreen">#449d48</color>
+    <color name="ColorSeekBarNextGreen">#3e7e42</color>
+    <color name="ColorSeekBarPassGreen">#388E3C</color>
+
+    <color name="ColorPrimaryLime">#CDDC39</color>
+    <color name="ColorPrimaryDarkLime">#AFB42B</color>
+    <color name="ColorPrimaryLightLime">#f0f4c3</color>
+    <color name="ColorAccentLime">#eeff41</color>
+    <color name="SlideTopColorLime">#c6d626</color>
+    <color name="ColorSeekBarNextLime">#b8c633</color>
+    <color name="ColorSeekBarPassLime">#a4b02d</color>
+
+    <color name="ColorPrimaryAmber">#ff9800</color>
+    <color name="ColorPrimaryDarkAmber">#f57c00</color>
+    <color name="ColorPrimaryLightAmber">#ffe0b2</color>
+    <color name="ColorAccentAmber">#ffd740</color>
+    <color name="SlideTopColorAmber">#e68900</color>
+    <color name="ColorSeekBarNextAmber">#e58800</color>
+    <color name="ColorSeekBarPassAmber">#e68900</color>
+
+    <color name="ColorPrimaryOrange">#FF9800</color>
+    <color name="ColorPrimaryDarkOrange">#F57C00</color>
+    <color name="ColorPrimaryLightOrange">#ffe0b2</color>
+    <color name="ColorAccentOrange">#ffab40</color>
+    <color name="SlideTopColorOrange">#e68900</color>
+    <color name="ColorSeekBarNextOrange">#e58800</color>
+    <color name="ColorSeekBarPassOrange">#e68900</color>
+
+    <color name="ColorPrimaryDeepOrange">#ff5722</color>
+    <color name="ColorPrimaryDarkDeepOrange">#e64a19</color>
+    <color name="ColorPrimaryLightDeepOrange">#ffccbc</color>
+    <color name="ColorAccentDeepOrange">#ff6e40</color>
+    <color name="SlideTopColorDeepOrange">#ff4408</color>
+    <color name="ColorSeekBarNextDeepOrange">#e54e1e</color>
+    <color name="ColorSeekBarPassDeepOrange">#cc451b</color>
+
+    <color name="ColorPrimaryBrown">#795548</color>
+    <color name="ColorPrimaryDarkBrown">#5D4037</color>
+    <color name="ColorPrimaryLightBrown">#d7ccc8</color>
+    <color name="ColorAccentBrown">#8d6e63</color>
+    <color name="SlideTopColorBrown">#694a3e</color>
+    <color name="ColorSeekBarNextBrown">#6c4c40</color>
+    <color name="ColorSeekBarPassBrown">#694a3e</color>
+
+    <color name="ColorPrimaryGrey">#9E9E9E</color>
+    <color name="ColorPrimaryDarkGrey">#616161</color>
+    <color name="ColorPrimaryLightGrey">#f5f5f5</color>
+    <color name="ColorAccentGrey">#bdbdbd</color>
+    <color name="SlideTopColorGrey">#919191</color>
+    <color name="ColorSeekBarNextGrey">#8e8e8e</color>
+    <color name="ColorSeekBarPassGrey">#919191</color>
+
+    <color name="ColorPrimaryBlueGrey">#607D8B</color>
+    <color name="ColorPrimaryDarkBlueGrey">#455A64</color>
+    <color name="ColorPrimaryLightBlueGrey">#cfd8dc</color>
+    <color name="ColorAccentBlueGrey">#78909c</color>
+    <color name="SlideTopColorBlueGrey">#566f7c</color>
+    <color name="ColorSeekBarNextBlueGrey">#56707d</color>
+    <color name="ColorSeekBarPassBlueGrey">#566f7c</color>
+
+    <color name="ColorPrimaryCarmine">#9D2932</color>
+    <color name="ColorPrimaryDarkCarmine">#89242c</color>
+    <color name="ColorPrimaryLightCarmine">#e1bec1</color>
+    <color name="ColorAccentCarmine">#c5343f</color>
+    <color name="SlideTopColorCarmine">#89242c</color>
+    <color name="ColorSeekBarNextCarmine">#8d242d</color>
+    <color name="ColorSeekBarPassCarmine">#89242c</color>
+
+    <color name="ColorPrimaryDarkBlue1">#415065</color>
+    <color name="ColorPrimaryDarkDarkBlue1">#374455</color>
+    <color name="ColorPrimaryLightDarkBlue1">#d9dce0</color>
+    <color name="ColorAccentDarkBlue1">#556984</color>
+    <color name="SlideTopColorDarkBlue1">#374455</color>
+    <color name="ColorSeekBarNextDarkBlue1">#3a485a</color>
+    <color name="ColorSeekBarPassDarkBlue1">#374455</color>
+
+    <color name="ColorPrimarySandalwood">#B36D61</color>
+    <color name="ColorPrimaryDarkSandalwood">#a95e51</color>
+    <color name="ColorPrimaryLightSandalwood">#efe1df</color>
+    <color name="ColorAccentSandalwood">#c48d83</color>
+    <color name="SlideTopColorSandalwood">#a95e51</color>
+    <color name="ColorSeekBarNextSandalwood">#a16257</color>
+    <color name="ColorSeekBarPassSandalwood">#a95e51</color>
+
+    <color name="ColorPrimaryBambooGreen">#789262</color>
+    <color name="ColorPrimaryDarkBambooGreen">#6b8358</color>
+    <color name="ColorPrimaryLightBambooGreen">#e4e9df</color>
+    <color name="ColorAccentBambooGreen">#92a97e</color>
+    <color name="SlideTopColorBambooGreen">#6b8358</color>
+    <color name="ColorSeekBarNextBambooGreen">#6c8358</color>
+    <color name="ColorSeekBarPassBambooGreen">#6b8358</color>
+
 </resources>
+

@@ -2,12 +2,11 @@ package ironbear775.com.musicplayer.Activity;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import ironbear775.com.musicplayer.R;
@@ -24,13 +23,13 @@ public class About extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.about_layout);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.about_toolbar);
-        TextView version = (TextView) findViewById(R.id.version_number);
-        final TextView openSource = (TextView) findViewById(R.id.open_source);
+        Toolbar toolbar = findViewById(R.id.about_toolbar);
+        TextView version = findViewById(R.id.version_number);
+        final TextView openSource = findViewById(R.id.open_source);
 
 
         toolbar.setTitle(getResources().getString(R.string.about));
-        toolbar.setTitleTextColor(ContextCompat.getColor(this,R.color.listView_bg_color));
+        toolbar.setTitleTextColor(Color.WHITE);
 
         setSupportActionBar(toolbar);
 
@@ -50,12 +49,9 @@ public class About extends BaseActivity {
         }
 
         version.setText(versionCode);
-        openSource.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                OpenSource openSourceDialog = new OpenSource(About.this);
-                openSourceDialog.show();
-            }
+        openSource.setOnClickListener(v -> {
+            OpenSource openSourceDialog = new OpenSource(About.this);
+            openSourceDialog.show();
         });
     }
 

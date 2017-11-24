@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:theme="@style/AppTheme">
+    android:fitsSystemWindows="true">
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
@@ -14,16 +14,16 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/material_gray"
-            app:popupTheme="@style/Theme.AppCompat.Light"/>
+            android:background="?attr/colorPrimary" />
 
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/appbar"
+        android:background="?attr/appBgDark">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -34,11 +34,12 @@
                 android:id="@+id/ui"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:layout_alignParentTop="true"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/ui"
-                android:textColor="@color/material_gray_dark"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -47,143 +48,176 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/ui"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/use_default_album_art"
-                android:textSize="15sp"
-                android:background="?android:attr/selectableItemBackground"
-                />
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
+
             <ImageView
                 android:id="@+id/line"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@+id/use_default_cover"
                 android:background="#22616161" />
+
             <Switch
                 android:id="@+id/keep_screen_on"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/line"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/keep_screen_on"
-                android:textSize="15sp"
-                android:background="?android:attr/selectableItemBackground"
-                />
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
+
             <ImageView
                 android:id="@+id/line1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@+id/keep_screen_on"
                 android:background="#22616161" />
+
             <Switch
                 android:id="@+id/enable_shuffle"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/line1"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/enable_shuffle"
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/colors"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/enable_shuffle"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/colors"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/auto_night_mode"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/colors"
                 android:background="?android:attr/selectableItemBackground"
-                />
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/auto_night_mode"
+                android:textColor="?attr/mainTextColor" />
+
+            <ImageView
+                android:id="@+id/line9"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/auto_night_mode"
+                android:layout_marginTop="10dp"
+                android:background="#22616161" />
+
+            <RelativeLayout
+                android:id="@+id/color_picker"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/line9"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:id="@+id/color_picker_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="?attr/actionBarSize"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:text="@string/color_title"
+                    android:textColor="?attr/mainTextColor"
+                    android:textSize="15sp" />
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/color_iv"
+                    android:layout_width="?attr/actionBarSize"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="10dp"
+                    android:padding="8dp"
+                    android:src="?attr/colorPrimary"
+                    app:civ_border_color="?attr/colorAccent"
+                    app:civ_border_width="6dp" />
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/line10"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/color_picker"
+                android:layout_marginTop="10dp"
+                android:background="#22616161" />
+
+            <Switch
+                android:id="@+id/change_main_window"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/line10"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/change_main_window"
+                android:textColor="?attr/mainTextColor" />
 
             <TextView
                 android:id="@+id/launch_page"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@+id/enable_shuffle"
+                android:layout_below="@+id/change_main_window"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/start_page"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
-            <RadioGroup
-                android:id="@+id/page_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+            <TextView
+                android:id="@+id/start_page"
                 android:layout_below="@+id/launch_page"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:background="?android:attr/selectableItemBackground"
-                >
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#22616161" />
-
-                <android.support.v7.widget.AppCompatRadioButton
-                    android:id="@+id/page_music"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/material_gray_dark"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/slideBar_title_music" />
-
-                <android.support.v7.widget.AppCompatRadioButton
-                    android:id="@+id/page_artist"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/material_gray_dark"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/toolbar_title_artist" />
-
-                <android.support.v7.widget.AppCompatRadioButton
-                    android:id="@+id/page_album"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/material_gray_dark"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/toolbar_title_album" />
-
-
-                <android.support.v7.widget.AppCompatRadioButton
-                    android:id="@+id/page_playlist"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/material_gray_dark"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/toolbar_title_playlist" />
-
-
-                <android.support.v7.widget.AppCompatRadioButton
-                    android:id="@+id/page_recent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/material_gray_dark"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/toolbar_title_recent_added" />
-
-                <android.support.v7.widget.AppCompatRadioButton
-                    android:id="@+id/page_folder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/material_gray_dark"
-                    android:gravity="start|center_vertical"
-                    android:text="@string/toolbar_title_folder" />
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="10dp"
-                    android:background="#22616161" />
-            </RadioGroup>
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/notification"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@+id/page_group"
+                android:layout_below="@+id/start_page"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/notification"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -192,12 +226,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/notification"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/color_notification"
-                android:background="?android:attr/selectableItemBackground"
-                />
+                android:textColor="?attr/mainTextColor" />
 
             <ImageView
                 android:id="@+id/line3"
@@ -207,28 +242,29 @@
                 android:background="#22616161" />
 
             <Switch
-                android:id="@+id/lockscreen_album_art"
+                android:id="@+id/use_old_notification"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/line3"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
-                android:text="@string/lock_screen_notification"
-                android:textSize="15sp"
-                android:background="?android:attr/selectableItemBackground"
-                />
-
+                android:text="@string/use_old_notification"
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/filter"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@+id/lockscreen_album_art"
+                android:layout_below="@+id/use_old_notification"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/filter"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -237,59 +273,99 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/filter"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
-                android:textSize="15sp"
-                android:background="?android:attr/selectableItemBackground"
-                />
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/download"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/filter_text"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/download"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
                 android:textStyle="bold" />
+
             <RelativeLayout
-                android:layout_below="@+id/download"
-                android:id="@+id/download_layout"
+                android:id="@+id/match_artist_layout"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/download"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:id="@+id/match_artist_t"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:text="@string/match_artist_cover"
+                    android:textColor="?attr/mainTextColor"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/match_artist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/match_artist_t"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="?attr/subTextColor"
+                    android:textSize="13sp" />
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/line7"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/match_artist_layout"
+                android:background="#22616161" />
+
+            <RelativeLayout
+                android:id="@+id/match_album_layout"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/line7"
                 android:background="?android:attr/selectableItemBackground"
-                >
+                android:paddingTop="10dp">
+
                 <TextView
-                    android:id="@+id/download_t"
+                    android:id="@+id/match_album_t"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:paddingEnd="15dp"
                     android:paddingStart="15dp"
-                    android:gravity="center_vertical"
-                    android:textSize="15sp"
-                    android:textColor="@color/black"
-                    android:text="@string/download_text"
-                    />
+                    android:text="@string/match_album_cover"
+                    android:textColor="?attr/mainTextColor"
+                    android:textSize="15sp" />
+
                 <TextView
-                    android:layout_below="@+id/download_t"
-                    android:id="@+id/download_artist"
+                    android:id="@+id/match_album"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/match_album_t"
+                    android:gravity="center_vertical"
                     android:paddingEnd="15dp"
                     android:paddingStart="15dp"
-                    android:gravity="center_vertical"
-                    android:textSize="13sp"
-                    />
+                    android:textColor="?attr/subTextColor"
+                    android:textSize="13sp" />
             </RelativeLayout>
 
             <ImageView
                 android:id="@+id/line2"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@+id/download_layout"
+                android:layout_below="@+id/match_album_layout"
                 android:background="#22616161" />
 
             <Switch
@@ -297,22 +373,109 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/line2"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/load_web_lyric"
+                android:textColor="?attr/mainTextColor" />
+
+            <ImageView
+                android:id="@+id/line6"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/load_web_lyric"
+                android:background="#22616161" />
+
+            <RelativeLayout
+                android:id="@+id/lyric_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/line6"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:id="@+id/lyric_t"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/lyric_source"
+                    android:textColor="?attr/mainTextColor"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/lyric_source"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lyric_t"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="10dp"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="?attr/subTextColor"
+                    android:textSize="13sp" />
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/line4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/lyric_layout"
+                android:background="#22616161" />
+
+            <Switch
+                android:id="@+id/load_translate_lyric"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/line4"
                 android:background="?android:attr/selectableItemBackground"
-                />
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/load_translate_netease_lyric"
+                android:textColor="?attr/mainTextColor" />
+
+            <TextView
+                android:id="@+id/gesture"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/load_translate_lyric"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/gesture"
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Switch
+                android:id="@+id/swipe_gesture"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/gesture"
+                android:background="?android:attr/selectableItemBackground"
+                android:buttonTint="?attr/colorPrimary"
+                android:gravity="center_vertical"
+                android:paddingEnd="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/swipe_gesture"
+                android:textColor="?attr/mainTextColor" />
 
             <TextView
                 android:id="@+id/other"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@+id/load_web_lyric"
+                android:layout_below="@+id/swipe_gesture"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/other"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -322,44 +485,43 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/other"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/equalizer"
-                android:textColor="@color/black"
-                android:textSize="15sp"
-                android:background="?android:attr/selectableItemBackground"
-                />
+                android:textColor="?attr/mainTextColor"
+                android:textSize="15sp" />
 
             <RelativeLayout
                 android:id="@+id/layout_cache"
                 android:layout_width="match_parent"
-                android:layout_below="@+id/equalizer"
                 android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/equalizer"
                 android:background="?android:attr/selectableItemBackground">
 
                 <TextView
-                    android:layout_alignParentStart="true"
                     android:id="@+id/cache"
                     android:layout_width="wrap_content"
                     android:layout_height="?attr/actionBarSize"
+                    android:layout_alignParentStart="true"
+                    android:gravity="center_vertical"
                     android:paddingEnd="15dp"
                     android:paddingStart="15dp"
-                    android:gravity="center_vertical"
                     android:text="@string/cache"
-                    android:textColor="@color/black"
-                    android:textSize="15sp"
-                    />
+                    android:textColor="?attr/mainTextColor"
+                    android:textSize="15sp" />
+
                 <TextView
-                    android:layout_alignParentEnd="true"
                     android:id="@+id/clear_cache"
                     android:layout_width="wrap_content"
                     android:layout_height="?attr/actionBarSize"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="center_vertical"
                     android:paddingEnd="15dp"
                     android:paddingStart="15dp"
-                    android:gravity="center_vertical"
-                    android:textSize="15sp"
-                    />
+                    android:textColor="?attr/subTextColor"
+                    android:textSize="15sp" />
             </RelativeLayout>
 
             <TextView
@@ -367,14 +529,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/layout_cache"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
                 android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:gravity="center_vertical"
                 android:text="@string/about"
-                android:textStyle="bold"
+                android:textColor="?attr/mainTextColor"
                 android:textSize="15sp"
-                android:background="?android:attr/selectableItemBackground"
-                />
+                android:textStyle="bold" />
         </RelativeLayout>
 
     </ScrollView>

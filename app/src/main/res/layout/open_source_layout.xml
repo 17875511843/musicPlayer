@@ -5,6 +5,7 @@
     android:layout_height="match_parent">
     <ListView
         android:id="@+id/open_source_iv"
+        android:background="?attr/appBg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </ListView>

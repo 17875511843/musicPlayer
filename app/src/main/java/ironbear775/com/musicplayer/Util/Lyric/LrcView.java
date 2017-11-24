@@ -20,7 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import ironbear775.com.musicplayer.R;
+
 /**
  * 歌词
  * Created by wcy on 2015/11/9.
@@ -69,7 +71,7 @@ public class LrcView extends View {
         mCurrentColor = ta.getColor(R.styleable.LrcView_lrcCurrentTextColor, 0xFFFF4081);
         mLabel = ta.getString(R.styleable.LrcView_lrcLabel);
         mLabel = TextUtils.isEmpty(mLabel) ? "暂无歌词" : mLabel;
-        mLrcPadding = ta.getDimension(R.styleable.LrcView_lrcPadding, 0);
+        mLrcPadding = ta.getDimension(R.styleable.LrcView_lrcPadding, 10);
         ta.recycle();
 
         mPaint.setAntiAlias(true);
@@ -186,6 +188,7 @@ public class LrcView extends View {
         reset();
 
         setFlag(lrcText);
+
         AsyncTask<String, Integer, List<LrcEntry>> loadLrcTask = new AsyncTask<String, Integer, List<LrcEntry>>() {
             @Override
             protected List<LrcEntry> doInBackground(String... params) {
@@ -200,10 +203,12 @@ public class LrcView extends View {
                 }
             }
         };
+
         loadLrcTask.execute(lrcText);
     }
 
     private void onLrcLoaded(List<LrcEntry> entryList) {
+
         if (entryList != null && !entryList.isEmpty()) {
             mLrcEntryList.addAll(entryList);
         }
@@ -277,7 +282,6 @@ public class LrcView extends View {
         mCurrentLine = 0;
         mNextTime = 0L;
 
-        stopAnimation();
         postInvalidate();
     }
 
@@ -302,12 +306,7 @@ public class LrcView extends View {
     }
 
     private void newlineOnUI(final int index) {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                newlineAnimation(index);
-            }
-        });
+        post(() -> newlineAnimation(index));
     }
 
     /**
@@ -320,12 +319,9 @@ public class LrcView extends View {
         mAnimator = ValueAnimator.ofFloat(mLrcEntryList.get(index).getTextHeight() + mDividerHeight, 0.0f);
         mAnimator.setDuration(mAnimationDuration * mLrcEntryList.get(index).getStaticLayout().getLineCount());
         mAnimator.setInterpolator(new LinearInterpolator());
-        mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mAnimateOffset = (float) animation.getAnimatedValue();
-                invalidate();
-            }
+        mAnimator.addUpdateListener(animation -> {
+            mAnimateOffset = (float) animation.getAnimatedValue();
+            invalidate();
         });
         mAnimator.start();
     }

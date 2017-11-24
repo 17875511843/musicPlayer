@@ -5,5 +5,5 @@
     <solid
         android:color="@color/listView_bg_color"/>
     <stroke  android:color="@color/listView_bg_color"/>
-    <size android:height="25dp" android:width="5dp"/>
+    <size android:height="60dp" android:width="5dp"/>
 </shape>

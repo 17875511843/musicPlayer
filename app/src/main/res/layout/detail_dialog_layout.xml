@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/appBg">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/item_detail"
         android:textStyle="bold"
         android:padding="20dp"
+        android:textColor="?attr/mainTextColor"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"/>
     <LinearLayout
         android:orientation="horizontal"
@@ -23,6 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/file_path"
+            android:textColor="?attr/mainTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
         <TextView
@@ -32,6 +35,7 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:textColor="?attr/subTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
     </LinearLayout>
     <LinearLayout
@@ -46,6 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filename"
+            android:textColor="?attr/mainTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
         <TextView
@@ -55,6 +60,7 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:textColor="?attr/subTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:text="@string/add_to_list"/>
     </LinearLayout>
@@ -72,6 +78,7 @@
             android:layout_height="wrap_content"
             android:text="@string/toolbar_title_artist"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textColor="?attr/mainTextColor"
             android:textStyle="bold"/>
         <TextView
             android:id="@+id/fileArtist"
@@ -81,6 +88,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textColor="?attr/subTextColor"
             android:text="@string/add_to_list"/>
     </LinearLayout>
 
@@ -96,6 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/toolbar_title_album"
+            android:textColor="?attr/mainTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
         <TextView
@@ -103,6 +112,7 @@
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:layout_weight="1"
+            android:textColor="?attr/subTextColor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
@@ -121,6 +131,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/file_duration"
+            android:textColor="?attr/mainTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
         <TextView
@@ -129,6 +140,7 @@
             android:paddingRight="5dp"
             android:layout_weight="1"
             android:layout_width="0dp"
+            android:textColor="?attr/subTextColor"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:text="@string/add_to_list"/>
@@ -145,6 +157,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bitrate"
+            android:textColor="?attr/mainTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
         <TextView
@@ -153,6 +166,7 @@
             android:paddingRight="5dp"
             android:layout_weight="1"
             android:layout_width="0dp"
+            android:textColor="?attr/subTextColor"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
     </LinearLayout>
@@ -168,6 +182,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sampling_rate"
+            android:textColor="?attr/mainTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
         <TextView
@@ -175,6 +190,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:layout_weight="1"
+            android:textColor="?attr/subTextColor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />

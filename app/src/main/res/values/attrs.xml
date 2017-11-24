@@ -13,4 +13,16 @@
         <attr name="lrcLabel" format="string" />
         <attr name="lrcPadding" format="dimension" />
     </declare-styleable>
+    <attr name="mainTextColor" format="reference"/>
+    <attr name="subTextColor" format="reference"/>
+    <attr name="appBg" format="reference"/>
+    <attr name="appBgDark" format="reference"/>
+    <attr name="seekBarPassColor" format="reference"/>
+    <attr name="seekBarNextColor" format="reference"/>
+    <attr name="slideMainColor" format="reference"/>
+    <attr name="slideSubColor" format="reference"/>
+    <attr name="slideTopColor" format="reference"/>
+    <attr name="slideSubTextColor" format="reference"/>
+    <attr name="slideMainTextColor" format="reference"/>
+    <attr name="floatingActionButtonColor" format="reference"/>
 </resources>

@@ -22,15 +22,10 @@ public class IntroFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.intro_permission_fragement,container,false);
-        Button button = (Button) view.findViewById(R.id.intro_permission);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.SYSTEM_ALERT_WINDOW}, 1);
-
-            }
-        });
+        Button button = view.findViewById(R.id.intro_permission);
+        button.setOnClickListener(v -> ActivityCompat.requestPermissions(getActivity(),
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.SYSTEM_ALERT_WINDOW}, 1));
         return view;
     }
 }
+
