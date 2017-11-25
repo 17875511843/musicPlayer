@@ -33,7 +33,7 @@ import ironbear775.com.musicplayer.Util.SquareImageView;
  * Created by ironbear on 2017/1/15.
  */
 
-public class AlbumGridAdapter extends RecyclerView.Adapter<AlbumGridViewHolder>
+public class AlbumGridAdapter extends RecyclerView.Adapter<AlbumGridAdapter.AlbumGridViewHolder>
         implements FastScrollRecyclerView.SectionedAdapter {
     private final LayoutInflater mInflater;
     private final Context mContext;
@@ -128,37 +128,38 @@ public class AlbumGridAdapter extends RecyclerView.Adapter<AlbumGridViewHolder>
         return mList.size();
     }
 
-}
+    public class AlbumGridViewHolder extends RecyclerView.ViewHolder {
+        final ImageView iv;
+        final TextView tv_title;
+        final TextView tv_others;
+        final RelativeLayout item_info;
+        private final ImageView bg;
 
-
-class AlbumGridViewHolder extends RecyclerView.ViewHolder {
-    final ImageView iv;
-    final TextView tv_title;
-    final TextView tv_others;
-    final RelativeLayout item_info;
-    private final ImageView bg;
-
-    AlbumGridViewHolder(View itemView) {
-        super(itemView);
-        iv = (SquareImageView) itemView.findViewById(R.id.iv_grid_image);
-        tv_others =  itemView.findViewById(R.id.tv_others);
-        tv_title = itemView.findViewById(R.id.tv_title);
-        item_info = itemView.findViewById(R.id.item_info);
-        bg = itemView.findViewById(R.id.bg_imageView);
-    }
-
-    public void setData(int position) {
-        Set<Integer> positionSet = AlbumListFragment.positionSet;
-        if (MusicUtils.isSelectAll){
-            positionSet = MusicList.listPositionSet;
+        AlbumGridViewHolder(View itemView) {
+            super(itemView);
+            iv = (SquareImageView) itemView.findViewById(R.id.iv_grid_image);
+            tv_others =  itemView.findViewById(R.id.tv_others);
+            tv_title = itemView.findViewById(R.id.tv_title);
+            item_info = itemView.findViewById(R.id.item_info);
+            bg = itemView.findViewById(R.id.bg_imageView);
         }
-        if (positionSet.contains(position)) {
-            bg.setVisibility(View.VISIBLE);
-        } else {
-            bg.setVisibility(View.GONE);
+
+        public void setData(int position) {
+            Set<Integer> positionSet = AlbumListFragment.positionSet;
+            if (MusicUtils.isSelectAll){
+                positionSet = MusicList.listPositionSet;
+            }
+            if (positionSet.contains(position)) {
+                bg.setVisibility(View.VISIBLE);
+            } else {
+                bg.setVisibility(View.GONE);
+            }
         }
     }
 }
+
+
+
 
 
 

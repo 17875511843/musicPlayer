@@ -1275,7 +1275,7 @@ public class MusicUtils {
     public void cancelNetCall() {
         if (call != null && call.isExecuted())
             call.cancel();
-        if (call != null && call2.isExecuted())
+        if (call2 != null && call2.isExecuted())
             call2.cancel();
     }
 

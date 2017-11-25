@@ -15,6 +15,7 @@
     <string name="toolbar_title_playlist">播放列表</string>
     <string name="slideBar_title_music">音乐</string>
     <string name="add_to_list">添加到播放列表</string>
+    <string name="remove_from_queue">从播放队列中删除</string>
     <string name="delete_from_list">从设备中删除</string>
     <string name="create_new_playlist">新建列表</string>
     <string name="input_name">输入名称…</string>
@@ -160,9 +161,10 @@
     <string name="select_local_album_cover">选择本地专辑封面图片</string>
     <string name="option">选择操作</string>
     <string name="new_version_title">更新内容</string>
-    <string name="new_version_text">- 修复歌词一直在搜索的bug，如遇到一直搜索，原因可能是因为上一版本文件解析错误，请手动在菜单中更新歌词即可
-        \n- 播放界面也可以同主题改变颜色了
-        \n- 新增使用本地图片作为补全专辑封面
+    <string name="new_version_text">- 修复歌词一直在搜索的bug，如遇到一直搜索，原因可能是因为之前版本文件解析错误，请手动在菜单中更新歌词即可
+        \n- 新型通知添加关闭按钮
+        \n- 新增播放队列，更好的控制音乐播放
+        \n- 新增使用本地图片作为补全专辑封面,长按专辑详情页大图或播放界面专辑封面即可
         \n- 播放界面菜单精简，部分菜单选项改为在界面长按呼出
         \n- 优化在线歌词匹配，更精准，减少闪退情况
         \n- 修复bug</string>

@@ -20,7 +20,7 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  * Created by ironbear on 2017/5/13.
  */
 
-public class FolderAdapter extends RecyclerView.Adapter<FolderViewHolder>{
+public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderViewHolder>{
     private final LayoutInflater mInflater;
     private final ArrayList<Playlist> mList;
     private boolean isClickable = true;
@@ -71,26 +71,27 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderViewHolder>{
         return mList.size();
     }
 
-}
-class FolderViewHolder extends RecyclerView.ViewHolder {
-    final TextView tv_title;
-    final TextView tv_count;
+    public class FolderViewHolder extends RecyclerView.ViewHolder {
+        final TextView tv_title;
+        final TextView tv_count;
 
-    FolderViewHolder(View itemView) {
-        super(itemView);
-        tv_title = itemView.findViewById(R.id.folder_tv_title);
-        tv_count = itemView.findViewById(R.id.folder_tv_count);
-    }
-
-    public void setData(int position) {
-        Set<Integer> positionSet = FolderFragment.positionSet;
-        if (MusicUtils.isSelectAll){
-            positionSet = MusicList.listPositionSet;
+        FolderViewHolder(View itemView) {
+            super(itemView);
+            tv_title = itemView.findViewById(R.id.folder_tv_title);
+            tv_count = itemView.findViewById(R.id.folder_tv_count);
         }
-        if (positionSet.contains(position)) {
-            itemView.setBackgroundResource(R.color.items_selected_bg_color);
-        } else {
-            itemView.setBackground(null);
+
+        public void setData(int position) {
+            Set<Integer> positionSet = FolderFragment.positionSet;
+            if (MusicUtils.isSelectAll){
+                positionSet = MusicList.listPositionSet;
+            }
+            if (positionSet.contains(position)) {
+                itemView.setBackgroundResource(R.color.items_selected_bg_color);
+            } else {
+                itemView.setBackground(null);
+            }
         }
     }
 }
+

@@ -105,6 +105,7 @@ public class MusicService extends Service {
         intentFilter.addAction("cycle play");
         intentFilter.addAction("clear");
         intentFilter.addAction("play next");
+        intentFilter.addAction("MUSIC Control");
         intentFilter.addAction("delete current music success");
         registerReceiver(musicServiceReceiver, intentFilter);
         super.onCreate();
@@ -158,40 +159,44 @@ public class MusicService extends Service {
                                 break;
                             case 9:
                                 shuffleList = MusicUtils.arrayList;
+                                break;
+                            case 10:
+                                break;
+
                         }
                         musicPosition = intent.getIntExtra("musicPosition", 0);
-                        if (isRandom) {
-                            if (from != 9 && from != 8) {
-                                Log.d("TAG", "Title: " + musicList.get(musicPosition).getTitle());
-                                shuffleList = musicUtils.createShuffleList(musicList);
-                                int p = 0;
-                                for (int i = 0; i < shuffleList.size(); i++) {
-                                    if (shuffleList.get(i).getUri().equals(
-                                            musicList.get(musicPosition).getUri())) {
-                                        p = i;
-                                        break;
+                        if (from!=10) {
+                            if (isRandom) {
+                                if (from != 9 && from != 8) {
+                                    shuffleList = musicUtils.createShuffleList(musicList);
+                                    int p = 0;
+                                    for (int i = 0; i < shuffleList.size(); i++) {
+                                        if (shuffleList.get(i).getUri().equals(
+                                                musicList.get(musicPosition).getUri())) {
+                                            p = i;
+                                            break;
+                                        }
                                     }
+                                    Music temp = shuffleList.get(0);
+                                    shuffleList.set(0, shuffleList.get(p));
+                                    shuffleList.set(p, temp);
+
+                                } else if (from == 8) {
+                                    shuffleList = MusicUtils.getShuffleArray(this);
                                 }
-                                Music temp = shuffleList.get(0);
-                                shuffleList.set(0, shuffleList.get(p));
-                                shuffleList.set(p, temp);
-                                for (int i = 0; i < shuffleList.size(); i++) {
-                                    Log.d("shuffleList", "shuffleList: " + shuffleList.get(i).getTitle());
-                                }
-                            } else if (from == 8) {
-                                shuffleList = MusicUtils.getShuffleArray(this);
+                                if (shuffleList != null && shuffleList.size() > 0) {
+                                    onPlayingList = shuffleList;
+                                    if (from != 8)
+                                        musicPosition = 0;
+                                } else
+                                    onPlayingList = musicList;
+                            } else {
+                                if (from == 8)
+                                    onPlayingList = MusicUtils.getArray(this);
+                                else
+                                    onPlayingList = musicList;
                             }
-                            if (shuffleList != null && shuffleList.size() > 0) {
-                                onPlayingList = shuffleList;
-                                if (from != 8)
-                                    musicPosition = 0;
-                            } else
-                                onPlayingList = musicList;
-                        } else {
-                            if (from == 8)
-                                onPlayingList = MusicUtils.getArray(this);
-                            else
-                                onPlayingList = musicList;
+
                         }
 
                         if (shuffleList == null || shuffleList.size() == 0)
@@ -373,8 +378,8 @@ public class MusicService extends Service {
                 createNewNotification(R.drawable.footpause, music);
             }
         });
-        Intent intent1 = new Intent("update");
-        sendBroadcast(intent1);
+        sendBroadcast(new Intent("update onPlayingList"));
+        sendBroadcast(new Intent("update"));
         if (MusicService.mediaPlayer.isPlaying()) {
             if (!MusicUtils.loadWebLyric) {
                 try {
@@ -459,6 +464,7 @@ public class MusicService extends Service {
         intent.putExtra("position", musicPosition);
         sendBroadcast(intent);
 
+        sendBroadcast(new Intent("update onPlayingList"));
         sendBroadcast(new Intent("update"));
         if (!MusicUtils.loadWebLyric) {
             try {
@@ -530,6 +536,7 @@ public class MusicService extends Service {
         intent.putExtra("position", musicPosition);
         sendBroadcast(intent);
 
+        sendBroadcast(new Intent("update onPlayingList"));
         sendBroadcast(new Intent("update"));
         if (!MusicUtils.loadWebLyric) {
             try {
@@ -888,6 +895,10 @@ public class MusicService extends Service {
                             }
                             MusicUtils.saveArray(context, MusicList.list);
                         }
+                        break;
+                    case "MUSIC Control":
+                        if (intent.getAction().equals("PreMusic"))
+                            preMusic();
                         break;
                 }
             }

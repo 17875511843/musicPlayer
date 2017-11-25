@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/on_playing_num"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_toEndOf="@+id/on_playing_num"
+            android:layout_toStartOf="@+id/on_playing_menu"
+            android:orientation="vertical"
+            android:paddingTop="3dp">
+
+            <TextView
+                android:id="@+id/on_playing_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="3dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:paddingBottom="5dp"
+                android:paddingTop="10dp"
+                android:textColor="?attr/mainTextColor" />
+
+            <TextView
+                android:id="@+id/on_playing_others"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/on_playing_title"
+                android:layout_marginStart="3dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:textColor="?attr/subTextColor"
+                android:textSize="13sp" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/on_playing_menu"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="22dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="22dp"
+            android:src="@drawable/list_menu" />
+    </RelativeLayout>
+
+</FrameLayout>

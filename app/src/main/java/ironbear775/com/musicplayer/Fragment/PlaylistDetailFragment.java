@@ -19,6 +19,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 
 import github.nisrulz.recyclerviewhelper.RVHItemTouchHelperCallback;
 import ironbear775.com.musicplayer.Activity.MusicList;
-import ironbear775.com.musicplayer.Adapter.PlaylistDetaiNewlAdapter;
+import ironbear775.com.musicplayer.Adapter.PlaylistDetailAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
@@ -52,7 +53,6 @@ public class PlaylistDetailFragment extends Fragment {
     private boolean isClickable = true;
     private MusicUtils musicUtils;
     private Toolbar toolbar;
-    private PlaylistDetaiNewlAdapter adapter;
 
     @Nullable
     @Override
@@ -113,9 +113,10 @@ public class PlaylistDetailFragment extends Fragment {
         toolbar = view.findViewById(R.id.playlist_toolbar);
         shuffleLayout = view.findViewById(R.id.shuffle_playlist);
         FastScrollRecyclerView listView = view.findViewById(R.id.playlist_detail_listView);
-        adapter = new PlaylistDetaiNewlAdapter(getActivity().getApplicationContext(), musicList,name);
+        PlaylistDetailAdapter adapter = new PlaylistDetailAdapter(getActivity().getApplicationContext(), musicList, name);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL, false);
         listView.setLayoutManager(layoutManager);
 
         listView.setAdapter(adapter);
@@ -191,9 +192,6 @@ public class PlaylistDetailFragment extends Fragment {
             MusicList.count = 0;
             count = 1;
 
-            if (isChange){
-                adapter.notifyDataSetChanged();
-            }
             musicUtils.startMusic(position, progress,4);
 
             Intent intent = new Intent("set footBar");
@@ -248,7 +246,6 @@ public class PlaylistDetailFragment extends Fragment {
                         shuffleLayout.setClickable(false);
                         break;
                     case "playlist swap item":
-                        musicList = intent.getParcelableArrayListExtra("new list");
                         isChange = true;
                         break;
                     case "enableShuffle":

@@ -41,7 +41,7 @@ import ironbear775.com.musicplayer.Util.PlaylistDialog;
  * Created by ironbear on 2017/1/15.
  */
 
-public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHolder>
+public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.AlbumDetailViewHolder>
         implements FastScrollRecyclerView.SectionedAdapter {
     private final LayoutInflater mInflater;
     private final Activity mActivity;
@@ -228,26 +228,25 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailViewHold
     public int getItemCount() {
         return mList.size();
     }
-}
 
-class AlbumDetailViewHolder extends RecyclerView.ViewHolder {
-    final TextView tv_title;
-    final TextView tv_time;
-    final TextView track;
-    final ImageView item_image;
-    final ImageView item_menu;
+    public class AlbumDetailViewHolder extends RecyclerView.ViewHolder {
+        final TextView tv_title;
+        final TextView tv_time;
+        final TextView track;
+        final ImageView item_image;
+        final ImageView item_menu;
 
-    AlbumDetailViewHolder(View itemView) {
-        super(itemView);
-        track = itemView.findViewById(R.id.detail_track);
-        tv_time = itemView.findViewById(R.id.detail_time);
-        tv_title =  itemView.findViewById(R.id.detail_title);
-        item_menu = itemView.findViewById(R.id.detail_item_menu);
-        item_image =  itemView.findViewById(R.id.detail_album_art);
-    }
+        AlbumDetailViewHolder(View itemView) {
+            super(itemView);
+            track = itemView.findViewById(R.id.detail_track);
+            tv_time = itemView.findViewById(R.id.detail_time);
+            tv_title =  itemView.findViewById(R.id.detail_title);
+            item_menu = itemView.findViewById(R.id.detail_item_menu);
+            item_image =  itemView.findViewById(R.id.detail_album_art);
+        }
 
-    public void setData(int position) {
-        Set<Integer> positionSet;
+        public void setData(int position) {
+            Set<Integer> positionSet;
             if (MusicUtils.isSelectAll) {
                 positionSet = MusicList.listPositionSet;
             } else {
@@ -259,8 +258,11 @@ class AlbumDetailViewHolder extends RecyclerView.ViewHolder {
                 itemView.setBackground(null);
             }
 
+        }
     }
 }
+
+
 
 
 

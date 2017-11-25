@@ -15,6 +15,7 @@
     <string name="toolbar_title_playlist">Playlist</string>
     <string name="slideBar_title_music">Music</string>
     <string name="add_to_list">AddTOList</string>
+    <string name="remove_from_queue">Remove from queue</string>
     <string name="delete_from_list">Delete from device</string>
     <string name="create_new_playlist">Create New Playlist</string>
     <string name="input_name">Input Name…</string>
@@ -162,6 +163,8 @@
     <string name="new_version_title">What\'s New</string>
     <string name="new_version_text">- Play Window can change theme now
         \n- Option to select local image as album cover for missing cover songs
+        \n- Brand new now playing queue,better control your playlist now
+        \n- New style notification add close button
         \n- Optimized Online lyric,more accuracy,less crash
         \n- New SleepTimer Style
         \n- Fix bug</string>

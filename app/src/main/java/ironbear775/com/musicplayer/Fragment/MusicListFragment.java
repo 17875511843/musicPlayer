@@ -159,7 +159,8 @@ public class MusicListFragment extends android.app.Fragment {
     private void initView() {
 
         musicView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(
+                getActivity(), LinearLayoutManager.VERTICAL, false);
         musicView.setLayoutManager(layoutManager);
 
         initAdapter();

@@ -199,20 +199,10 @@ public class AlbumDetailFragment extends Fragment {
         albumListView.setLayoutManager(linearLayoutManager);
 
         albumArt.setOnLongClickListener(view1 -> {
-            try {
-                Mp3File mp3File = new Mp3File(musicList.get(0).getUri());
-                if (!mp3File.hasId3v2Tag()
-                        || (mp3File.hasId3v2Tag()
-                        && mp3File.getId3v2Tag().getAlbumImage() == null)) {
-                    Intent intent1 = new Intent();
-                    intent1.setType("image/*");
-                    intent1.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(intent1, 1011);
-                }
-
-            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
-                e.printStackTrace();
-            }
+            Intent intent1 = new Intent();
+            intent1.setType("image/*");
+            intent1.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(intent1, 1011);
             return false;
         });
         albumAdapter = new AlbumDetailAdapter(getActivity(), musicList);

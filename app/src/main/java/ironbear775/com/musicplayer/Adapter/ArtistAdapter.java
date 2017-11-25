@@ -31,7 +31,7 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  * Created by ironbear on 2017/1/26.
  */
 
-public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
+public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder>
         implements FastScrollRecyclerView.SectionedAdapter {
     private final LayoutInflater mInflater;
     private final ArrayList<Music> mList;
@@ -152,29 +152,28 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistViewHolder>
         return mList.size();
     }
 
+    public class ArtistViewHolder extends RecyclerView.ViewHolder {
+        final ImageView iv;
+        final TextView tv_title;
 
-}
-
-
-class ArtistViewHolder extends RecyclerView.ViewHolder {
-    final ImageView iv;
-    final TextView tv_title;
-
-    ArtistViewHolder(View itemView) {
-        super(itemView);
-        iv =  itemView.findViewById(R.id.artist_iv_image);
-        tv_title = itemView.findViewById(R.id.artist_tv_title);
-    }
-
-    public void setData(int position) {
-        Set<Integer> positionSet = ArtistListFragment.positionSet;
-        if (MusicUtils.isSelectAll) {
-            positionSet = MusicList.listPositionSet;
+        ArtistViewHolder(View itemView) {
+            super(itemView);
+            iv =  itemView.findViewById(R.id.artist_iv_image);
+            tv_title = itemView.findViewById(R.id.artist_tv_title);
         }
-        if (positionSet.contains(position)) {
-            itemView.setBackgroundResource(R.color.items_selected_bg_color);
-        } else {
-            itemView.setBackground(null);
+
+        public void setData(int position) {
+            Set<Integer> positionSet = ArtistListFragment.positionSet;
+            if (MusicUtils.isSelectAll) {
+                positionSet = MusicList.listPositionSet;
+            }
+            if (positionSet.contains(position)) {
+                itemView.setBackgroundResource(R.color.items_selected_bg_color);
+            } else {
+                itemView.setBackground(null);
+            }
         }
     }
 }
+
+

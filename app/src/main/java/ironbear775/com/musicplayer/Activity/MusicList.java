@@ -115,6 +115,7 @@ import ironbear775.com.musicplayer.Util.FootBarRelativeLayout;
 import ironbear775.com.musicplayer.Util.GetAlbumArt;
 import ironbear775.com.musicplayer.Util.Lyric.LrcView;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.OnPlayingListDialog;
 import ironbear775.com.musicplayer.Util.PlaylistDbHelper;
 import ironbear775.com.musicplayer.Util.PlaylistDialog;
 import ironbear775.com.musicplayer.Util.SquareImageView;
@@ -847,12 +848,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 popupMenu.show();
                 break;
             case R.id.lyric:
-                if (lyricView.getVisibility() == View.VISIBLE) {
-                    musicUtils.cancelNetCall();
-                    lyricView.setVisibility(View.GONE);
-                    blurBG.setVisibility(View.GONE);
-                } else
-                    setLyric(this, musicUtils);
+                OnPlayingListDialog onPlayingListDialog = new OnPlayingListDialog(MusicList.this);
+                onPlayingListDialog.show();
                 break;
 
         }

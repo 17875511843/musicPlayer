@@ -40,7 +40,7 @@ import ironbear775.com.musicplayer.Util.PlaylistDialog;
  * Created by ironbear on 2017/1/15.
  */
 
-public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
+public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHolder>
         implements FastScrollRecyclerView.SectionedAdapter{
     private static final int TYPE_HEADER = 0;  //说明是带有Header的
     private static final int TYPE_NORMAL = 1;  //说明是不带有header和footer的
@@ -232,46 +232,47 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicViewHolder>
         return mList.size();
     }
 
-}
+    class MusicViewHolder extends RecyclerView.ViewHolder   {
+        final ImageView iv;
+        final TextView tv_title;
+        final TextView tv_others;
+        final ImageView item_menu;
 
-class MusicViewHolder extends RecyclerView.ViewHolder   {
-    final ImageView iv;
-    final TextView tv_title;
-    final TextView tv_others;
-    final ImageView item_menu;
+        MusicViewHolder(final View itemView) {
+            super(itemView);
+            iv = itemView.findViewById(R.id.iv_image);
+            tv_others = itemView.findViewById(R.id.tv_others);
+            tv_title = itemView.findViewById(R.id.tv_title);
+            item_menu = itemView.findViewById(R.id.item_menu);
+        }
 
-    MusicViewHolder(final View itemView) {
-        super(itemView);
-        iv = itemView.findViewById(R.id.iv_image);
-        tv_others = itemView.findViewById(R.id.tv_others);
-        tv_title = itemView.findViewById(R.id.tv_title);
-        item_menu = itemView.findViewById(R.id.item_menu);
-    }
-
-    public void setData(int position){
-        Set<Integer> positionSet = new HashSet<>();
-        if (MusicUtils.isSelectAll){
-            positionSet = MusicList.listPositionSet;
-        }else {
-            switch (MusicList.Mod) {
-                case 1:
-                    positionSet = MusicListFragment.positionSet;
-                    break;
-                case 5:
-                    positionSet = MusicRecentAddedFragment.positionSet;
-                    break;
-                case 6:
-                    positionSet = FolderDetailFragment.positionSet;
-                    break;
+        public void setData(int position){
+            Set<Integer> positionSet = new HashSet<>();
+            if (MusicUtils.isSelectAll){
+                positionSet = MusicList.listPositionSet;
+            }else {
+                switch (MusicList.Mod) {
+                    case 1:
+                        positionSet = MusicListFragment.positionSet;
+                        break;
+                    case 5:
+                        positionSet = MusicRecentAddedFragment.positionSet;
+                        break;
+                    case 6:
+                        positionSet = FolderDetailFragment.positionSet;
+                        break;
+                }
+            }
+            if (positionSet.contains(position)){
+                itemView.setBackgroundResource(R.color.items_selected_bg_color);
+            }else {
+                itemView.setBackground(null);
             }
         }
-        if (positionSet.contains(position)){
-            itemView.setBackgroundResource(R.color.items_selected_bg_color);
-        }else {
-            itemView.setBackground(null);
-        }
     }
 }
+
+
 
 
 

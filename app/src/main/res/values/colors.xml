@@ -20,6 +20,7 @@
     <color name="gray_dark">#999999</color>
     <color name="gray_trans">#44999999</color>
     <color name="gray_light">#dcdcdc</color>
+    <color name="divider_trans">#33757575</color>
 
     <!-- theme color -->
 

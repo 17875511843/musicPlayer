@@ -41,7 +41,7 @@ import ironbear775.com.musicplayer.Util.PlaylistDialog;
  * Created by ironbear on 2017/10/17.
  */
 
-public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailViewHolder>
+public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailAdapter.ArtistDetailViewHolder>
         implements FastScrollRecyclerView.SectionedAdapter {
     private final LayoutInflater mInflater;
     private final Activity mActivity;
@@ -224,41 +224,43 @@ public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailViewHo
     public int getItemCount() {
         return mList.size();
     }
-}
 
-class ArtistDetailViewHolder extends RecyclerView.ViewHolder {
-    final TextView tv_title;
-    final TextView tv_time;
-    final TextView track;
-    final ImageView item_image;
-    final ImageView item_menu;
+    public class ArtistDetailViewHolder extends RecyclerView.ViewHolder {
+        final TextView tv_title;
+        final TextView tv_time;
+        final TextView track;
+        final ImageView item_image;
+        final ImageView item_menu;
 
-    ArtistDetailViewHolder(View itemView) {
-        super(itemView);
-        track = itemView.findViewById(R.id.detail_track);
-        tv_time = itemView.findViewById(R.id.detail_time);
-        tv_title = itemView.findViewById(R.id.detail_title);
-        item_menu = itemView.findViewById(R.id.detail_item_menu);
-        item_image = itemView.findViewById(R.id.detail_album_art);
-    }
+        ArtistDetailViewHolder(View itemView) {
+            super(itemView);
+            track = itemView.findViewById(R.id.detail_track);
+            tv_time = itemView.findViewById(R.id.detail_time);
+            tv_title = itemView.findViewById(R.id.detail_title);
+            item_menu = itemView.findViewById(R.id.detail_item_menu);
+            item_image = itemView.findViewById(R.id.detail_album_art);
+        }
 
-    public void setData(int position) {
-        Set<Integer> positionSet;
-        if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_PAGE) {
-            if (MusicUtils.isSelectAll) {
-                positionSet = MusicList.listPositionSet;
-            } else {
-                positionSet = ArtistDetailFragment.positionSet;
-            }
-            if (positionSet.contains(position)) {
-                itemView.setBackgroundResource(R.color.items_selected_bg_color);
-            } else {
-                itemView.setBackground(null);
+        public void setData(int position) {
+            Set<Integer> positionSet;
+            if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_PAGE) {
+                if (MusicUtils.isSelectAll) {
+                    positionSet = MusicList.listPositionSet;
+                } else {
+                    positionSet = ArtistDetailFragment.positionSet;
+                }
+                if (positionSet.contains(position)) {
+                    itemView.setBackgroundResource(R.color.items_selected_bg_color);
+                } else {
+                    itemView.setBackground(null);
+                }
             }
         }
-    }
 
+    }
 }
+
+
 
 
 

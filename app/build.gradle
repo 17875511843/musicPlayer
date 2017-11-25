@@ -8,7 +8,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 56
-        versionName "1.8.4"
+        versionName "1.8.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -56,4 +56,5 @@ dependencies {
     compile files('libs/beaglebuddy_mp3.jar')
     compile 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.sdsmdg.harjot:croller:1.0.7'
+    compile 'com.yqritc:recyclerview-flexibledivider:1.4.0'
 }

@@ -91,11 +91,17 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                         String uri = musicList.get(pos).getUri();
                         values.put("title", musicList.get(pos).getTitle());
                         values.put("artist", musicList.get(pos).getArtist());
-                        values.put("albumArtUri",musicList.get(pos).getAlbumArtUri() );
+                        values.put("albumArtUri", musicList.get(pos).getAlbumArtUri());
                         values.put("album", musicList.get(pos).getAlbum());
                         values.put("uri", uri);
 
-                        Cursor cur = database1.query(table.toString(), null, null, null, null, null, null);
+                        Cursor cur = database1.query(table.toString(),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null);
 
                         if (cur != null) {
                             if (cur.moveToFirst()) {
@@ -127,17 +133,16 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                     SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                     for (int pos : playlistPositionSet) {
                         String albumTag = musicList.get(pos).getAlbum();
-                        ArrayList<Music> albumMusicList = new ArrayList<>();
                         Cursor cursor;
                         if ("from album in artist".equals(MusicList.fromWhere)
-                                && !"".equals(MusicList.artistInALbum)){
+                                && !"".equals(MusicList.artistInALbum)) {
                             cursor = getContext().getContentResolver().query(
                                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                     null,
-                                    MediaStore.Audio.Media.ALBUM + "=? and "+ MediaStore.Audio.Media.ARTIST +"=?",
-                                    new String[]{albumTag,MusicList.artistInALbum},
+                                    MediaStore.Audio.Media.ALBUM + "=? and " + MediaStore.Audio.Media.ARTIST + "=?",
+                                    new String[]{albumTag, MusicList.artistInALbum},
                                     MediaStore.Audio.Media.TITLE);
-                        }else {
+                        } else {
                             cursor = getContext().getContentResolver().query(
                                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                     null,
@@ -147,57 +152,42 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                         }
                         if (cursor != null && cursor.moveToFirst()) {
                             do {
-                                Music music = new Music();
-                                music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                                music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
+                                ContentValues values = new ContentValues();
 
-                                music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                                String uri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                                values.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                                values.put("artist", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                                values.put("albumArtUri", String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                         , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                                music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                                music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                                music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                                values.put("album", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                                values.put("uri", uri);
 
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
-                                    albumMusicList.add(music);
+                                Cursor cur = database1.query(table.toString(),
+                                        null,
+                                        null,
+                                        null,
+                                        null, null,
+                                        null);
+                                if (cur.moveToFirst()) {
+                                    do {
+                                        String uri1 = cur.getString(cur.getColumnIndex("uri"));
+                                        if (uri.equals(uri1)) {
+                                            flag = 1;
+                                            break;
+                                        }
+                                    } while (cur.moveToNext());
                                 }
+                                cur.close();
+                                if (flag == 0) {
+                                    database1.insert(table.toString(), null, values);
+                                    values.clear();
+
+                                } else {
+                                    flag = 0;
+                                }
+
                             } while (cursor.moveToNext());
                             cursor.close();
-                        }
-                        for (int i = 0; i < albumMusicList.size(); i++) {
-                            ContentValues values = new ContentValues();
-
-                            String uri = albumMusicList.get(i).getUri();
-                            values.put("title", albumMusicList.get(i).getTitle());
-                            values.put("artist", albumMusicList.get(i).getArtist());
-                            values.put("albumArtUri", albumMusicList.get(i).getAlbumArtUri());
-                            values.put("album", albumMusicList.get(i).getAlbum());
-                            values.put("uri", uri);
-
-                            Cursor cur = database1.query(table.toString(),
-                                    null,
-                                    null,
-                                    null,
-                                    null, null,
-                                    null);
-                            if (cur.moveToFirst()) {
-                                do {
-                                    String uri1 = cur.getString(cur.getColumnIndex("uri"));
-                                    if (uri.equals(uri1)) {
-                                        flag = 1;
-                                        break;
-                                    }
-                                } while (cur.moveToNext());
-                            }
-                            cur.close();
-                            if (flag == 0) {
-                                database1.insert(table.toString(), null, values);
-                                values.clear();
-
-                            } else {
-                                flag = 0;
-                            }
-
                         }
                     }
                     database.close();
@@ -212,57 +202,46 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                     for (int pos : playlistPositionSet) {
 
                         String artistTag = musicList.get(pos).getArtist();
-                        ArrayList<Music> artistMusicList = new ArrayList<>();
                         Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                 null, MediaStore.Audio.Media.ARTIST + "=?", new String[]{artistTag}, MediaStore.Audio.Media.TITLE);
 
                         if (cursor != null && cursor.moveToFirst()) {
                             do {
-                                Music music = new Music();
-                                music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                                music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
+                                ContentValues values = new ContentValues();
 
-                                music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
+                                String uri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                                values.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                                values.put("artist", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                                values.put("albumArtUri", String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
                                         , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                                music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                                music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                                music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                                values.put("album", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                                values.put("uri", uri);
 
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
-                                    artistMusicList.add(music);
+                                Cursor cur = database1.query(table.toString(),
+                                        null,
+                                        null,
+                                        null,
+                                        null, null,
+                                        null);
+                                if (cur.moveToFirst()) {
+                                    do {
+                                        String uri1 = cur.getString(cur.getColumnIndex("uri"));
+                                        if (uri.equals(uri1)) {
+                                            flag = 1;
+                                            break;
+                                        }
+                                    } while (cur.moveToNext());
                                 }
-                            } while (cursor.moveToNext());
+                                cur.close();
+                                if (flag == 0) {
+                                    database1.insert(table.toString(), null, values);
+                                    values.clear();
+
+                                } else {
+                                    flag = 0;
+                                }
+                            }while (cursor.moveToNext());
                             cursor.close();
-                        }
-                        for (int i = 0; i < artistMusicList.size(); i++) {
-                            ContentValues values = new ContentValues();
-
-                            String uri = artistMusicList.get(i).getUri();
-                            values.put("title", artistMusicList.get(i).getTitle());
-                            values.put("artist", artistMusicList.get(i).getArtist());
-                            values.put("albumArtUri", artistMusicList.get(i).getAlbumArtUri());
-                            values.put("album", artistMusicList.get(i).getAlbum());
-                            values.put("uri", uri);
-
-                            Cursor cur = database1.query(table.toString(), null, null, null, null, null, null);
-                            if (cur.moveToFirst()) {
-                                do {
-                                    String uri1 = cur.getString(cur.getColumnIndex("uri"));
-                                    if (uri.equals(uri1)) {
-                                        flag = 1;
-                                        break;
-                                    }
-                                } while (cur.moveToNext());
-                            }
-                            cur.close();
-                            if (flag == 0) {
-                                database1.insert(table.toString(), null, values);
-                                values.clear();
-                            } else {
-                                flag = 0;
-                            }
-
                         }
                     }
                     database.close();
