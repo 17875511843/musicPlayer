@@ -16,6 +16,7 @@ import ironbear775.com.musicplayer.Class.ColorItem;
 import ironbear775.com.musicplayer.R;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 
 /**
  * Created by ironbear on 2017/11/7.
@@ -37,9 +38,9 @@ public class ColorPickerDialog extends Dialog {
         setContentView(R.layout.color_layout);
 
         SharedPreferences sp = mContext.getSharedPreferences("data", MODE_PRIVATE);
-        MusicUtils.checkPosition = sp.getInt("checkPosition", 0);
+        MusicUtils.getInstance().checkPosition = sp.getInt("checkPosition", 0);
 
-        checkPosition = MusicUtils.checkPosition;
+        checkPosition = MusicUtils.getInstance().checkPosition;
 
         Log.d("TAG", "checkPosition: "+checkPosition);
 
@@ -157,9 +158,11 @@ public class ColorPickerDialog extends Dialog {
                 editor.putInt("checkPosition", checkPosition);
                 editor.putInt("themeName", colorItem1.getName());
                 editor.apply();
+                editor.commit();
                 adapter.notifyDataSetChanged();
 
                 getContext().sendBroadcast(new Intent("restart yourself"));
+
 
             }
 

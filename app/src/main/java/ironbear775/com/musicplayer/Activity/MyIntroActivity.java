@@ -59,6 +59,7 @@ public class MyIntroActivity extends AppIntro2 {
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(getBaseContext(), MusicList.class);
+            intent.putExtra("IS_NEW_VERSION", true);
             startActivity(intent);
         }
     }

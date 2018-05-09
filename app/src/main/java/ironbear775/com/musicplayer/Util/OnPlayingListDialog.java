@@ -12,7 +12,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
-
 import github.nisrulz.recyclerviewhelper.RVHItemTouchHelperCallback;
 import ironbear775.com.musicplayer.Adapter.OnPlayingListAdapter;
 import ironbear775.com.musicplayer.R;
@@ -27,7 +26,7 @@ public class OnPlayingListDialog extends Dialog {
     private RecyclerView onPlayingListView;
     private OnPlayingListAdapter onPlayingListAdapter;
     private OnPlayingReceiver receiver;
-    private MusicUtils musicUtils;
+    private boolean isChanged = false;
     public OnPlayingListDialog(Context context) {
         super(context);
         mContext = context;
@@ -38,10 +37,10 @@ public class OnPlayingListDialog extends Dialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.onplaying_list_dialog_layout);
 
-        musicUtils = new MusicUtils(mContext);
         receiver = new OnPlayingReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("update onPlayingList");
+        intentFilter.addAction("list changed");
 
         mContext.registerReceiver(receiver, intentFilter);
 
@@ -57,8 +56,7 @@ public class OnPlayingListDialog extends Dialog {
         onPlayingListView.setAdapter(onPlayingListAdapter);
         onPlayingListView.hasFixedSize();
 
-        onPlayingListAdapter.setOnItemClickListener((view1, position) ->
-                setClickAction(position));
+        onPlayingListAdapter.setOnItemClickListener((view, position) -> setClickAction(mContext,position));
 
         ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(
                 onPlayingListAdapter, true, false, true);
@@ -68,8 +66,8 @@ public class OnPlayingListDialog extends Dialog {
         onPlayingListView.scrollToPosition(MusicService.musicPosition);
     }
 
-    private void setClickAction(int position) {
-        musicUtils.startMusic(position,0,10);
+    private void setClickAction(Context context,int position) {
+        MusicUtils.getInstance().startMusic(context,position,0,11);
         mContext.sendBroadcast(new Intent("update_cover"));
         mContext.sendBroadcast(new Intent("set lyric from service"));
     }
@@ -79,15 +77,29 @@ public class OnPlayingListDialog extends Dialog {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action != null && (action.equals("update onPlayingList"))) {
-                onPlayingListView.scrollToPosition(MusicService.musicPosition);
-                onPlayingListAdapter.notifyDataSetChanged();
+            if (action != null ){
+
+                switch (action){
+                    case "update onPlayingList":
+                        onPlayingListView.scrollToPosition(MusicService.musicPosition);
+                        onPlayingListAdapter.notifyDataSetChanged();
+                        break;
+                    case "list changed":
+                        isChanged = true;
+                        break;
+                }
             }
         }
     }
 
     @Override
     protected void onStop() {
+        if (isChanged) {
+            if (MusicService.isRandom)
+                MusicUtils.getInstance().saveShuffleArray(mContext, MusicService.onPlayingList);
+            else
+                MusicUtils.getInstance().saveArray(mContext, MusicService.onPlayingList);
+        }
         mContext.unregisterReceiver(receiver);
         super.onStop();
     }

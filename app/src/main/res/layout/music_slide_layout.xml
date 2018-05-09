@@ -39,7 +39,7 @@
     <RelativeLayout
         android:id="@+id/ui_title"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/top_blank"
         android:layout_toEndOf="@+id/left_shadow"
         android:layout_toStartOf="@+id/right_shadow"
@@ -58,7 +58,7 @@
             android:src="@drawable/list_menu_white" />
 
         <ImageView
-            android:id="@+id/lyric"
+            android:id="@+id/on_playing_list"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignParentEnd="true"
@@ -67,16 +67,7 @@
             android:layout_marginStart="10dp"
             android:background="?android:attr/selectableItemBackground"
             android:scaleType="fitCenter"
-            android:src="@drawable/lyric_white" />
-
-        <ImageView
-            android:id="@+id/blank"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginStart="10dp" />
+            android:src="@drawable/on_playing_list_white" />
 
         <TextView
             android:id="@+id/title"
@@ -85,7 +76,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerInParent="true"
             android:layout_toEndOf="@+id/slide_menu"
-            android:layout_toStartOf="@+id/blank"
+            android:layout_toStartOf="@+id/on_playing_list"
             android:clickable="false"
             android:ellipsize="end"
             android:gravity="center"
@@ -210,7 +201,7 @@
                 android:layout_centerInParent="true"
                 android:layout_toStartOf="@+id/music_last"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:padding="6dp" />
+                android:padding="11dp" />
 
             <ImageView
                 android:id="@+id/music_last"
@@ -222,15 +213,14 @@
                 android:padding="6dp"
                 android:src="@drawable/previous_white" />
 
-            <android.support.design.widget.FloatingActionButton
+            <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/music_play"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:layout_centerInParent="true"
-                android:backgroundTint="?attr/floatingActionButtonColor"
                 android:src="@drawable/footplay"
-                app:borderWidth="0dp"
-                app:fabSize="normal" />
+                app:fab_size="normal"
+                />
 
 
             <ImageView
@@ -250,7 +240,7 @@
                 android:layout_centerInParent="true"
                 android:layout_toEndOf="@+id/music_next"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:padding="6dp" />
+                android:padding="11dp" />
         </RelativeLayout>
 
         <RelativeLayout

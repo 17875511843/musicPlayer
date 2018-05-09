@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -15,12 +16,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,11 +32,8 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.mpatric.mp3agic.InvalidDataException;
-import com.mpatric.mp3agic.Mp3File;
-import com.mpatric.mp3agic.UnsupportedTagException;
+import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
@@ -55,17 +56,16 @@ import ironbear775.com.musicplayer.Util.SquareImageView;
 
 public class AlbumDetailFragment extends Fragment {
     public static int pos = 0;
-    public static int count = 0;
     public static final Set<Integer> positionSet = new HashSet<>();
-    public static ArrayList<Music> musicList = new ArrayList<>();
+    public static ArrayList<Music> musicList;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private RelativeLayout playAll;
     private SquareImageView albumArt;
     private AlbumDetailAdapter albumAdapter;
-    private MusicUtils musicUtils;
     public static int id;
     public static int playColor;
+    private FastScrollRecyclerView albumListView;
 
     @Nullable
     @Override
@@ -79,8 +79,7 @@ public class AlbumDetailFragment extends Fragment {
         setHasOptionsMenu(true);
 
         findView(view);
-
-        musicUtils = new MusicUtils(getActivity());
+        reCreateView();
 
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setTitle(album);
@@ -100,14 +99,15 @@ public class AlbumDetailFragment extends Fragment {
         filter.addAction("hide albumDetailFragment");
         filter.addAction("hide fragment on switch");
         filter.addAction("get color from album");
+        filter.addAction("restart yourself");
         getActivity().registerReceiver(clickableReceiver, filter);
 
         Glide.with(getActivity())
-                .load(musicList.get(0).getAlbumArtUri())
                 .asBitmap()
+                .load(musicList.get(0).getAlbumArtUri())
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                    public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
                         Palette.from(resource).generate(palette -> {
                             Palette.Swatch swatch = palette.getVibrantSwatch();
                             if (swatch != null) {
@@ -141,7 +141,8 @@ public class AlbumDetailFragment extends Fragment {
                 });
 
         albumArt.setTag(R.id.item_url, musicList.get(0).getTitle() + musicList.get(0).getArtist());
-        musicUtils.setAlbumCoverToAdapter(musicList.get(0), albumArt, MusicUtils.FROM_ADAPTER);
+        MusicUtils.getInstance().setAlbumCoverToAdapter(getActivity(),musicList.get(0),
+                albumArt, MusicUtils.getInstance().FROM_ADAPTER);
 
         return view;
     }
@@ -154,7 +155,7 @@ public class AlbumDetailFragment extends Fragment {
 
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.hide(this);
+                transaction.remove(this);
                 transaction.setCustomAnimations(
                         R.animator.fragment_slide_right_enter,
                         R.animator.fragment_slide_right_exit,
@@ -162,24 +163,22 @@ public class AlbumDetailFragment extends Fragment {
                         R.animator.fragment_slide_left_exit
                 );
 
-                if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_DETAIl_PAGE) {
+                if (MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ARTIST_DETAIl_PAGE) {
 
+                    MusicUtils.getInstance().fromWhere = MusicUtils.getInstance().FROM_ARTIST_PAGE;
                     transaction.show(ArtistListFragment.artistDetailFragment);
                     transaction.commit();
                     getActivity().getWindow().setStatusBarColor(ArtistDetailFragment.playColor);
                     ArtistDetailFragment.color = 0;
-                    MusicUtils.fromWhere = MusicUtils.FROM_ARTIST_PAGE;
 
-                }
-
-                if (MusicUtils.fromWhere == MusicUtils.FROM_ALBUM_PAGE) {
+                } else if (MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ALBUM_PAGE) {
                     transaction.show(MusicList.albumFragment);
                     transaction.commit();
-                    getActivity().getWindow().setStatusBarColor(0);
+                    getActivity().getWindow().setStatusBarColor(MusicList.colorPri);
                     Intent intent1 = new Intent("set toolbar text");
                     intent1.putExtra("title", R.string.toolbar_title_album);
                     getActivity().sendBroadcast(intent1);
-                    MusicUtils.fromWhere = MusicUtils.CLEAR;
+                    MusicUtils.getInstance().fromWhere = MusicUtils.getInstance().CLEAR;
                 }
 
                 break;
@@ -192,7 +191,7 @@ public class AlbumDetailFragment extends Fragment {
         collapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
         playAll = view.findViewById(R.id.album_play_all);
         albumArt = view.findViewById(R.id.album_detail_art);
-        FastScrollRecyclerView albumListView = view.findViewById(R.id.album_detail_list);
+        albumListView = view.findViewById(R.id.album_detail_list);
         albumListView.setHasFixedSize(true);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
@@ -213,9 +212,9 @@ public class AlbumDetailFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 if (MusicList.actionMode != null) {
                     //多选状态
-                    musicUtils.addOrRemoveItem(position, positionSet, albumAdapter);
+                    MusicUtils.getInstance().addOrRemoveItem(getActivity(),position, positionSet, albumAdapter);
                 } else {
-                    setClickAction(position);
+                    setClickAction(getActivity(),position);
                 }
             }
 
@@ -229,16 +228,9 @@ public class AlbumDetailFragment extends Fragment {
         });
 
         playAll.setOnClickListener(v -> {
-            FolderDetailFragment.count = 0;
-            MusicListFragment.count = 0;
-            MusicRecentAddedFragment.count = 0;
-            ArtistDetailFragment.count = 0;
-            PlaylistDetailFragment.count = 0;
-            MusicList.count = 0;
-            count = 1;
+            MusicUtils.getInstance().playPage = 4;
 
-            musicUtils = new MusicUtils(v.getContext());
-            musicUtils.playAll(musicList, 3);
+            MusicUtils.getInstance().playAll(getActivity(),musicList, 3);
 
         });
     }
@@ -323,31 +315,24 @@ public class AlbumDetailFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
-    private void setClickAction(int position) {
+    private void setClickAction(Context context,int position) {
 
-        FolderDetailFragment.count = 0;
-        MusicListFragment.count = 0;
-        MusicRecentAddedFragment.count = 0;
-        ArtistDetailFragment.count = 0;
-        PlaylistDetailFragment.count = 0;
-        MusicList.count = 0;
-        count = 1;
+        MusicUtils.getInstance().playPage = 4;
 
         int progress = 0;
 
-        musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position, progress, 3);
+        MusicUtils.getInstance().startMusic(context,position, progress, 3);
 
 
         Intent intent = new Intent("set footBar");
         Intent intent1 = new Intent("set PlayOrPause");
         intent.putExtra("footTitle", musicList.get(position).getTitle());
         intent.putExtra("footArtist", musicList.get(position).getArtist());
-        intent1.putExtra("PlayOrPause", R.drawable.footplaywhite);
+        intent1.putExtra("PlayOrPause", R.drawable.play_to_pause_white_anim);
         getActivity().sendBroadcast(intent);
         getActivity().sendBroadcast(intent1);
 
-        musicUtils.getFootAlbumArt(position, musicList, MusicUtils.FROM_ADAPTER);
+        MusicUtils.getInstance().getFootAlbumArt(context,position, musicList, MusicUtils.getInstance().FROM_ADAPTER);
         pos = position;
     }
 
@@ -391,7 +376,7 @@ public class AlbumDetailFragment extends Fragment {
                         getActivity().getWindow().setStatusBarColor(ArtistDetailFragment.playColor);
                         FragmentManager fragmentManager = getFragmentManager();
                         FragmentTransaction transaction = fragmentManager.beginTransaction();
-                        transaction.hide(getFragmentManager().findFragmentById(id));
+                        transaction.remove(getFragmentManager().findFragmentById(id));
                         transaction.setCustomAnimations(
                                 R.animator.fragment_slide_right_enter,
                                 R.animator.fragment_slide_right_exit,
@@ -401,7 +386,7 @@ public class AlbumDetailFragment extends Fragment {
                         );
                         transaction.show(ArtistListFragment.artistDetailFragment);
                         transaction.commit();
-                        MusicUtils.fromWhere = MusicUtils.FROM_ARTIST_PAGE;
+                        MusicUtils.getInstance().fromWhere = MusicUtils.getInstance().FROM_ARTIST_PAGE;
                         break;
                     case "hide fragment on switch":
                         FragmentManager fragmentManager1 = getFragmentManager();
@@ -412,10 +397,33 @@ public class AlbumDetailFragment extends Fragment {
                     case "get color from album":
                         playColor = intent.getIntExtra("color", 0);
                         break;
+                    case "restart yourself":
+                        reCreateView();
+                        albumAdapter.notifyDataSetChanged();
+                        break;
                 }
             }
         }
     };
+
+    private void reCreateView() {
+        try {
+            Resources.Theme theme = getActivity().getTheme();
+            TypedValue appBgValue = new TypedValue();
+
+            theme.resolveAttribute(R.attr.appBg, appBgValue, true);
+            Resources resources = getResources();
+
+            int appBg = ResourcesCompat.getColor(resources,
+                    appBgValue.resourceId, null);
+
+            albumListView.setBackgroundColor(appBg);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onDestroyView() {

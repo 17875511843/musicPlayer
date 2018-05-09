@@ -5,9 +5,9 @@ package ironbear775.com.musicplayer.Class;
  */
 
 public class ColorItem {
-    private int name;
-    private int color;
-    private boolean checked;
+    private int name; //主题名称
+    private int color; //主题主颜色
+    private boolean checked; //主题是否应用
 
     public void setName(int name) {
         this.name = name;

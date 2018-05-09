@@ -24,8 +24,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Activity.MusicList;
-import ironbear775.com.musicplayer.Activity.TagEditActivty;
+import ironbear775.com.musicplayer.Activity.TagEditActivity;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
 import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
@@ -77,14 +78,15 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
         this.mInflater = LayoutInflater.from(activity);
     }
 
+    @NonNull
     @Override
-    public AlbumDetailViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AlbumDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.detail_layout, parent, false);
         return new AlbumDetailViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final AlbumDetailViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final AlbumDetailViewHolder holder, final int position) {
         holder.setData(position);
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> {
@@ -97,15 +99,17 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
                 return false;
             });
         }
-        if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_DETAIl_PAGE
-                || MusicUtils.fromWhere == MusicUtils.FROM_ALBUM_PAGE) {
+        if (MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ARTIST_DETAIl_PAGE
+                || MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ALBUM_PAGE) {
+
             holder.item_image.setVisibility(View.GONE);
             String track = mList.get(position).getTrack();
             if (track.equals("0"))
                 track = "-";
             holder.track.setText(track);
+
         }
-        holder.item_image.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
+        holder.item_image.setTag(R.id.item_url, mList.get(position).getTitle() + mList.get(position).getArtist());
 
         holder.tv_title.setText(mList.get(position).getTitle());
         holder.tv_time.setText(time.format(mList.get(position).getDuration()));
@@ -148,8 +152,8 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
                             if (file.isFile()) {
                                 if (file.delete()) {
                                     if (MusicService.musicService != null
-                                            &&MusicService.mediaPlayer.isPlaying()
-                                            &&mList.get(position).getUri().equals(MusicService.music.getUri())) {
+                                            && MusicService.mediaPlayer.isPlaying()
+                                            && mList.get(position).getUri().equals(MusicService.music.getUri())) {
                                         Intent intentNext = new Intent("delete current music success");
                                         mActivity.sendBroadcast(intentNext);
                                     }
@@ -183,12 +187,12 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
                                     mActivity.sendBroadcast(intent);
 
                                     Intent intent1 = new Intent("show snackBar");
-                                    intent1.putExtra("text id",R.string.success);
+                                    intent1.putExtra("text id", R.string.success);
                                     mActivity.sendBroadcast(intent1);
                                 } else {
 
                                     Intent intent1 = new Intent("show snackBar");
-                                    intent1.putExtra("text id",R.string.failed);
+                                    intent1.putExtra("text id", R.string.failed);
                                     mActivity.sendBroadcast(intent1);
                                 }
                             }
@@ -197,8 +201,8 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
                         break;
                     case R.id.play_next:
                         Intent intent1 = new Intent("play next");
-                        intent1.putExtra("from",1);
-                        intent1.putExtra("uri",mList.get(position).getUri());
+                        intent1.putExtra("from", 1);
+                        intent1.putExtra("uri", mList.get(position).getUri());
                         mActivity.sendBroadcast(intent1);
                         break;
                     case R.id.menu_detail:
@@ -208,7 +212,7 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
                     case R.id.tag_edit:
                         if (mList.get(position).getUri().contains(".mp3")
                                 || mList.get(position).getUri().contains(".MP3")) {
-                            Intent intent = new Intent(mActivity, TagEditActivty.class);
+                            Intent intent = new Intent(mActivity, TagEditActivity.class);
                             intent.putExtra("music", (Parcelable) mList.get(position));
                             mActivity.startActivity(intent);
                         } else {
@@ -240,18 +244,31 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
             super(itemView);
             track = itemView.findViewById(R.id.detail_track);
             tv_time = itemView.findViewById(R.id.detail_time);
-            tv_title =  itemView.findViewById(R.id.detail_title);
+            tv_title = itemView.findViewById(R.id.detail_title);
             item_menu = itemView.findViewById(R.id.detail_item_menu);
-            item_image =  itemView.findViewById(R.id.detail_album_art);
+            item_image = itemView.findViewById(R.id.detail_album_art);
         }
 
         public void setData(int position) {
             Set<Integer> positionSet;
-            if (MusicUtils.isSelectAll) {
+            if (MusicUtils.getInstance().isSelectAll) {
                 positionSet = MusicList.listPositionSet;
             } else {
                 positionSet = AlbumDetailFragment.positionSet;
             }
+
+            if (BaseActivity.isNight) {
+                tv_title.setTextColor(itemView.getResources().getColor(
+                        R.color.nightMainTextColor));
+                track.setTextColor(itemView.getResources().getColor(
+                        R.color.nightMainTextColor));
+            } else {
+                tv_title.setTextColor(itemView.getResources().getColor(
+                        R.color.lightMainTextColor));
+                track.setTextColor(itemView.getResources().getColor(
+                        R.color.lightMainTextColor));
+            }
+
             if (positionSet.contains(position)) {
                 itemView.setBackgroundResource(R.color.items_selected_bg_color);
             } else {

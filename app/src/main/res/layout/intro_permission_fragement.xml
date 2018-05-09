@@ -24,7 +24,7 @@
         android:layout_centerHorizontal="true"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:src="@drawable/settings"/>
+        android:src="@drawable/ic_settings_black_48dp"/>
 
     <TextView
         android:padding="20dp"

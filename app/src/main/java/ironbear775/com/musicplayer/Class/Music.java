@@ -11,18 +11,16 @@ import java.io.Serializable;
 
 //使用Parcelable来规格化数据，从而通过intent传递数据
 public class Music implements Parcelable, Serializable {
-    private long ID;
-    private long size;
-
-    private int duration;
-    private String album_id;
-
-    private String title;
-    private String album;
-    private String artist;
-    private String uri;
-    private String albumArtUri;
-    private String track;
+    private long ID; //歌曲ID
+    private long size; //歌曲文件大小
+    private int duration; //歌曲时长
+    private String album_id; //专辑封面id
+    private String title; //歌曲标题名称
+    private String album; //歌曲专辑名称
+    private String artist; //歌曲艺术家名称
+    private String uri; //歌曲对应Android媒体库的uri
+    private String albumArtUri; //歌曲专辑封面对应Android媒体库的uri
+    private String track; //歌曲专辑音轨
 
     public Music() {
 

@@ -24,8 +24,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Activity.MusicList;
-import ironbear775.com.musicplayer.Activity.TagEditActivty;
+import ironbear775.com.musicplayer.Activity.TagEditActivity;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
 import ironbear775.com.musicplayer.Fragment.AlbumListFragment;
@@ -77,14 +78,15 @@ public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailAdapte
         this.mInflater = LayoutInflater.from(activity);
     }
 
+    @NonNull
     @Override
-    public ArtistDetailViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ArtistDetailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.detail_layout, parent, false);
         return new ArtistDetailViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ArtistDetailViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ArtistDetailViewHolder holder, final int position) {
         holder.setData(position);
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> {
@@ -97,11 +99,11 @@ public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailAdapte
                 return false;
             });
         }
-        if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_PAGE) {
+        if (MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ARTIST_PAGE) {
             holder.track.setVisibility(View.GONE);
             holder.item_image.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
-            MusicUtils musicUtils = new MusicUtils(mActivity);
-            musicUtils.setAlbumCoverToAdapter(mList.get(position),holder.item_image,MusicUtils.FROM_ADAPTER);
+            MusicUtils.getInstance().setAlbumCoverToAdapter(mActivity,mList.get(position),
+                    holder.item_image,MusicUtils.getInstance().FROM_ADAPTER);
         }
 
         holder.tv_title.setText(mList.get(position).getTitle());
@@ -205,7 +207,7 @@ public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailAdapte
                     case R.id.tag_edit:
                         if (mList.get(position).getUri().contains(".mp3")
                                 || mList.get(position).getUri().contains(".MP3")) {
-                            Intent intent = new Intent(mActivity, TagEditActivty.class);
+                            Intent intent = new Intent(mActivity, TagEditActivity.class);
                             intent.putExtra("music", (Parcelable) mList.get(position));
                             mActivity.startActivity(intent);
                         } else {
@@ -243,12 +245,25 @@ public class ArtistDetailAdapter extends RecyclerView.Adapter<ArtistDetailAdapte
 
         public void setData(int position) {
             Set<Integer> positionSet;
-            if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_PAGE) {
-                if (MusicUtils.isSelectAll) {
+            if (MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ARTIST_PAGE) {
+                if (MusicUtils.getInstance().isSelectAll) {
                     positionSet = MusicList.listPositionSet;
                 } else {
                     positionSet = ArtistDetailFragment.positionSet;
                 }
+
+                if (BaseActivity.isNight) {
+                    tv_title.setTextColor(itemView.getResources().getColor(
+                            R.color.nightMainTextColor));
+                    track.setTextColor(itemView.getResources().getColor(
+                            R.color.nightMainTextColor));
+                }else {
+                    tv_title.setTextColor(itemView.getResources().getColor(
+                            R.color.lightMainTextColor));
+                    track.setTextColor(itemView.getResources().getColor(
+                            R.color.lightMainTextColor));
+                }
+
                 if (positionSet.contains(position)) {
                     itemView.setBackgroundResource(R.color.items_selected_bg_color);
                 } else {

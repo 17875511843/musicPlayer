@@ -9,12 +9,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +56,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
     private SQLiteDatabase database;
     private int flag = 0;
     private boolean isClickable = true;
+    private ListView playlist;
 
     @Nullable
     @Override
@@ -63,14 +67,17 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
+        filter.addAction("restart yourself");
         getActivity().registerReceiver(clickableReceiver, filter);
 
         readList();
         findView(view);
 
-        if (MusicUtils.launchPage == 4) {
+        reCreateView();
 
-            MusicUtils.setLaunchPage(getActivity(), MusicUtils.FROM_ADAPTER);
+        if (MusicUtils.getInstance().launchPage == 4) {
+
+            MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
         }
 
         return view;
@@ -103,7 +110,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         cancel = view.findViewById(R.id.create_cancel);
         submit = view.findViewById(R.id.create_submit);
         createNew = view.findViewById(R.id.create_playlist);
-        ListView playlist = view.findViewById(R.id.playlist_listView);
+        playlist = view.findViewById(R.id.playlist_listView);
         adapter = new PlaylistAdapter(getActivity(), R.layout.playlist_item_layout, list);
         playlist.setAdapter(adapter);
         playlist.setOnItemClickListener((parent, view1, position, id) -> {
@@ -207,7 +214,6 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                         for (char a : name.toCharArray()) {
                             table.append((int) a);
                         }
-                        Log.d("TABLE", table.toString());
                         String db = "create table " + table.toString() + " ("
                                 + "id integer primary key autoincrement, "
                                 + "title text,"
@@ -267,11 +273,39 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                         isClickable = false;
                         createNew.setClickable(false);
                         break;
+                    case "restart yourself":
+                        reCreateView();
+                        adapter.notifyDataSetChanged();
+                        break;
                 }
             }
         }
     };
+    private void reCreateView() {
+        try {
+            Resources.Theme theme = getActivity().getTheme();
+            TypedValue appBgValue = new TypedValue();
+            TypedValue colorPrimaryValue = new TypedValue();
 
+            theme.resolveAttribute(R.attr.appBg, appBgValue, true);
+            theme.resolveAttribute(R.attr.colorPrimary, colorPrimaryValue, true);
+            Resources resources = getResources();
+
+            int appBg = ResourcesCompat.getColor(resources,
+                    appBgValue.resourceId, null);
+            int colorPrimary = ResourcesCompat.getColor(resources,
+                    colorPrimaryValue.resourceId, null);
+
+            createNew.setBackgroundColor(colorPrimary);
+            playlist.setBackgroundColor(appBg);
+
+            getActivity().findViewById(R.id.toolbar).setBackgroundColor(colorPrimary);
+
+            MusicList.colorPri = colorPrimary;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onDestroyView() {
         getActivity().unregisterReceiver(clickableReceiver);

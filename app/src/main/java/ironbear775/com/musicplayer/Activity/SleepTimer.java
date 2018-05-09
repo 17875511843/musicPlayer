@@ -44,7 +44,7 @@ public class SleepTimer extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMinute = MusicUtils.sleepTime;
+        mMinute = MusicUtils.getInstance().sleepTime;
         setContentView(R.layout.sleep_timer_new_layout);
         Button confirm =  findViewById(R.id.sleepStart);
         final Button cancel =  findViewById(R.id.sleepCancel);
@@ -97,7 +97,7 @@ public class SleepTimer extends Dialog {
                 Intent intent2 = new Intent("show snackBar");
                 intent2.putExtra("text id",R.string.set_success);
                 mContext.sendBroadcast(intent2);
-                MusicUtils.sleepTime = mMinute;
+                MusicUtils.getInstance().sleepTime = mMinute;
                 SharedPreferences sharedPreferences = mContext.getSharedPreferences("data",Context.MODE_PRIVATE);
                 sharedPreferences.edit().putInt("sleepTime",mMinute).apply();
                 hide();

@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Class.Playlist;
 import ironbear775.com.musicplayer.R;
 
@@ -41,8 +42,16 @@ public class PlaylistAdapter extends ArrayAdapter<Playlist> {
             viewHolder = (ViewHolder) view.getTag();
         }
         viewHolder.name.setText(playlist != null ? playlist.getName() : null);
+        if (BaseActivity.isNight) {
+            viewHolder.name.setTextColor(view.getResources().getColor(
+                    R.color.nightMainTextColor));
+        }else {
+            viewHolder.name.setTextColor(view.getResources().getColor(
+                    R.color.lightMainTextColor));
+        }
         return view;
     }
+
     private class ViewHolder {
         TextView name;
     }

@@ -63,11 +63,6 @@ public class DetailDialog extends Dialog {
             } catch (IOException | UnsupportedTagException | InvalidDataException e) {
                 e.printStackTrace();
             }
-        } else {
-            fileDuration.setText("-");
-            fileSamplingRate.setText("-");
-            fileBitrate.setText("-");
         }
-
     }
 }

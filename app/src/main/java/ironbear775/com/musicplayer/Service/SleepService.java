@@ -1,14 +1,11 @@
 package ironbear775.com.musicplayer.Service;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-
-import ironbear775.com.musicplayer.Activity.ActivityCollector;
 
 /**
  * Created by ironbear on 2016/12/19.

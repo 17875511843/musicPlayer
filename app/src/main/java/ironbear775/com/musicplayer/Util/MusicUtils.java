@@ -14,6 +14,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,10 +24,11 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.cache.ExternalCacheDiskCacheFactory;
 import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.signature.ObjectKey;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -42,10 +45,12 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.MulticastSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
@@ -72,79 +77,104 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class MusicUtils {
 
-    private static String newPath = "http://www.kugou.com/yy/index.php?r=play/getdata&hash=";
-    private static String newPathNetease = "http://music.163.com/api/song/lyric?id=";
+    private final String newPath = "http://www.kugou.com/yy/index.php?r=play/getdata&hash=";
+    private final String newPathNetease = "http://music.163.com/api/song/lyric?id=";
 
-    public static final int CLEAR = 0;
-    public static final int FROM_ARTIST_PAGE = 1;
-    public static final int FROM_ARTIST_DETAIl_PAGE = 2;
-    public static final int FROM_ALBUM_PAGE = 3;
-    public static int fromWhere;
+    public int CLEAR = 0;
+    public int FROM_ARTIST_PAGE = 1;
+    public int FROM_ARTIST_DETAIl_PAGE = 2;
+    public int FROM_ALBUM_PAGE = 3;
+    public int fromWhere;
+    private final String lyricFolder = "MusicPlayer/lyric";
 
-    private static Context mContext;
-    private static ImageView mImageView;
-    private static Drawable mPlaceHolder;
-    public static final String localPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-    public static final String artistFolder = "MusicPlayer/artist";
-    public static final String albumFolder = "MusicPlayer/album";
-    private static final String lyricFolder = "MusicPlayer/lyric";
-    private static File appDir;
-    private static OkHttpClient client;
-    private static Request.Builder requestBuilder;
-    public static boolean enableDefaultCover = false;
-    public static boolean enableColorNotification = false;
-    public static boolean useOldStyleNotification = false;
-    public static boolean enableSwipeGesture = true;
-    public static boolean keepScreenOn = false;
-    public static boolean loadWebLyric = true;
-    public static boolean enableEqualizer = false;
-    public static boolean enableShuffle = true;
-    public static boolean enableTranslateLyric = true;
-    public static boolean autoSwitchNightMode = true;
-    public static boolean isFlyme = false;
-    public static int sleepTime = 30;
-    public static int themeName = R.string.color_Pink;
-    public static int checkPosition = 0;
-    public static int downloadArtist = 2;//0,1,2 never,data,wifi
-    public static int downloadAlbum = 0;//0,1,2 never,data,wifi
-    public static int filterNum = 2; // 0,1,2,3,4,5,6 0,15s,20s,30s,40s,50s,60s
-    public static int launchPage = 1;//1,2,3,4,5,6 music,artist,album,playlist,recent,folder
-    public static int updateMusic = 0;//0,1 netease,kugou
-    public static int loadlyric = 0;//0,1,2 netease frist,netease,kugou
-    public static int pos = 1;
-    public static final String messageGood = "good";
-    public static final String messageBad = "error";
-    public static final String messageNull = "null";
-    public static final int[] time = {0, 15000, 20000, 30000, 40000, 50000, 60000};
-    public static boolean isSelectAll = false;
-    public static final int FROM_ADAPTER = 1;
-    public static final int FROM_MAINIAMGE = 2;
-    public static final int FROM_SERVICE = 3;
-    public static final int FROM_FOOTBAR = 4;
+    public final String localPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+    public final String artistFolder = "MusicPlayer/artist";
+    public final String albumFolder = "MusicPlayer/album";
+    public final String MY_ALIPAY_QRCODE = "https://qr.alipay.com/tsx06081gjjlyskuhkvxhef";
+    public final int FROM_ADAPTER = 1;
+    public final int FROM_MAINIMAGE = 2;
+    public final int FROM_SERVICE = 3;
+    public final int FROM_FOOTBAR = 4;
+    public boolean enableDefaultCover = false;
+    public boolean enableColorNotification = false;
+    public boolean useOldStyleNotification = false;
+    public boolean enableSwipeGesture = true;
+    public boolean keepScreenOn = false;
+    public boolean loadWebLyric = true;
+    public boolean enableEqualizer = false;
+    public boolean enableShuffle = true;
+    public boolean enableTranslateLyric = true;
+    public boolean autoSwitchNightMode = true;
+    public boolean isFlyme = false;
+    public int playPage = 0; //当前点击播放的页面 1.MusicListFragment 2.MusicRecentAddedFragment
+    // 3.ArtistDetailFragment 4.AlbumDetailFragment 5.PlaylistDetailFragment 6.FolderDetailFragment 7.MusicList
+    public boolean isArtistlistFragmentOpen = false;
+    public boolean isAlbumlistFragmentOpen = false;
+    public int sleepTime = 30;
+    public int themeName = R.string.color_Pink;
+    public int checkPosition = 0;
+    public int downloadArtist = 2;//0,1,2 never,data,wifi
+    public int downloadAlbum = 0;//0,1,2 never,data,wifi
+    public int filterNum = 2; // 0,1,2,3,4,5,6 0,15s,20s,30s,40s,50s,60s
+    public int launchPage = 1;//1,2,3,4,5,6 music,artist,album,playlist,recent,folder
+    public int updateMusic = 0;//0,1 netease,kugou
+    public int loadlyric = 0;//0,1,2 netease frist,netease,kugou
+    public int pos = 1;
+    public final String messageGood = "good";
+    public final String messageBad = "error";
+    public final String messageNull = "null";
+    public final int[] time = {0, 15000, 20000, 30000, 40000, 50000, 60000};
+    public boolean isSelectAll = false;
+    private File appDir;
+    private OkHttpClient client;
+    private Request.Builder requestBuilder;
+    private ImageView mImageView;
+    private Drawable mPlaceHolder;
     private Request.Builder builder;
     private Call call, call2;
 
-    public MusicUtils(Context context) {
-        mContext = context;
+    private static MusicUtils instance;
+
+    private MusicUtils() {
         client = new OkHttpClient();
         requestBuilder = null;
     }
 
-    public void startMusic(int position, int progress, int from) {
+    public static synchronized MusicUtils getInstance() {
+        if (MusicUtils.instance == null)
+            instance = new MusicUtils();
+        return instance;
+    }
 
-        Intent serviceIntent = new Intent(mContext, MusicService.class);
+    public void startMusic(Context context, int position, int progress, ArrayList<Music> list) {
+        Intent serviceIntent = new Intent(context, MusicService.class);
 
         serviceIntent.setAction("musiclist");
-        serviceIntent.putExtra("from", from);
+        serviceIntent.putExtra("musicList", list);
         serviceIntent.putExtra("musicPosition", position);
         serviceIntent.putExtra("musicProgress", progress);
 
-        mContext.startService(serviceIntent);
+        context.startService(serviceIntent);
+    }
+
+    public void startMusic(Context context, int position, int progress, int from) {
+
+        Intent serviceIntent = new Intent(context, MusicService.class);//intent转跳
+
+        serviceIntent.setAction("musiclist");
+        serviceIntent.putExtra("from", from); // 服务通过from判断使用那个页面的列表进行播放
+        serviceIntent.putExtra("musicPosition", position); //播放歌曲在列表中的位置
+        serviceIntent.putExtra("musicProgress", progress); //播放歌曲当前的进度
+
+        if (from == 10)
+            playPage = 7;
+
+        context.startService(serviceIntent); //开启服务
     }
 
     //设置底部栏专辑封面
-    public void getFootAlbumArt(int pos1, ArrayList<Music> musicList, int from) {
-        setAlbumCoverToFootAndHeader(musicList.get(pos1), from);
+    public void getFootAlbumArt(Context context, int pos1, ArrayList<Music> musicList, int from) {
+        setAlbumCoverToFootAndHeader(context, musicList.get(pos1), from);
     }
 
     //生成随机数
@@ -160,13 +190,13 @@ public class MusicUtils {
     }
 
     //randInt()函数的实现
-    private static int randInt(int x, int y) {
+    private int randInt(int x, int y) {
         //return (int)(Math.random()*100%(y-x+1)+x);//这个算法还是不好
         return (int) (Math.random() * (y - x + 1) + x);
     }
 
     //实现swap()方法
-    private static void swap(ArrayList<Music> arrayList, int x, int y) {
+    private void swap(ArrayList<Music> arrayList, int x, int y) {
         Music temp;
         temp = arrayList.get(x);
         arrayList.set(x, arrayList.get(y));
@@ -183,21 +213,21 @@ public class MusicUtils {
         return tempList;
     }
 
-    public static ArrayList<Music> arrayList = new ArrayList<>();
+    public ArrayList<Music> arrayList = new ArrayList<>();
 
-    public void shufflePlay(ArrayList<Music> musicList, int from) {
+    public void shufflePlay(Context context, ArrayList<Music> musicList, int from) {
         if (musicList.size() >= 1) {
 
             Intent intent2 = new Intent("cycle list");
             intent2.putExtra("from", from);
-            mContext.sendBroadcast(intent2);
+            context.sendBroadcast(intent2);
 
             arrayList = createShuffleList(musicList);
 
-            startMusic(0, 0, 9);
+            startMusic(context, 0, 0, 9);
 
             MusicService.isRandom = true;
-            SharedPreferences.Editor editor = mContext.getSharedPreferences("data", MODE_PRIVATE).edit();
+            SharedPreferences.Editor editor = context.getSharedPreferences("data", MODE_PRIVATE).edit();
 
             editor.putInt("progress", MusicService.mediaPlayer.getCurrentPosition());
             editor.putBoolean("isRandom", MusicService.isRandom);
@@ -206,30 +236,30 @@ public class MusicUtils {
             intent.putExtra("footTitle", arrayList.get(0).getTitle());
             intent.putExtra("footArtist", arrayList.get(0).getArtist());
             Intent intent1 = new Intent("set PlayOrPause");
-            intent1.putExtra("PlayOrPause", R.drawable.footpausewhite);
-            mContext.sendBroadcast(intent);
-            mContext.sendBroadcast(intent1);
-            getFootAlbumArt(0, arrayList, from);
+            intent1.putExtra("PlayOrPause", R.drawable.pause_to_play_white_anim);
+            context.sendBroadcast(intent);
+            context.sendBroadcast(intent1);
+            getFootAlbumArt(context, 0, arrayList, from);
 
         }
     }
 
-    public void playAll(ArrayList<Music> musicList, int from) {
-        startMusic(0, 0, from);
+    public void playAll(Context context, ArrayList<Music> musicList, int from) {
+        startMusic(context, 0, 0, from);
         MusicService.isRandom = false;
         Intent intent = new Intent("set footBar");
         Intent intent1 = new Intent("set PlayOrPause");
         intent.putExtra("footTitle", musicList.get(0).getTitle());
         intent.putExtra("footArtist", musicList.get(0).getArtist());
-        intent1.putExtra("PlayOrPause", R.drawable.footplaywhite);
-        mContext.sendBroadcast(intent);
-        mContext.sendBroadcast(intent1);
+        intent1.putExtra("PlayOrPause", R.drawable.play_to_pause_white_anim);
+        context.sendBroadcast(intent);
+        context.sendBroadcast(intent1);
 
-        getFootAlbumArt(0, musicList, from);
+        getFootAlbumArt(context, 0, musicList, from);
     }
 
 
-    public void selectAll(Set<Integer> positionSet, ArrayList<Music> list) {
+    public void selectAll(Context context, Set<Integer> positionSet, ArrayList<Music> list) {
         for (int position = 0; position < list.size(); position++) {
             positionSet.add(position);
         }
@@ -238,17 +268,17 @@ public class MusicUtils {
         } else {
             String locale = Locale.getDefault().toString();
             if (locale.equals("zh_CN")) {
-                MusicList.actionMode.setTitle(mContext.getResources().getString(R.string.selected) +
+                MusicList.actionMode.setTitle(context.getResources().getString(R.string.selected) +
                         " " + positionSet.size());
             } else {
                 MusicList.actionMode.setTitle(positionSet.size() +
-                        " " + mContext.getResources().getString(R.string.selected));
+                        " " + context.getResources().getString(R.string.selected));
             }
         }
         isSelectAll = true;
     }
 
-    public void addOrRemoveItem(int position, Set<Integer> positionSet,
+    public void addOrRemoveItem(Context context, int position, Set<Integer> positionSet,
                                 RecyclerView.Adapter adapter) {
         if (isSelectAll) {
             positionSet = MusicList.listPositionSet;
@@ -263,22 +293,21 @@ public class MusicUtils {
         } else {
             String locale = Locale.getDefault().toString();
             if (locale.equals("zh_CN")) {
-                MusicList.actionMode.setTitle(mContext.getResources().getString(R.string.selected) +
+                MusicList.actionMode.setTitle(context.getResources().getString(R.string.selected) +
                         " " + positionSet.size());
             } else {
                 MusicList.actionMode.setTitle(positionSet.size() +
-                        " " + mContext.getResources().getString(R.string.selected));
+                        " " + context.getResources().getString(R.string.selected));
             }
             adapter.notifyItemChanged(position);
         }
     }
 
-    public static void artistImage(ImageView imageView, final Context context,
-                                   final String keyWord, final Drawable placeHolder,
-                                   final Activity uiactivity) {
+    public void artistImage(ImageView imageView, final Context context,
+                            final String keyWord, final Drawable placeHolder,
+                            final Activity uiactivity) {
         if (downloadArtist != 0) {
             mImageView = imageView;
-            mContext = context;
             mPlaceHolder = placeHolder;
 
             appDir = new File(localPath, artistFolder);
@@ -315,12 +344,13 @@ public class MusicUtils {
             if (call != null) {
                 call.enqueue(new Callback() {
                     @Override
-                    public void onFailure(Call call, IOException e) {
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Log.d("Fail", "request failed");
                     }
 
                     @Override
-                    public void onResponse(Call call, Response response) throws IOException {
+                    public void onResponse(@NonNull Call call,
+                                           @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String result = response.body().string();
 
@@ -381,11 +411,12 @@ public class MusicUtils {
                             uiactivity.runOnUiThread(() -> {
                                 if (mImageView.getTag(R.id.artist_url).equals(keyWord)) {
                                     if (file.exists()) {
-                                        Glide.with(mContext)
-                                                .load(file)
+                                        Glide.with(context)
                                                 .asBitmap()
-                                                .centerCrop()
-                                                .placeholder(mPlaceHolder)
+                                                .load(file)
+                                                .apply(new RequestOptions()
+                                                        .placeholder(mPlaceHolder)
+                                                        .centerCrop())
                                                 .into(mImageView);
                                     }
                                 }
@@ -400,12 +431,12 @@ public class MusicUtils {
         }
     }
 
-    public static void updateArtist(ImageView imageView, final Context context,
-                                    final String keyWord, final Drawable placeHolder,
-                                    final Activity uiactivity) {
-        if ((haveWIFI(mContext) && downloadArtist == 2) ||
-                (haveData(mContext) && downloadArtist == 1) ||
-                (haveWIFI(mContext) && downloadArtist == 1)) {
+    public void updateArtist(ImageView imageView, final Context context,
+                             final String keyWord, final Drawable placeHolder,
+                             final Activity uiactivity) {
+        if ((haveWIFI(context) && downloadArtist == 2) ||
+                (haveData(context) && downloadArtist == 1) ||
+                (haveWIFI(context) && downloadArtist == 1)) {
             appDir = new File(localPath, albumFolder);
 
             String newKeyWord;
@@ -424,11 +455,11 @@ public class MusicUtils {
         }
     }
 
-    public static void closeDownloadArtistImage() {
+    public void closeDownloadArtistImage() {
         client.dispatcher().cancelAll();
     }
 
-    public static void deleteDownloadImage(File root) {
+    public void deleteDownloadImage(File root) {
         File files[] = root.listFiles();
         if (files != null) {
             for (File f : files) {
@@ -445,7 +476,7 @@ public class MusicUtils {
         }
     }
 
-    private static String parseJson(String json) {
+    private String parseJson(String json) {
         String imageUrl = null;
         try {
             JSONObject main = new JSONObject(json);
@@ -467,7 +498,7 @@ public class MusicUtils {
     }
 
 
-    private static List<String> parseLyricJson(String json) {
+    private List<String> parseLyricJson(String json) {
         List<String> key = new ArrayList<>();
         String j = json.substring(41, json.length() - 1);
 
@@ -519,7 +550,7 @@ public class MusicUtils {
         return key;
     }
 
-    public static boolean haveWIFI(Context context) {
+    public boolean haveWIFI(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = null;
         if (connectivityManager != null) {
@@ -528,7 +559,7 @@ public class MusicUtils {
         return activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
-    public static boolean haveData(Context context) {
+    public boolean haveData(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = null;
         if (connectivityManager != null) {
@@ -537,7 +568,7 @@ public class MusicUtils {
         return activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_MOBILE;
     }
 
-    public static boolean isImageGood(File file) {
+    public boolean isImageGood(File file) {
         BitmapFactory.Options options;
         options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -547,13 +578,23 @@ public class MusicUtils {
                 || options.outHeight == -1);
     }
 
-    public void getWebLyric(String songTitle, String singer,
+    public void getWebLyric(Context context, String songTitle, String singer,
                             boolean showLyric, boolean embed) {
+        String newSinger, newSongTitle;
+        if (singer.contains("&"))
+            newSinger = singer.replaceFirst("&", "%26");
+        else
+            newSinger = singer;
+
+        if (songTitle.contains("&"))
+            newSongTitle = songTitle.replaceFirst("&", "%26");
+        else
+            newSongTitle = songTitle;
         OkHttpClient client = new OkHttpClient();
         try {
 
             String Path = "http://music.163.com/api/search/pc?s=";
-            URL u = new URL(Path + songTitle + " " + singer
+            URL u = new URL(Path + newSongTitle + " " + newSinger
                     + " &type=1");
 
             FormBody body = new FormBody.Builder()
@@ -571,13 +612,15 @@ public class MusicUtils {
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    sendLyricNotFoundBroadcast(showLyric, embed, false);
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    sendLyricNotFoundBroadcast(context, showLyric, embed, false);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+
                     String result = response.body().string();
+                    //Log.d("TAG", "getWebLyric: " + result);
 
                     String id = parseJsonFromNetease(result, songTitle);
 
@@ -589,27 +632,27 @@ public class MusicUtils {
                         call2 = client.newCall(builder.build());
                         call2.enqueue(new Callback() {
                             @Override
-                            public void onFailure(Call call, IOException e) {
-                                getWebLyricFromKugou(songTitle, singer, showLyric, embed, false);
+                            public void onFailure(@NonNull Call call,
+                                                  @NonNull IOException e) {
+                                getWebLyricFromKugou(context, songTitle, singer, showLyric, embed, false);
                             }
 
                             @Override
-                            public void onResponse(Call call, Response response) throws IOException {
+                            public void onResponse(@NonNull Call call,
+                                                   @NonNull Response response) throws IOException {
                                 if (response.isSuccessful()) {
                                     String webLyric = response.body().string();
 
-                                    //Log.d("web", "" + webLyric);
-                                    saveLyricFile("1", "1",
-                                            false, false, webLyric, false, false);
+                                    //saveLyricFile("1", "1",false, false, webLyric, false, false);
                                     try {
                                         JSONObject main = new JSONObject(webLyric);
 
                                         if (enableTranslateLyric && main.has("tlyric")) {
-                                            showTranslateLyric(main, songTitle, singer, showLyric, embed, false);
+                                            showTranslateLyric(context, main, songTitle, singer, showLyric, embed, false);
                                         } else if (main.has("lrc")) {
-                                            showOriginalLyric(main, songTitle, singer, showLyric, embed, false);
+                                            showOriginalLyric(context, main, songTitle, singer, showLyric, embed, false);
                                         } else {
-                                            getWebLyricFromKugou(songTitle, singer, showLyric, embed, false);
+                                            getWebLyricFromKugou(context, songTitle, singer, showLyric, embed, false);
                                         }
                                     } catch (JSONException e) {
                                         e.printStackTrace();
@@ -618,7 +661,7 @@ public class MusicUtils {
                             }
                         });
                     } else {
-                        getWebLyricFromKugou(songTitle, singer, showLyric, embed, false);
+                        getWebLyricFromKugou(context, songTitle, singer, showLyric, embed, false);
                     }
                 }
             });
@@ -629,7 +672,7 @@ public class MusicUtils {
 
     }
 
-    public void getLyricFromNeteaseById(String id, String songTitle, String singer,
+    public void getLyricFromNeteaseById(Context context, String id, String songTitle, String singer,
                                         boolean showLyric, boolean embed,
                                         boolean isUpdate) {
         if (id != null) {
@@ -640,26 +683,27 @@ public class MusicUtils {
                 call2 = client.newCall(builder.build());
                 call2.enqueue(new Callback() {
                     @Override
-                    public void onFailure(Call call, IOException e) {
-                        sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                     }
 
                     @Override
-                    public void onResponse(Call call, Response response) throws IOException {
+                    public void onResponse(@NonNull Call call,
+                                           @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String webLyric = response.body().string();
 
-                            Log.d("web", webLyric);
+                            //Log.d("web", webLyric);
                             try {
                                 JSONObject main = new JSONObject(webLyric);
 
                                 if (enableTranslateLyric
                                         && main.has("tlyric")) {
-                                    showTranslateLyric(main, songTitle, singer, showLyric, embed, isUpdate);
+                                    showTranslateLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                                 } else if (main.has("lrc")) {
-                                    showOriginalLyric(main, songTitle, singer, showLyric, embed, isUpdate);
+                                    showOriginalLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                                 } else {
-                                    sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                                    sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -671,18 +715,30 @@ public class MusicUtils {
                 e.printStackTrace();
             }
         } else {
-            sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+            sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
         }
     }
 
-    public void getWebLyricFromNetease(String songTitle, String singer,
+    public void getWebLyricFromNetease(Context context, String songTitle, String singer,
                                        boolean showLyric, boolean embed,
                                        boolean isUpdate) {
         OkHttpClient client = new OkHttpClient();
+
+        String newSinger, newSongTitle;
+        if (singer.contains("&"))
+            newSinger = singer.replaceFirst("&", "%26");
+        else
+            newSinger = singer;
+
+        if (songTitle.contains("&"))
+            newSongTitle = songTitle.replaceFirst("&", "%26");
+        else
+            newSongTitle = songTitle;
+
         try {
 
             String Path = "http://music.163.com/api/search/pc?s=";
-            URL u = new URL(Path + songTitle + " " + singer
+            URL u = new URL(Path + newSongTitle + " " + newSinger
                     + " &type=1");
             FormBody body = new FormBody.Builder()
                     .add("Host", "music.163.com")
@@ -698,20 +754,21 @@ public class MusicUtils {
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     Intent intent = new Intent("load lyric failed");
-                    mContext.sendBroadcast(intent);
+                    context.sendBroadcast(intent);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call,
+                                       @NonNull Response response) throws IOException {
                     String result = response.body().string();
 
-                    Log.d("Result", "Result: " + result);
+                    //Log.d("Result", "Result: " + result);
                     String id = parseJsonFromNetease(result, songTitle);
 
-                    Log.d("ID", "" + id);
-                    getLyricFromNeteaseById(id, songTitle, singer, showLyric, embed, isUpdate);
+                    //Log.d("ID", "" + id);
+                    getLyricFromNeteaseById(context, id, songTitle, singer, showLyric, embed, isUpdate);
                 }
             });
 
@@ -721,26 +778,36 @@ public class MusicUtils {
 
     }
 
-    public void getWebLyricFromKugou(String songTitle, String singer,
+    public void getWebLyricFromKugou(Context context, String songTitle, String singer,
                                      boolean showLyric, boolean embed,
                                      boolean isUpdate) {
         OkHttpClient client = new OkHttpClient();
+        String newSinger, newSongTitle;
+        if (singer.contains("&"))
+            newSinger = singer.replaceFirst("&", "%26");
+        else
+            newSinger = singer;
 
+        if (songTitle.contains("&"))
+            newSongTitle = songTitle.replaceFirst("&", "%26");
+        else
+            newSongTitle = songTitle;
         try {
 
             String hashPath = "http://songsearch.kugou.com/song_search_v2?callback=jQuery19102275292550172583_1493445518059&keyword=";
-            URL u = new URL(hashPath + songTitle + " " + singer
+            URL u = new URL(hashPath + newSongTitle + " " + newSinger
                     + "&page=1&pagesize=30&userid=-1&clientver=&platform=WebFilter&tag=em&filter=2&iscorrection=1&privilege_filter=0&_=1493445518061");
             builder = new Request.Builder().url(u);
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call,
+                                       @NonNull Response response) throws IOException {
                     String result = response.body().string();
 
                     String hashkey;
@@ -759,12 +826,14 @@ public class MusicUtils {
                             Call call2 = client.newCall(builder.build());
                             call2.enqueue(new Callback() {
                                 @Override
-                                public void onFailure(Call call, IOException e) {
-                                    sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                                public void onFailure(@NonNull Call call,
+                                                      @NonNull IOException e) {
+                                    sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                                 }
 
                                 @Override
-                                public void onResponse(Call call, Response response) throws IOException {
+                                public void onResponse(@NonNull Call call,
+                                                       @NonNull Response response) throws IOException {
                                     if (response.isSuccessful()) {
                                         String webLyric = response.body().string();
 
@@ -778,17 +847,17 @@ public class MusicUtils {
                                                     lyric = data.getString("lyrics");
 
                                                     if (lyric != null) {
-                                                        saveLyricFile(songTitle, singer, showLyric, embed, lyric, false, isUpdate);
+                                                        saveLyricFile(context, songTitle, singer, showLyric, embed, lyric, false, isUpdate);
                                                     } else {
-                                                        sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                                                        sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                                                     }
                                                 } else {
-                                                    sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                                                    sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
 
                                                 }
 
                                             } else {
-                                                sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                                                sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                                             }
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -798,7 +867,7 @@ public class MusicUtils {
                                 }
                             });
                         } else {
-                            sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                            sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                         }
                     }
                 }
@@ -809,24 +878,24 @@ public class MusicUtils {
         }
     }
 
-    private void sendLyricNotFoundBroadcast(boolean showLyric, boolean embed, boolean isUpdate) {
+    private void sendLyricNotFoundBroadcast(Context context, boolean showLyric, boolean embed, boolean isUpdate) {
         if (showLyric && isUpdate) {
             Intent intent = new Intent("update lyric failed");
-            mContext.sendBroadcast(intent);
+            context.sendBroadcast(intent);
         }
         if (showLyric) {
             Intent intent = new Intent("load lyric failed");
-            mContext.sendBroadcast(intent);
+            context.sendBroadcast(intent);
         }
 
         if (embed) {
             Intent intent = new Intent("embed lyric");
             intent.putExtra("lyric", "");
-            mContext.sendBroadcast(intent);
+            context.sendBroadcast(intent);
         }
     }
 
-    private void showTranslateLyric(JSONObject main, String songTitle, String singer,
+    private void showTranslateLyric(Context context, JSONObject main, String songTitle, String singer,
                                     boolean showLyric, boolean embed,
                                     boolean isUpdate) {
         try {
@@ -840,7 +909,7 @@ public class MusicUtils {
                     && !tLrc.get("lyric").toString().equalsIgnoreCase("null")) {
                 tLyric = tLrc.getString("lyric");
             } else {
-                showOriginalLyric(main, songTitle, singer, showLyric, embed, isUpdate);
+                showOriginalLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                 return;
             }
 
@@ -854,10 +923,10 @@ public class MusicUtils {
                 ArrayList<String> oArrayList = formatLyric(oArray);
                 ArrayList<String> tArrayList = formatLyric(tArray);
 
-                saveLyricFile(songTitle, singer, showLyric,
+                saveLyricFile(context, songTitle, singer, showLyric,
                         embed, mergeLyric(oArrayList, tArrayList), true, isUpdate);
             } else {
-                saveLyricFile(songTitle, singer, showLyric,
+                saveLyricFile(context, songTitle, singer, showLyric,
                         embed, tLyric, true, isUpdate);
             }
         } catch (JSONException e) {
@@ -881,7 +950,7 @@ public class MusicUtils {
         }
     }
 
-    private void showOriginalLyric(JSONObject main, String songTitle, String singer,
+    private void showOriginalLyric(Context context, JSONObject main, String songTitle, String singer,
                                    boolean showLyric, boolean embed,
                                    boolean isUpdate) {
         String oLyric;
@@ -910,15 +979,16 @@ public class MusicUtils {
                             stringBuilder.append(arrayList.get(j)).append("\n");
                         }
 
-                        saveLyricFile(songTitle, singer, showLyric, embed, stringBuilder.toString(), false, isUpdate);
+                        saveLyricFile(context, songTitle, singer, showLyric, embed,
+                                stringBuilder.toString(), false, isUpdate);
 
                     } else
-                        sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                        sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                 } else {
-                    sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                    sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
                 }
             } else {
-                sendLyricNotFoundBroadcast(showLyric, embed, isUpdate);
+                sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -926,9 +996,25 @@ public class MusicUtils {
     }
 
     private ArrayList<String> formatLyric(String[] array) {
-        ArrayList<String> lyricList = new ArrayList<>();
 
-        lyricList.addAll(Arrays.asList(array));
+        ArrayList<String> lyricList = new ArrayList<>(Arrays.asList(array));
+        ListIterator<String> iterator = lyricList.listIterator();
+        //去除空行
+        while (iterator.hasNext()) {
+            if (iterator.next().equals("")) {
+                iterator.remove();
+            }
+        }
+
+        //去除[[为[
+        for (int i = 0; i < lyricList.size(); i++) {
+            if (lyricList.get(i) != null) {
+                int index = lyricList.get(i).indexOf("[") + 1;
+                if (lyricList.get(i).charAt(index) == '[') {
+                    lyricList.set(i, lyricList.get(i).substring(index));
+                }
+            }
+        }
 
         //将有换行符的歌词合并，负责换行符会使歌词读取失败
         for (int i = 0; i < lyricList.size(); i++) {
@@ -1014,7 +1100,9 @@ public class MusicUtils {
 
                     if (!lineMatcher.matches() && !timeMatcher.matches()) {
                         oArrayList.remove(i);
+                        i--;
                     }
+
                 }
 
                 for (int i = 0; i < tArrayList.size(); i++) {
@@ -1025,7 +1113,9 @@ public class MusicUtils {
 
                     if (!lineMatcher.matches() && !timeMatcher.matches()) {
                         tArrayList.remove(i);
+                        i--;
                     }
+
                 }
                 break;
             case 4:
@@ -1037,6 +1127,7 @@ public class MusicUtils {
 
                     if (!lineMatcher.matches() && !timeMatcher.matches()) {
                         oArrayList.remove(i);
+                        i--;
                     }
                 }
                 for (int i = 0; i < tArrayList.size(); i++) {
@@ -1047,6 +1138,7 @@ public class MusicUtils {
 
                     if (!lineMatcher.matches() && !timeMatcher.matches()) {
                         tArrayList.remove(i);
+                        i--;
                     }
                 }
                 break;
@@ -1076,7 +1168,7 @@ public class MusicUtils {
     }
 
 
-    private void saveLyricFile(String songTitle, String singer,
+    private void saveLyricFile(Context context, String songTitle, String singer,
                                boolean showLyric, boolean embed, String lyric,
                                boolean isTlyric, boolean isUpdate) {
         try {
@@ -1114,17 +1206,17 @@ public class MusicUtils {
             if (showLyric && isUpdate) {
                 Intent intent = new Intent("update lyric");
                 intent.putExtra("lyric", lyric);
-                mContext.sendBroadcast(intent);
+                context.sendBroadcast(intent);
             }
             if (showLyric) {
                 Intent intent = new Intent("show lyric");
                 intent.putExtra("lyric", lyric);
-                mContext.sendBroadcast(intent);
+                context.sendBroadcast(intent);
             }
             if (embed) {
                 Intent intent = new Intent("embed lyric");
                 intent.putExtra("lyric", lyric);
-                mContext.sendBroadcast(intent);
+                context.sendBroadcast(intent);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -1174,7 +1266,7 @@ public class MusicUtils {
         }
     }
 
-    private static String parseJsonFromNetease(String json, String title) {
+    private String parseJsonFromNetease(String json, String title) {
         String id = null;
         try {
             JSONObject main = new JSONObject(json);
@@ -1228,16 +1320,16 @@ public class MusicUtils {
         return id;
     }
 
-    public void updateLyricFromNetease(String songTitle, String singer,
+    public void updateLyricFromNetease(Context context, String songTitle, String singer,
                                        boolean showLyric) {
         deleteLyricFile(songTitle, singer);
-        getWebLyricFromNetease(songTitle, singer, showLyric, false, true);
+        getWebLyricFromNetease(context, songTitle, singer, showLyric, false, true);
     }
 
-    public void updateLyricFromKugou(String songTitle, String singer,
+    public void updateLyricFromKugou(Context context, String songTitle, String singer,
                                      boolean showLyric) {
         deleteLyricFile(songTitle, singer);
-        getWebLyricFromKugou(songTitle, singer, showLyric, false, true);
+        getWebLyricFromKugou(context, songTitle, singer, showLyric, false, true);
     }
 
     private void deleteLyricFile(String songTitle, String singer) {
@@ -1279,7 +1371,7 @@ public class MusicUtils {
             call2.cancel();
     }
 
-    public void getAlbumCover(String singer, String albumTitle, int from) {
+    public void getAlbumCover(Context context, String singer, String albumTitle, int from) {
 
         OkHttpClient client = new OkHttpClient();
         try {
@@ -1301,12 +1393,13 @@ public class MusicUtils {
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    sendLoadCoverFailedBroadcast(from);
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    sendLoadCoverFailedBroadcast(context, from);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call,
+                                       @NonNull Response response) throws IOException {
                     String json = response.body().string();
                     //Log.d("Result", "onResponse: " + json);
 
@@ -1315,18 +1408,18 @@ public class MusicUtils {
                         if (main.has("result")) {
                             JSONObject result = main.getJSONObject("result");
                             if (result.has("albums")) {
-                                parseAlbumJson(result, singer, albumTitle, from);
+                                parseAlbumJson(context, result, singer, albumTitle, from);
                             } else if (result.has("albumCount")
                                     && result.getString("albumCount").equalsIgnoreCase("0")) {
                                 if (singer.contains("-") || singer.contains("/"))
-                                    getAlbumCoverWithSingleSinger(singer, albumTitle, from);
+                                    getAlbumCoverWithSingleSinger(context, singer, albumTitle, from);
                                 else
-                                    getAlbumCoverWithoutSinger(singer, albumTitle, from);
+                                    getAlbumCoverWithoutSinger(context, singer, albumTitle, from);
                             } else {
-                                sendLoadCoverFailedBroadcast(from);
+                                sendLoadCoverFailedBroadcast(context, from);
                             }
                         } else {
-                            sendLoadCoverFailedBroadcast(from);
+                            sendLoadCoverFailedBroadcast(context, from);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -1341,7 +1434,7 @@ public class MusicUtils {
 
     }
 
-    private void getAlbumCoverWithSingleSinger(String singer, String albumTitle, int from) {
+    private void getAlbumCoverWithSingleSinger(Context context, String singer, String albumTitle, int from) {
 
         OkHttpClient client = new OkHttpClient();
         try {
@@ -1370,29 +1463,32 @@ public class MusicUtils {
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    sendLoadCoverFailedBroadcast(from);
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    sendLoadCoverFailedBroadcast(context, from);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call,
+                                       @NonNull Response response) throws IOException {
+
                     String json = response.body().string();
                     //Log.d("Result", "onResponse: " + json);
 
                     try {
+
                         JSONObject main = new JSONObject(json);
                         if (main.has("result")) {
                             JSONObject result = main.getJSONObject("result");
                             if (result.has("albums")) {
-                                parseAlbumJson(result, singer, albumTitle, from);
+                                parseAlbumJson(context, result, singer, albumTitle, from);
                             } else if (result.has("albumCount")
                                     && result.getString("albumCount").equalsIgnoreCase("0")) {
-                                getAlbumCoverWithoutSinger(singer, albumTitle, from);
+                                getAlbumCoverWithoutSinger(context, singer, albumTitle, from);
                             } else {
-                                sendLoadCoverFailedBroadcast(from);
+                                sendLoadCoverFailedBroadcast(context, from);
                             }
                         } else {
-                            sendLoadCoverFailedBroadcast(from);
+                            sendLoadCoverFailedBroadcast(context, from);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -1407,7 +1503,7 @@ public class MusicUtils {
 
     }
 
-    private void getAlbumCoverWithoutSinger(String singer, String albumTitle, int from) {
+    private void getAlbumCoverWithoutSinger(Context context, String singer, String albumTitle, int from) {
 
         OkHttpClient client = new OkHttpClient();
         try {
@@ -1428,12 +1524,13 @@ public class MusicUtils {
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    sendLoadCoverFailedBroadcast(from);
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    sendLoadCoverFailedBroadcast(context, from);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call,
+                                       @NonNull Response response) throws IOException {
                     String json = response.body().string();
                     //Log.d("Result", "onResponse: " + json);
 
@@ -1442,12 +1539,12 @@ public class MusicUtils {
                         if (main.has("result")) {
                             JSONObject result = main.getJSONObject("result");
                             if (result.has("albums")) {
-                                parseAlbumJson(result, singer, albumTitle, from);
+                                parseAlbumJson(context, result, singer, albumTitle, from);
                             } else {
-                                sendLoadCoverFailedBroadcast(from);
+                                sendLoadCoverFailedBroadcast(context, from);
                             }
                         } else {
-                            sendLoadCoverFailedBroadcast(from);
+                            sendLoadCoverFailedBroadcast(context, from);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -1462,24 +1559,24 @@ public class MusicUtils {
 
     }
 
-    private void sendLoadCoverFailedBroadcast(int from) {
-        if (from == FROM_MAINIAMGE || from == FROM_SERVICE) {
+    private void sendLoadCoverFailedBroadcast(Context context, int from) {
+        if (from == FROM_MAINIMAGE || from == FROM_SERVICE) {
             Intent intent = new Intent("load album cover failed");
-            mContext.sendBroadcast(intent);
+            context.sendBroadcast(intent);
 
             if (MusicService.musicService != null) {
                 Intent intent2 = new Intent("refresh notification");
                 intent2.putExtra("file", "");
-                mContext.sendBroadcast(intent2);
+                context.sendBroadcast(intent2);
             }
         }
         if (from == FROM_FOOTBAR) {
             Intent intent = new Intent("load footbar cover failed");
-            mContext.sendBroadcast(intent);
+            context.sendBroadcast(intent);
         }
     }
 
-    private void parseAlbumJson(JSONObject result, String singer, String albumTitle, int from) {
+    private void parseAlbumJson(Context context, JSONObject result, String singer, String albumTitle, int from) {
         String picUrl;
         try {
             JSONArray albums = result.getJSONArray("albums");
@@ -1495,28 +1592,28 @@ public class MusicUtils {
                             if (from == FROM_FOOTBAR) {
                                 Intent intent = new Intent("load footbar cover");
                                 intent.putExtra("picUrl", picUrl);
-                                mContext.sendBroadcast(intent);
+                                context.sendBroadcast(intent);
 
                                 if (MusicService.musicService != null) {
                                     Intent intent2 = new Intent("refresh notification");
                                     intent2.putExtra("file", picUrl);
-                                    mContext.sendBroadcast(intent2);
+                                    context.sendBroadcast(intent2);
                                 }
                             }
 
-                            if (from == FROM_MAINIAMGE || from == FROM_SERVICE) {
+                            if (from == FROM_MAINIMAGE || from == FROM_SERVICE) {
                                 Intent intent = new Intent("load album cover");
                                 intent.putExtra("picUrl", picUrl);
-                                mContext.sendBroadcast(intent);
+                                context.sendBroadcast(intent);
 
                                 Intent intent1 = new Intent("get blurBG visibility");
                                 intent1.putExtra("file", picUrl);
-                                mContext.sendBroadcast(intent1);
+                                context.sendBroadcast(intent1);
 
                                 if (MusicService.musicService != null) {
                                     Intent intent2 = new Intent("refresh notification");
                                     intent2.putExtra("file", picUrl);
-                                    mContext.sendBroadcast(intent2);
+                                    context.sendBroadcast(intent2);
                                 }
                             }
 
@@ -1532,17 +1629,17 @@ public class MusicUtils {
                             singer);
                     Intent intent = new Intent("load album cover");
                     intent.putExtra("picUrl", picUrl);
-                    mContext.sendBroadcast(intent);
+                    context.sendBroadcast(intent);
 
 
                     Intent intent1 = new Intent("get blurBG visibility");
                     intent1.putExtra("file", picUrl);
-                    mContext.sendBroadcast(intent1);
+                    context.sendBroadcast(intent1);
 
                     if (MusicService.musicService != null) {
                         Intent intent2 = new Intent("refresh notification");
                         intent2.putExtra("file", picUrl);
-                        mContext.sendBroadcast(intent2);
+                        context.sendBroadcast(intent2);
                     }
                 }
             }
@@ -1614,173 +1711,174 @@ public class MusicUtils {
     }
 
     public void setAlbumCoverToService(Context context, Music music, int from) {
-        if (MusicUtils.downloadAlbum == 2 && MusicUtils.haveWIFI(mContext)
-                || MusicUtils.downloadAlbum == 1) {
-            Bitmap bitmap = GetAlbumArt.getAlbumArtBitmap(context, music.getAlbumArtUri(), 1);
+        if (music != null)
+            if (downloadAlbum == 2 && haveWIFI(context)
+                    || downloadAlbum == 1) {
+                Bitmap bitmap = GetAlbumArt.getAlbumArtBitmap(context, music.getAlbumArtUri(), 1);
 
-            if (bitmap != null) {
+                if (bitmap != null) {
 
-                Intent intent = new Intent("load image with uri");
-                intent.putExtra("uri", music.getAlbumArtUri());
-                mContext.sendBroadcast(intent);
-            } else {
-                File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
-
-                if (file.exists()) {
-
-                    Intent intent1 = new Intent("load image with uri");
-                    intent1.putExtra("uri", file.getAbsolutePath());
-                    mContext.sendBroadcast(intent1);
-
-                    Intent intent = new Intent("refresh notification");
-                    intent.putExtra("file", file.getAbsolutePath());
+                    Intent intent = new Intent("load image with uri");
+                    intent.putExtra("uri", music.getAlbumArtUri());
                     context.sendBroadcast(intent);
                 } else {
-                    getAlbumCover(music.getArtist(),
-                            music.getAlbum(), from);
+                    File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
+
+                    if (file.exists()) {
+
+                        Intent intent1 = new Intent("load image with uri");
+                        intent1.putExtra("uri", file.getAbsolutePath());
+                        context.sendBroadcast(intent1);
+
+                        Intent intent = new Intent("refresh notification");
+                        intent.putExtra("file", file.getAbsolutePath());
+                        context.sendBroadcast(intent);
+                    } else {
+                        getAlbumCover(context, music.getArtist(),
+                                music.getAlbum(), from);
+                    }
                 }
-            }
-        } else {
-
-            Intent intent = new Intent("load image with uri");
-            File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
-            if (file.exists())
-                intent.putExtra("uri", file.getAbsolutePath());
-            else
-                intent.putExtra("uri", music.getAlbumArtUri());
-            mContext.sendBroadcast(intent);
-
-        }
-    }
-
-    public void setAlbumCoverToAdapter(Music music, ImageView imageView, int from) {
-        if (MusicUtils.downloadAlbum == 2 && MusicUtils.haveWIFI(mContext)
-                || MusicUtils.downloadAlbum == 1) {
-
-            Glide.with(mContext)
-                    .load(music.getAlbumArtUri())
-                    .centerCrop()
-                    .placeholder(R.drawable.default_album_art)
-                    .into(new SimpleTarget<GlideDrawable>() {
-                        @Override
-                        public void onLoadStarted(Drawable placeholder) {
-                            imageView.setImageResource(R.drawable.default_album_art);
-                            super.onLoadStarted(placeholder);
-                        }
-
-                        @Override
-                        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                            if ((music.getTitle() + music.getArtist())
-                                    .equals(imageView.getTag(R.id.item_url)))
-                                imageView.setImageDrawable(resource);
-                        }
-
-                        @Override
-                        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                            File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
-
-                            if (file.exists() && (music.getTitle() + music.getArtist())
-                                    .equals(imageView.getTag(R.id.item_url))) {
-                                Glide.with(mContext)
-                                        .load(file)
-                                        .centerCrop()
-                                        .placeholder(R.drawable.default_album_art)
-                                        .into(imageView);
-                            } else {
-                                getAlbumCover(music.getArtist(),
-                                        music.getAlbum(), from);
-                            }
-                        }
-                    });
-        } else {
-            File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
-            if (file.exists())
-                MusicUtils.loadImageUseGlide(mContext, imageView, file);
-            else
-                loadImageUseGlide(mContext, imageView, music.getAlbumArtUri(), false);
-        }
-    }
-
-    public void setAlbumCoverToFootAndHeader(Music music, int from) {
-        if (MusicUtils.downloadAlbum == 2 && MusicUtils.haveWIFI(mContext)
-                || MusicUtils.downloadAlbum == 1) {
-
-            Bitmap bitmap = GetAlbumArt.getAlbumArtBitmap(mContext, music.getAlbumArtUri(), 1);
-
-            if (bitmap != null) {
+            } else {
 
                 Intent intent = new Intent("load image with uri");
-                intent.putExtra("uri", music.getAlbumArtUri());
-                mContext.sendBroadcast(intent);
+                File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
+                if (file.exists())
+                    intent.putExtra("uri", file.getAbsolutePath());
+                else
+                    intent.putExtra("uri", music.getAlbumArtUri());
+                context.sendBroadcast(intent);
 
+            }
+
+    }
+
+    public void setAlbumCoverToAdapter(Context context, Music music, ImageView imageView, int from) {
+        if (music != null)
+            if (downloadAlbum == 2 && haveWIFI(context)
+                    || downloadAlbum == 1) {
+
+                Glide.with(context)
+                        .load(music.getAlbumArtUri())
+                        .apply(new RequestOptions()
+                                .centerCrop()
+                                .placeholder(R.drawable.default_album_art))
+                        .into(new SimpleTarget<Drawable>() {
+                            @Override
+                            public void onLoadStarted(@Nullable Drawable placeholder) {
+                                imageView.setImageResource(R.drawable.default_album_art);
+                                super.onLoadStarted(placeholder);
+                            }
+
+                            @Override
+                            public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
+                                if ((music.getTitle() + music.getArtist())
+                                        .equals(imageView.getTag(R.id.item_url)))
+                                    imageView.setImageDrawable(resource);
+                            }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                super.onLoadFailed(errorDrawable);
+                                File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
+
+                                if (file.exists() && (music.getTitle() + music.getArtist())
+                                        .equals(imageView.getTag(R.id.item_url))) {
+                                    Glide.with(context)
+                                            .load(file)
+                                            .apply(new RequestOptions()
+                                                    .centerCrop()
+                                                    .placeholder(R.drawable.default_album_art))
+                                            .into(imageView);
+                                } else {
+                                    getAlbumCover(context, music.getArtist(),
+                                            music.getAlbum(), from);
+                                }
+                            }
+                        });
             } else {
                 File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
+                if (file.exists())
+                    loadImageUseGlide(context, imageView, file);
+                else
+                    loadImageUseGlide(context, imageView, music.getAlbumArtUri());
+            }
+    }
 
-                if (file.exists()) {
+    public void setAlbumCoverToFootAndHeader(Context context, Music music, int from) {
+        if (music != null)
+            if (downloadAlbum == 2 && haveWIFI(context)
+                    || downloadAlbum == 1) {
+
+                Bitmap bitmap = GetAlbumArt.getAlbumArtBitmap(context, music.getAlbumArtUri(), 1);
+
+                if (bitmap != null) {
+
                     Intent intent = new Intent("load image with uri");
-                    intent.putExtra("uri", file.getAbsolutePath());
-                    mContext.sendBroadcast(intent);
+                    intent.putExtra("uri", music.getAlbumArtUri());
+                    context.sendBroadcast(intent);
 
                 } else {
-                    getAlbumCover(music.getArtist(),
-                            music.getAlbum(), from);
+                    File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
+
+                    if (file.exists()) {
+                        Intent intent = new Intent("load image with uri");
+                        intent.putExtra("uri", file.getAbsolutePath());
+                        context.sendBroadcast(intent);
+
+                    } else {
+                        getAlbumCover(context, music.getArtist(),
+                                music.getAlbum(), from);
+                    }
                 }
+            } else {
+                Intent intent = new Intent("load image with uri");
+                File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
+                if (file.exists())
+                    intent.putExtra("uri", file.getAbsolutePath());
+                else
+                    intent.putExtra("uri", music.getAlbumArtUri());
+                context.sendBroadcast(intent);
+
             }
-        } else {
-            Intent intent = new Intent("load image with uri");
-            File file = getAlbumCoverFile(music.getArtist(), music.getAlbum());
-            if (file.exists())
-                intent.putExtra("uri", file.getAbsolutePath());
-            else
-                intent.putExtra("uri", music.getAlbumArtUri());
-            mContext.sendBroadcast(intent);
-
-        }
 
     }
 
-    public static void loadImageUseGlide(Context context, ImageView imageView, String uri, Boolean isAccountHeader) {
-        if (isAccountHeader)
-            Glide.with(context)
-                    .load(uri)
-                    .crossFade(500)
-                    .centerCrop()
-                    .placeholder(R.drawable.default_album_art_land)
-                    .error(R.drawable.default_album_art_land)
-                    .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
-                    .into(imageView);
-        else
-            Glide.with(context)
-                    .load(uri)
-                    .crossFade(500)
-                    .centerCrop()
-                    .placeholder(R.drawable.default_album_art)
-                    .error(R.drawable.default_album_art)
-                    .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
-                    .into(imageView);
-    }
-
-    public static void loadImageUseGlide(Context context, ImageView imageView, File file) {
+    public void loadImageUseGlide(Context context, ImageView imageView,
+                                  String uri) {
         Glide.with(context)
-                .load(file)
-                .crossFade(500)
-                .centerCrop()
-                .placeholder(R.drawable.default_album_art)
-                .error(R.drawable.default_album_art)
-                .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                .load(uri)
+                .apply(new RequestOptions()
+                        .centerCrop()
+                        .placeholder(R.drawable.default_album_art)
+                        .error(R.drawable.default_album_art)
+                        .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
+                .transition(new DrawableTransitionOptions().crossFade(500))
                 .into(imageView);
     }
 
-    public static void loadImageUseGlide(Context context, ImageView imageView, Bitmap bitmap) {
+    public void loadImageUseGlide(Context context, ImageView imageView, File file) {
+        Glide.with(context)
+                .load(file)
+                .apply(new RequestOptions()
+                        .centerCrop()
+                        .placeholder(R.drawable.default_album_art)
+                        .error(R.drawable.default_album_art)
+                        .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
+                .transition(new DrawableTransitionOptions().crossFade(500))
+                .into(imageView);
+    }
+
+    public void loadImageUseGlide(Context context, ImageView imageView, Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         Glide.with(context)
                 .load(stream.toByteArray())
-                .crossFade(500)
-                .centerCrop()
-                .placeholder(R.drawable.default_album_art)
-                .error(R.drawable.default_album_art)
-                .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                .apply(new RequestOptions()
+                        .centerCrop()
+                        .placeholder(R.drawable.default_album_art)
+                        .error(R.drawable.default_album_art)
+                        .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
+                .transition(new DrawableTransitionOptions().crossFade(500))
                 .into(imageView);
     }
 
@@ -1864,7 +1962,7 @@ public class MusicUtils {
         return "";
     }
 
-    private static String getFormatSize(double size) {
+    private String getFormatSize(double size) {
 
         double kiloByte = size / 1024;
         if (kiloByte < 1) {
@@ -1910,7 +2008,7 @@ public class MusicUtils {
         return size;
     }
 
-    public static boolean isFlyme(Context context) {
+    public boolean isFlyme(Context context) {
         PackageManager packageManager = context.getPackageManager();
         List<PackageInfo> packageInfoList = packageManager.getInstalledPackages(0);
 
@@ -1928,90 +2026,103 @@ public class MusicUtils {
         return false;
     }
 
-    public static void setLaunchPage(Context context, int from) {
-        MusicUtils musicUtils = new MusicUtils(context);
-        if (MusicService.mediaPlayer.isPlaying()) {
-            musicUtils.setAlbumCoverToFootAndHeader(MusicService.music, from);
+    public void setLaunchPage(Context context, int from) {
+        if (MusicList.flag == 1 && MusicService.mediaPlayer.isPlaying()) {
+            setAlbumCoverToFootAndHeader(context, MusicService.music, from);
 
             Intent intent = new Intent("set footBar");
             Intent intent1 = new Intent("set PlayOrPause");
             intent.putExtra("footTitle", MusicService.music.getTitle());
             intent.putExtra("footArtist", MusicService.music.getArtist());
-            intent1.putExtra("PlayOrPause", R.drawable.footpausewhite);
-            mContext.sendBroadcast(intent);
-            mContext.sendBroadcast(intent1);
+            intent1.putExtra("PlayOrPause", R.drawable.pause_to_play_white_anim);
+            context.sendBroadcast(intent);
+            context.sendBroadcast(intent1);
 
         } else {
-            if (MusicList.first) {
+            /*if (MusicList.first) {
+
                 MusicListFragment.readMusic(context);
                 MusicList.list = MusicListFragment.musicList;
                 MusicList.shufflelist = MusicListFragment.musicList;
-            }
+            }*/
 
             if (MusicService.isRandom) {
-                if (MusicList.shufflelist.size() > 0) {
+                if (MusicList.shufflelist != null
+                        && MusicList.shufflelist.size() > 0) {
 
                     Intent intent = new Intent("set footBar");
                     Intent intent1 = new Intent("set PlayOrPause");
-                    intent.putExtra("footTitle", MusicList.shufflelist.get(MusicUtils.pos).getTitle());
-                    intent.putExtra("footArtist", MusicList.shufflelist.get(MusicUtils.pos).getArtist());
-                    intent1.putExtra("PlayOrPause", R.drawable.footplaywhite);
-                    mContext.sendBroadcast(intent);
-                    mContext.sendBroadcast(intent1);
+                    intent.putExtra("footTitle", MusicList.shufflelist.get(pos).getTitle());
+                    intent.putExtra("footArtist", MusicList.shufflelist.get(pos).getArtist());
+                    intent1.putExtra("PlayOrPause", R.drawable.play_to_pause_white_anim);
+                    context.sendBroadcast(intent);
+                    context.sendBroadcast(intent1);
 
-                    musicUtils.getFootAlbumArt(MusicUtils.pos, MusicList.shufflelist, from);
+                    getFootAlbumArt(context, pos, MusicList.shufflelist, from);
                 }
             } else {
-                if (MusicList.list.size() > 0) {
+                if (MusicList.list != null
+                        && MusicList.list.size() > 0) {
 
                     Intent intent = new Intent("set footBar");
                     Intent intent1 = new Intent("set PlayOrPause");
-                    intent.putExtra("footTitle", MusicList.list.get(MusicUtils.pos).getTitle());
-                    intent.putExtra("footArtist", MusicList.list.get(MusicUtils.pos).getArtist());
-                    intent1.putExtra("PlayOrPause", R.drawable.footplaywhite);
-                    mContext.sendBroadcast(intent);
-                    mContext.sendBroadcast(intent1);
+                    intent.putExtra("footTitle", MusicList.list.get(pos).getTitle());
+                    intent.putExtra("footArtist", MusicList.list.get(pos).getArtist());
+                    intent1.putExtra("PlayOrPause", R.drawable.play_to_pause_white_anim);
+                    context.sendBroadcast(intent);
+                    context.sendBroadcast(intent1);
 
-                    musicUtils.getFootAlbumArt(MusicUtils.pos, MusicList.list, from);
+                    getFootAlbumArt(context, pos, MusicList.list, from);
                 }
             }
         }
     }
 
-    public static void saveArray(Context context, ArrayList<Music> list) {
+    //保存本次应用播放的的播放列表
+    public void saveArray(Context context, ArrayList<Music> list) {
         Gson gson = new Gson();
         String jsonString = gson.toJson(list);
-        SharedPreferences.Editor sp = context.getSharedPreferences("data", MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = context.getSharedPreferences("data", MODE_PRIVATE).edit();
 
-        sp.putString("Musiclist", jsonString);
-        sp.apply();
+        editor.putString("Musiclist", jsonString);
+        editor.apply();
+        editor.commit();
     }
 
-    public static void saveShuffleArray(Context context, ArrayList<Music> list) {
+
+    //保存本次播放的随机播放列表
+    public void saveShuffleArray(Context context, ArrayList<Music> list) {
         Gson gson = new Gson();
-        String jsonString = gson.toJson(list);
-        SharedPreferences.Editor sp = context.getSharedPreferences("data", MODE_PRIVATE).edit();
+        String jsonString = gson.toJson(list); //使用GSON序列化列表，转化为SharedPreferences可以保存的字符串类型
+        //使用SharedPreferences可以将数据保存在应用本地，使用键值对进行存储和获取
+        SharedPreferences.Editor editor = context.getSharedPreferences("data", MODE_PRIVATE).edit();
 
-        sp.putString("Shufflelist", jsonString);
-        sp.apply();
+        editor.putString("Shufflelist", jsonString);
+        editor.apply();
+        editor.commit();
     }
 
-    public static ArrayList<Music> getArray(Context context) {
+    //获取上次应用保存的播放列表
+    public ArrayList<Music> getArray(Context context) {
         SharedPreferences sp = context.getSharedPreferences("data", MODE_PRIVATE);
 
         Gson gson = new Gson();
-        String jsonString = gson.toJson(MusicListFragment.musicList);
+        //默认值
+        String jsonString = gson.toJson(MusicList.list);
 
+        //通过GSON将存储的字符串转换为列表项
         return gson.fromJson(sp.getString("Musiclist", jsonString),
                 new TypeToken<ArrayList<Music>>() {
                 }.getType());
     }
 
-    public static ArrayList<Music> getShuffleArray(Context context) {
+    //获取上次应用保存的随机播放列表
+    public ArrayList<Music> getShuffleArray(Context context) {
         SharedPreferences sp = context.getSharedPreferences("data", MODE_PRIVATE);
 
         Gson gson = new Gson();
-        String jsonString = gson.toJson(MusicListFragment.musicList);
+        //默认值
+        String jsonString = gson.toJson(MusicList.list);
 
         return gson.fromJson(sp.getString("Shufflelist", jsonString),
                 new TypeToken<ArrayList<Music>>() {

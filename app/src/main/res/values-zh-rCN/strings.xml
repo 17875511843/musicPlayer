@@ -44,6 +44,7 @@
     <string name="album">专辑: </string>
     <string name="artist"> 艺术家: </string>
     <string name="set_success">设置成功</string>
+    <string name="set_failed">设置失败</string>
     <string name="wrong_time">错误的时间</string>
     <string name="added">已添加</string>
     <string name="already_have">已存在</string>
@@ -92,6 +93,7 @@
     <string name="not_lyric_file">该文件不是歌词文件</string>
     <string name="not_image_file">该文件不是图像文件</string>
     <string name="toolbar_title_folder">文件夹</string>
+    <string name="equalizer_cant_open">自定义均衡器不能在蓝牙耳机上使用</string>
     <string name="songs">首</string>
     <string name="cache">清理缓存</string>
     <string name="clear_cache">清除中…</string>
@@ -157,16 +159,17 @@
     <string name="unknown_error">未知错误</string>
     <string name="auto_switch_to_night_mode">已自动切换到夜间模式</string>
     <string name="auto_switch_to_day_mode">已自动切换到日间模式</string>
-    <string name="night_mode_test">先播放音乐否则可能崩溃</string>
     <string name="select_local_album_cover">选择本地专辑封面图片</string>
     <string name="option">选择操作</string>
+    <string name="placeholder">-</string>
     <string name="new_version_title">更新内容</string>
-    <string name="new_version_text">- 修复歌词一直在搜索的bug，如遇到一直搜索，原因可能是因为之前版本文件解析错误，请手动在菜单中更新歌词即可
-        \n- 新型通知添加关闭按钮
-        \n- 新增播放队列，更好的控制音乐播放
-        \n- 新增使用本地图片作为补全专辑封面,长按专辑详情页大图或播放界面专辑封面即可
-        \n- 播放界面菜单精简，部分菜单选项改为在界面长按呼出
-        \n- 优化在线歌词匹配，更精准，减少闪退情况
-        \n- 修复bug</string>
-
+    <string name="new_version_text">- 新增中文繁体和日语，感谢酷友Rou17提供翻译
+        \n- 修复播放列表无法保存和点击的bug
+        \n- 修复部分歌词闪退bug</string>
+    <string name="donate">捐赠</string>
+    <string name="contact_me">加群讨论</string>
+    <string name="check_qq_installed">请检查是否安装了QQ</string>
+    <string name="check_alipay_installed">请检查是否安装了支付宝</string>
+    <string name="check_coolapk_installed">请检查是否安装了酷安应用市场</string>
+    <string name="rate">去评分</string>
 </resources>

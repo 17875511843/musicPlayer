@@ -14,8 +14,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
@@ -68,14 +68,15 @@ public class AlbumInArtistAdapter extends RecyclerView.Adapter<AlbumInArtistAdap
         this.mInflater = LayoutInflater.from(context);
     }
 
+    @NonNull
     @Override
-    public AlbumInArtistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AlbumInArtistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.album_detail_item_in_artist_view_layout, parent, false);
         return new AlbumInArtistViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final AlbumInArtistViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final AlbumInArtistViewHolder holder, final int position) {
         holder.item_info.setBackgroundColor(ContextCompat.getColor(mContext, R.color.material_gray_dark));
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> {
@@ -94,12 +95,11 @@ public class AlbumInArtistAdapter extends RecyclerView.Adapter<AlbumInArtistAdap
         final String albumArtUri = mList.get(position).getAlbumArtUri();
 
         Glide.with(mContext)
-                .load(albumArtUri)
                 .asBitmap()
+                .load(albumArtUri)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-
+                    public void onResourceReady(@NonNull Bitmap resource, Transition<? super Bitmap> transition) {
                         Palette.from(resource).generate(palette -> {
                             Palette.Swatch swatch = palette.getVibrantSwatch();
                             if (swatch != null) {
@@ -120,8 +120,8 @@ public class AlbumInArtistAdapter extends RecyclerView.Adapter<AlbumInArtistAdap
 
         holder.iv.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
 
-        MusicUtils musicUtils = new MusicUtils(mContext);
-        musicUtils.setAlbumCoverToAdapter(mList.get(position),holder.iv,MusicUtils.FROM_ADAPTER);
+        MusicUtils.getInstance().setAlbumCoverToAdapter(mContext,mList.get(position),holder.iv,
+                MusicUtils.getInstance().FROM_ADAPTER);
     }
 
     @Override
@@ -147,8 +147,8 @@ public class AlbumInArtistAdapter extends RecyclerView.Adapter<AlbumInArtistAdap
 
         public void setData(int position) {
             Set<Integer> positionSet = ArtistDetailFragment.albumPositionSet;
-            if (MusicUtils.fromWhere == MusicUtils.FROM_ARTIST_PAGE) {
-                if (MusicUtils.isSelectAll) {
+            if (MusicUtils.getInstance().fromWhere == MusicUtils.getInstance().FROM_ARTIST_PAGE) {
+                if (MusicUtils.getInstance().isSelectAll) {
                     positionSet = MusicList.listPositionSet;
                 }
                 if (positionSet.contains(position)) {

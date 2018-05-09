@@ -44,6 +44,7 @@
     <string name="album">Album: </string>
     <string name="artist"> Artist: </string>
     <string name="set_success">Set Success</string>
+    <string name="set_failed">Set Failed</string>
     <string name="wrong_time">Wrong Time!</string>
     <string name="added">Added</string>
     <string name="already_have">Already have a list name</string>
@@ -92,6 +93,7 @@
     <string name="not_lyric_file">This file is not a lyric file</string>
     <string name="not_image_file">This file is not a image file</string>
     <string name="toolbar_title_folder">Folder</string>
+    <string name="equalizer_cant_open">Custom equalizer won\'t work on bluetooth headset</string>
     <string name="songs">songs</string>
     <string name="cache">Clear cache</string>
     <string name="clear_cache">clearing</string>
@@ -157,15 +159,17 @@
     <string name="unknown_error">Unknown error</string>
     <string name="auto_switch_to_night_mode">Auto Switch to Night Mode</string>
     <string name="auto_switch_to_day_mode">Auto Switch to Day Mode</string>
-    <string name="night_mode_test">Play music first Or may crash</string>
     <string name="select_local_album_cover">Select local album cover image</string>
     <string name="option">Option</string>
     <string name="new_version_title">What\'s New</string>
-    <string name="new_version_text">- Play Window can change theme now
-        \n- Option to select local image as album cover for missing cover songs
-        \n- Brand new now playing queue,better control your playlist now
-        \n- New style notification add close button
-        \n- Optimized Online lyric,more accuracy,less crash
-        \n- New SleepTimer Style
-        \n- Fix bug</string>
+    <string name="placeholder">-</string>
+    <string name="new_version_text">- 新增中文繁体和日语，感谢酷友Rou17提供翻译
+        \n- 修复播放列表无法保存和点击的bug
+        \n- 修复部分歌词闪退bug</string>
+    <string name="donate">Donate</string>
+    <string name="contact_me">Chat in group</string>
+    <string name="check_qq_installed">Check if QQ is installed</string>
+    <string name="check_alipay_installed">Check if Alipay is installed</string>
+    <string name="check_coolapk_installed">Check if Coolapk market is installed</string>
+    <string name="rate">Rate this app</string>
 </resources>

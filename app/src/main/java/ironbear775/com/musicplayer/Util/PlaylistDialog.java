@@ -2,17 +2,20 @@ package ironbear775.com.musicplayer.Util;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,7 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import ironbear775.com.musicplayer.Activity.MusicList;
@@ -30,6 +33,7 @@ import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Class.Playlist;
 import ironbear775.com.musicplayer.Fragment.PlaylistFragment;
 
+import static com.mikepenz.iconics.Iconics.TAG;
 import static ironbear775.com.musicplayer.R.id;
 import static ironbear775.com.musicplayer.R.layout;
 import static ironbear775.com.musicplayer.R.string;
@@ -49,9 +53,10 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
     private PlaylistDbHelper dbHelper1;
     private SQLiteDatabase database;
     private PlaylistAdapter adapter;
-    private Set<Integer> playlistPositionSet = new HashSet<>();
-    private ArrayList<Music> musicList = new ArrayList<>();
+    private Set<Integer> playlistPositionSet;
+    private ArrayList<Music> musicList;
     private Dialog dialog;
+    private DialogReceiver receiver;
 
     public PlaylistDialog(Context context, Set<Integer> positionSet, ArrayList<Music> musicArrayList) {
         super(context);
@@ -65,8 +70,16 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
         setContentView(layout.playlist_dialog_layout);
         setTitle(string.add_to_playlist);
         PlaylistFragment.list.clear();
-        readList();
+        receiver = new DialogReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ADD_TO_PLAYLIST_FINISHED");
+        filter.addAction("READ_PLAYLIST_FINISHED");
+        filter.addAction("CREATE_PLAYLIST_FINISHED");
+        getContext().registerReceiver(receiver, filter);
+
         findView();
+        new Thread(readListRunnable).start();
+
         playlist.setOnItemClickListener((parent, view, position, id) -> {
             final String name = PlaylistFragment.list.get(position).getName();
             final StringBuilder table = new StringBuilder();
@@ -123,7 +136,9 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
 
                     }
                     database.close();
-                    addHandler.sendMessage(message);
+                    dbHelper.close();
+                    database1.close();
+                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                 }).start();
             } else if (MusicList.isAlbum) {
                 new Thread(() -> {
@@ -135,12 +150,12 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                         String albumTag = musicList.get(pos).getAlbum();
                         Cursor cursor;
                         if ("from album in artist".equals(MusicList.fromWhere)
-                                && !"".equals(MusicList.artistInALbum)) {
+                                && !"".equals(MusicList.artistInAlbum)) {
                             cursor = getContext().getContentResolver().query(
                                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                     null,
                                     MediaStore.Audio.Media.ALBUM + "=? and " + MediaStore.Audio.Media.ARTIST + "=?",
-                                    new String[]{albumTag, MusicList.artistInALbum},
+                                    new String[]{albumTag, MusicList.artistInAlbum},
                                     MediaStore.Audio.Media.TITLE);
                         } else {
                             cursor = getContext().getContentResolver().query(
@@ -191,7 +206,10 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                         }
                     }
                     database.close();
-                    addHandler.sendMessage(message);
+                    database1.close();
+                    dbHelper.close();
+                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
+
                 }).start();
             } else if (MusicList.isArtist) {
 
@@ -240,28 +258,25 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                                 } else {
                                     flag = 0;
                                 }
-                            }while (cursor.moveToNext());
+                            } while (cursor.moveToNext());
                             cursor.close();
                         }
                     }
                     database.close();
-                    addHandler.sendMessage(message);
+                    database1.close();
+                    dbHelper.close();
+                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                 }).start();
 
             }
         });
     }
 
-    private Handler addHandler = new Handler() {
+    private Runnable readListRunnable = new Runnable() {
         @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == 1 && dialog.isShowing()) {
-                dialog.dismiss();
-                Snackbar.make(playlist, getContext().getResources().getString(string.added), Snackbar.LENGTH_LONG)
-                        .setDuration(1000)
-                        .show();
-            }
+        public void run() {
+            readList();
+            getContext().sendBroadcast(new Intent("READ_PLAYLIST_FINISHED"));
         }
     };
 
@@ -346,38 +361,77 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                                 .setDuration(1000)
                                 .show();
                     } else if (flag == 0) {
-                        String db = "create table " + table.toString() + " ("
-                                + "id integer primary key autoincrement, "
-                                + "title text,"
-                                + "artist text,"
-                                + "albumArtUri text, "
-                                + "album text, "
-                                + "uri text )";
-                        dbHelper1 = new PlaylistDbHelper(getContext(), table.toString() + ".db", db);
-                        dbHelper1.getWritableDatabase();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String db = "create table " + table.toString() + " ("
+                                        + "id integer primary key autoincrement, "
+                                        + "title text,"
+                                        + "artist text,"
+                                        + "albumArtUri text, "
+                                        + "album text, "
+                                        + "uri text )";
+                                dbHelper1 = new PlaylistDbHelper(getContext(), table.toString() + ".db", db);
+                                dbHelper1.getWritableDatabase();
 
-                        PlaylistDbHelper dbHelper2 = new PlaylistDbHelper(getContext(), "playlist.db", db);
-                        database = dbHelper2.getWritableDatabase();
-                        ContentValues value = new ContentValues();
-                        value.put("title", name);
-                        database.insert("playlist", null, value);
-                        database.close();
-                        dbHelper2.close();
-                        flag = 0;
-                        Playlist p = new Playlist(name, "");
-                        PlaylistFragment.list.add(p);
-                        adapter.notifyDataSetChanged();
+                                PlaylistDbHelper dbHelper2 = new PlaylistDbHelper(getContext(), "playlist.db", db);
+                                database = dbHelper2.getWritableDatabase();
+                                ContentValues value = new ContentValues();
+                                value.put("title", name);
+                                database.insert("playlist", null, value);
+                                database.close();
+                                dbHelper2.close();
+                                flag = 0;
+                                Playlist p = new Playlist(name, "");
+                                PlaylistFragment.list.add(p);
+                                getContext().sendBroadcast(new Intent("CREATE_PLAYLIST_FINISHED"));
+                            }
+                        }).start();
                     }
 
-                    createSubmit.setVisibility(View.GONE);
-                    createCancel.setVisibility(View.GONE);
-                    createEdit.setVisibility(View.GONE);
-                    createNewIcon.setVisibility(View.VISIBLE);
-                    createNewText.setVisibility(View.VISIBLE);
                 }
                 break;
 
         }
     }
 
+    private class DialogReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (Objects.requireNonNull(intent.getAction())) {
+                case "ADD_TO_PLAYLIST_FINISHED":
+                    if (dialog != null && dialog.isShowing()) {
+                        dialog.dismiss();
+                        Snackbar.make(playlist, getContext().getResources().getString(string.added), Snackbar.LENGTH_LONG)
+                                .setDuration(1000)
+                                .show();
+                    }
+                    break;
+                case "READ_PLAYLIST_FINISHED":
+                    if (adapter != null)
+                        adapter.notifyDataSetChanged();
+                    break;
+                case "CREATE_PLAYLIST_FINISHED":
+                    if (adapter != null)
+                        adapter.notifyDataSetChanged();
+
+                    createSubmit.setVisibility(View.GONE);
+                    createCancel.setVisibility(View.GONE);
+                    createEdit.setVisibility(View.GONE);
+                    createNewIcon.setVisibility(View.VISIBLE);
+                    createNewText.setVisibility(View.VISIBLE);
+                    break;
+
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+        getContext().unregisterReceiver(receiver);
+    }
 }
+

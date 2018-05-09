@@ -1,23 +1,18 @@
 package ironbear775.com.musicplayer.Adapter;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
-import android.provider.MediaStore;
-import android.support.v7.app.AlertDialog;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,13 +21,8 @@ import java.util.Set;
 
 import github.nisrulz.recyclerviewhelper.RVHAdapter;
 import github.nisrulz.recyclerviewhelper.RVHViewHolder;
-import ironbear775.com.musicplayer.Activity.MusicList;
-import ironbear775.com.musicplayer.Activity.SearchActivity;
-import ironbear775.com.musicplayer.Activity.TagEditActivty;
+import ironbear775.com.musicplayer.Activity.TagEditActivity;
 import ironbear775.com.musicplayer.Class.Music;
-import ironbear775.com.musicplayer.Fragment.FolderDetailFragment;
-import ironbear775.com.musicplayer.Fragment.MusicListFragment;
-import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.DetailDialog;
@@ -56,15 +46,16 @@ public class OnPlayingListAdapter extends RecyclerView.Adapter<OnPlayingListAdap
         this.mInflater = LayoutInflater.from(context);
     }
 
+    @NonNull
     @Override
-    public OnPlayingListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public OnPlayingListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.onplaying_item_layout, parent, false);
 
         return new OnPlayingListViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(OnPlayingListViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull OnPlayingListViewHolder holder, int position) {
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> {
                 if (isClickable) {
@@ -93,10 +84,7 @@ public class OnPlayingListAdapter extends RecyclerView.Adapter<OnPlayingListAdap
                             MusicService.musicPosition--;
                         mList.add(MusicService.musicPosition + 1, music);
                         notifyDataSetChanged();
-                        if (MusicService.isRandom)
-                            MusicUtils.saveShuffleArray(mContext, MusicService.onPlayingList);
-                        else
-                            MusicUtils.saveArray(mContext, MusicService.onPlayingList);
+                        mContext.sendBroadcast(new Intent("list changed"));
                         break;
                     case R.id.remove_from_queue:
                         remove(position);
@@ -108,7 +96,7 @@ public class OnPlayingListAdapter extends RecyclerView.Adapter<OnPlayingListAdap
                     case R.id.tag_edit:
                         if (mList.get(position).getUri().contains(".mp3")
                                 || mList.get(position).getUri().contains(".MP3")) {
-                            Intent intent = new Intent(mContext, TagEditActivty.class);
+                            Intent intent = new Intent(mContext, TagEditActivity.class);
                             intent.putExtra("music", (Parcelable) mList.get(position));
                             mContext.startActivity(intent);
                         } else {
@@ -134,7 +122,7 @@ public class OnPlayingListAdapter extends RecyclerView.Adapter<OnPlayingListAdap
     }
 
     @Override
-    public void onBindViewHolder(OnPlayingListViewHolder holder, int position, List<Object> payloads) {
+    public void onBindViewHolder(@NonNull OnPlayingListViewHolder holder, int position, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, position, payloads);
         if (!payloads.isEmpty()) {
             if (payloads.get(0) instanceof Integer) {
@@ -170,10 +158,8 @@ public class OnPlayingListAdapter extends RecyclerView.Adapter<OnPlayingListAdap
         Collections.swap(mList, fromPosition, toPosition);
 
         notifyItemMoved(fromPosition, toPosition);
-        if (MusicService.isRandom)
-            MusicUtils.saveShuffleArray(mContext, MusicService.onPlayingList);
-        else
-            MusicUtils.saveArray(mContext, MusicService.onPlayingList);
+        mContext.sendBroadcast(new Intent("list changed"));
+
     }
 
     private void remove(int position) {
@@ -181,14 +167,11 @@ public class OnPlayingListAdapter extends RecyclerView.Adapter<OnPlayingListAdap
         if (position < MusicService.musicPosition)
             MusicService.musicPosition--;
         notifyDataSetChanged();
-        if (MusicService.isRandom)
-            MusicUtils.saveShuffleArray(mContext, MusicService.onPlayingList);
-        else
-            MusicUtils.saveArray(mContext, MusicService.onPlayingList);
+
+        mContext.sendBroadcast(new Intent("list changed"));
 
         if (position == MusicService.musicPosition){
-            MusicUtils musicUtils = new MusicUtils(mContext);
-            musicUtils.startMusic(MusicService.musicPosition,0,10);
+            MusicUtils.getInstance().startMusic(mContext,MusicService.musicPosition,0,10);
             mContext.sendBroadcast(new Intent("update_cover"));
             mContext.sendBroadcast(new Intent("set lyric from service"));
         }

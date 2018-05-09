@@ -6,16 +6,19 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,7 +48,6 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     public static int pos = 0;
     private MusicAdapter musicAdapter;
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView musicView;
-    private MusicUtils musicUtils;
     private Toolbar toolbar;
     private RelativeLayout shuffle;
 
@@ -54,6 +56,8 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.shuffle_item_layout, container, false);
         findView(view);
+
+        reCreateView();
 
         setHasOptionsMenu(true);
 
@@ -69,7 +73,7 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         toolbar.setTitleTextColor(Color.WHITE);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
 
-        if (!MusicUtils.enableShuffle)
+        if (!MusicUtils.getInstance().enableShuffle)
             shuffle.setVisibility(View.GONE);
         else
             shuffle.setVisibility(View.VISIBLE);
@@ -79,17 +83,18 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
         filter.addAction("enableShuffle");
+        filter.addAction("enableShuffle");
+        filter.addAction("restart yourself");
         getActivity().registerReceiver(clickableReceiver, filter);
 
         musicList.clear();
         readMusic(getActivity());
-        musicUtils = new MusicUtils(getActivity());
 
         initView();
 
-        if (MusicUtils.launchPage == 5) {
+        if (MusicUtils.getInstance().launchPage == 5) {
 
-            MusicUtils.setLaunchPage(getActivity(),MusicUtils.FROM_ADAPTER);
+            MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
         }
 
         return view;
@@ -108,9 +113,9 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
             public void onItemClick(View view, int position) {
                 if (MusicList.actionMode != null) {
                     //多选状态
-                    musicUtils.addOrRemoveItem(position, positionSet, musicAdapter);
+                    MusicUtils.getInstance().addOrRemoveItem(getActivity(),position, positionSet, musicAdapter);
                 } else {
-                    setClickAction(position);
+                    setClickAction(getActivity(),position);
                 }
             }
 
@@ -124,16 +129,9 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         });
 
         shuffle.setOnClickListener(v -> {
-            count = 1;
-            MusicListFragment.count = 0;
-            AlbumDetailFragment.count = 0;
-            ArtistDetailFragment.count = 0;
-            PlaylistDetailFragment.count = 0;
-            FolderDetailFragment.count = 0;
-            MusicList.count = 0;
+            MusicUtils.getInstance().playPage = 2;
 
-            musicUtils = new MusicUtils(v.getContext());
-            musicUtils.shufflePlay(musicList,6);
+            MusicUtils.getInstance().shufflePlay(getActivity(),musicList, 6);
         });
     }
 
@@ -153,30 +151,22 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setClickAction(int position) {
+    private void setClickAction(Context context,int position) {
 
-        count = 1;
-
-        MusicListFragment.count = 0;
-        AlbumDetailFragment.count = 0;
-        ArtistDetailFragment.count = 0;
-        PlaylistDetailFragment.count = 0;
-        FolderDetailFragment.count = 0;
-        MusicList.count = 0;
-
+        MusicUtils.getInstance().playPage = 2;
         int progress = 0;
-        musicUtils = new MusicUtils(getActivity());
-        musicUtils.startMusic(position, progress,6);
+
+        MusicUtils.getInstance().startMusic(context,position, progress, 6);
 
         Intent intent = new Intent("set footBar");
         Intent intent1 = new Intent("set PlayOrPause");
-        intent.putExtra("footTitle",musicList.get(position).getTitle());
-        intent.putExtra("footArtist",musicList.get(position).getArtist());
-        intent1.putExtra("PlayOrPause",R.drawable.footplaywhite);
+        intent.putExtra("footTitle", musicList.get(position).getTitle());
+        intent.putExtra("footArtist", musicList.get(position).getArtist());
+        intent1.putExtra("PlayOrPause", R.drawable.play_to_pause_white_anim);
         getActivity().sendBroadcast(intent);
         getActivity().sendBroadcast(intent1);
 
-        musicUtils.getFootAlbumArt(position, musicList,MusicUtils.FROM_ADAPTER);
+        MusicUtils.getInstance().getFootAlbumArt(context,position, musicList, MusicUtils.getInstance().FROM_ADAPTER);
 
         pos = position;
 
@@ -188,40 +178,58 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         musicView = view.findViewById(R.id.music_list);
     }
 
+    private Runnable readMusicRunnable = new Runnable() {
+        @Override
+        public void run() {
+            readMusic(getActivity());
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (musicAdapter != null)
+                        musicAdapter.notifyDataSetChanged();
+                    if (readMusicRunnable !=null)
+                        readMusicRunnable = null;
+                }
+            });
+        }
+    };
+
     //获取音乐各种信息
     private void readMusic(Context context) {
 
         Cursor cursor;
         cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, null, null, MediaStore.Audio.Media.DATE_ADDED);
-        if (MusicUtils.isFlyme){
+        if (MusicUtils.getInstance().isFlyme) {
             if (cursor != null) {
                 if (cursor.moveToLast()) {
                     do {
-                            Music music = new Music();
-                            music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                            music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
+                        Music music = new Music();
+                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 
-                            music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(
-                                    Uri.parse("content://media/external/audio/albumart")
-                                    , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                            music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                            music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                            music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                            music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                            music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                            music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(
+                                Uri.parse("content://media/external/audio/albumart")
+                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
+                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
+                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                            if (!music.getUri().contains(".wmv")) {
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                    musicList.add(music);
-                            }
+
+                        if (!music.getUri().contains(".wmv") && !music.getUri().contains(".mkv")) {
+                            if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum])
+                                musicList.add(music);
+                        }
 
                     } while (cursor.moveToPrevious());
                     cursor.close();
                 }
             }
-        }else {
+        } else {
             if (cursor != null) {
                 if (cursor.moveToLast()) {
                     do {
@@ -240,8 +248,8 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                            if (!music.getUri().contains(".wmv")) {
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                            if (!music.getUri().contains(".wmv") && !music.getUri().contains(".mkv")) {
+                                if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum])
                                     musicList.add(music);
                             }
                         }
@@ -270,16 +278,45 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
                         readMusic(context);
                         break;
                     case "enableShuffle":
-                        if (!MusicUtils.enableShuffle)
+                        if (!MusicUtils.getInstance().enableShuffle)
                             shuffle.setVisibility(View.GONE);
                         else
                             shuffle.setVisibility(View.VISIBLE);
+                        break;
 
+                    case "restart yourself":
+                        reCreateView();
+                        musicAdapter.notifyDataSetChanged();
                         break;
                 }
             }
         }
     };
+
+    private void reCreateView() {
+        try {
+            Resources.Theme theme = getActivity().getTheme();
+            TypedValue appBgValue = new TypedValue();
+            TypedValue colorPrimaryValue = new TypedValue();
+
+            theme.resolveAttribute(R.attr.appBg, appBgValue, true);
+            theme.resolveAttribute(R.attr.colorPrimary, colorPrimaryValue, true);
+            Resources resources = getResources();
+
+            int appBg = ResourcesCompat.getColor(resources,
+                    appBgValue.resourceId, null);
+            int colorPrimary = ResourcesCompat.getColor(resources,
+                    colorPrimaryValue.resourceId, null);
+
+            toolbar.setBackgroundColor(colorPrimary);
+            shuffle.setBackgroundColor(colorPrimary);
+            musicView.setBackgroundColor(appBg);
+
+            MusicList.colorPri = colorPrimary;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onDestroyView() {

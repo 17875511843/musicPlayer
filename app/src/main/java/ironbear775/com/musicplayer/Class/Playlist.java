@@ -5,8 +5,8 @@ package ironbear775.com.musicplayer.Class;
  */
 
 public class Playlist {
-    private String name;
-    private String count;
+    private String name; //自定义播放列表名称
+    private String count; //列表歌曲个数
 
     public Playlist(String name,String count){
         this.name = name;

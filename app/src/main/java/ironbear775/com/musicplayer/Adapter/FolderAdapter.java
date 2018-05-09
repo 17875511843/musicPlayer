@@ -1,6 +1,7 @@
 package ironbear775.com.musicplayer.Adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Set;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Playlist;
 import ironbear775.com.musicplayer.Fragment.FolderFragment;
@@ -45,14 +47,15 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderView
     }
 
 
+    @NonNull
     @Override
-    public FolderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FolderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.folder_item_layout, parent, false);
         return new FolderViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(FolderViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FolderViewHolder holder, int position) {
         holder.setData(position);
         if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> {
@@ -83,9 +86,18 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderView
 
         public void setData(int position) {
             Set<Integer> positionSet = FolderFragment.positionSet;
-            if (MusicUtils.isSelectAll){
+            if (MusicUtils.getInstance().isSelectAll){
                 positionSet = MusicList.listPositionSet;
             }
+
+            if (BaseActivity.isNight) {
+                tv_title.setTextColor(itemView.getResources().getColor(
+                        R.color.nightMainTextColor));
+            }else {
+                tv_title.setTextColor(itemView.getResources().getColor(
+                        R.color.lightMainTextColor));
+            }
+
             if (positionSet.contains(position)) {
                 itemView.setBackgroundResource(R.color.items_selected_bg_color);
             } else {

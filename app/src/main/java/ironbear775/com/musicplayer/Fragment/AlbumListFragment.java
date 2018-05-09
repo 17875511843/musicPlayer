@@ -8,13 +8,16 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,12 +38,13 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
 
 public class AlbumListFragment extends android.app.Fragment {
     public static final ArrayList<Music> albumlist = new ArrayList<>();
-    public static int count = 0;
+    public static final ArrayList<Music> albumDetailist = new ArrayList<>();
     public static Fragment detailFragment;
     public static final Set<Integer> positionSet = new HashSet<>();
     private AlbumGridAdapter albumAdapter;
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView albumView;
-    private MusicUtils musicUtils;
+    private String albumID;
+    private String albumTag;
 
     @Nullable
     @Override
@@ -48,6 +52,7 @@ public class AlbumListFragment extends android.app.Fragment {
         View view = inflater.inflate(R.layout.list_layout, container, false);
         findView(view);
 
+        reCreateView();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
@@ -56,15 +61,7 @@ public class AlbumListFragment extends android.app.Fragment {
         getActivity().registerReceiver(clickableReceiver, filter);
 
         albumlist.clear();
-        readMusic(getActivity());
-
-        musicUtils = new MusicUtils(getActivity());
-
-        initView();
-
-        if (MusicUtils.launchPage == 3) {
-            MusicUtils.setLaunchPage(getActivity(), MusicUtils.FROM_ADAPTER);
-        }
+        new Thread(readAlbumRunnable).start();
 
         return view;
     }
@@ -84,7 +81,7 @@ public class AlbumListFragment extends android.app.Fragment {
                 public void onItemClick(View view, int position) {
                     if (MusicList.actionMode != null) {
                         //多选状态
-                        musicUtils.addOrRemoveItem(position, positionSet, albumAdapter);
+                        MusicUtils.getInstance().addOrRemoveItem(getActivity(),position, positionSet, albumAdapter);
                     } else {
                         setClickAction(position);
                     }
@@ -102,16 +99,21 @@ public class AlbumListFragment extends android.app.Fragment {
     }
 
     private void setClickAction(int position) {
-        count = 1;
-        String albumTag = albumlist.get(position).getAlbum();
-        String albumId = albumlist.get(position).getAlbum_id();
-        ArrayList<Music> albumMusicList = new ArrayList<>();
-        Cursor cursor;
-        cursor = getActivity().getBaseContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                null, MediaStore.Audio.Media.ALBUM_ID + "=?",
-                new String[]{albumId}, MediaStore.Audio.Media.TRACK);
 
-        if (MusicUtils.isFlyme) {
+        albumID = albumlist.get(position).getAlbum_id();
+        albumTag = albumlist.get(position).getAlbum();
+
+        new Thread(readDetailRunnable).start();
+    }
+
+    private void readDetailMusic(Context context) {
+        albumDetailist.clear();
+        Cursor cursor;
+        cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                null, MediaStore.Audio.Media.ALBUM_ID + "=?",
+                new String[]{albumID}, MediaStore.Audio.Media.TRACK);
+
+        if (MusicUtils.getInstance().isFlyme) {
             if (cursor != null) {
                 cursor.moveToFirst();
                 do {
@@ -131,8 +133,8 @@ public class AlbumListFragment extends android.app.Fragment {
                     music.setTrack(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK)));
                     cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK));
                     if (!music.getUri().contains(".wmv")) {
-                        if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                            albumMusicList.add(music);
+                        if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum])
+                            albumDetailist.add(music);
                     }
                 } while (cursor.moveToNext());
                 cursor.close();
@@ -158,36 +160,14 @@ public class AlbumListFragment extends android.app.Fragment {
                         music.setTrack(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TRACK)));
 
                         if (!music.getUri().contains(".wmv")) {
-                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
-                                albumMusicList.add(music);
+                            if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum])
+                                albumDetailist.add(music);
                         }
                     }
                 } while (cursor.moveToNext());
                 cursor.close();
             }
         }
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Bundle bundle = new Bundle();
-        bundle.putString("album", albumTag);
-        bundle.putString("from", "from album");
-
-        bundle.putParcelableArrayList("musicList", albumMusicList);
-
-        if (MusicList.albumFragment != null) {
-            transaction.hide(MusicList.albumFragment);
-        }
-        transaction.setCustomAnimations(
-                R.animator.fragment_slide_left_enter,
-                R.animator.fragment_slide_left_exit,
-                R.animator.fragment_slide_right_enter,
-                R.animator.fragment_slide_right_exit);
-
-        detailFragment = new AlbumDetailFragment();
-        detailFragment.setArguments(bundle);
-        transaction.add(R.id.content, detailFragment);
-        transaction.commit();
-        MusicUtils.fromWhere = MusicUtils.FROM_ALBUM_PAGE;
     }
 
 
@@ -195,8 +175,65 @@ public class AlbumListFragment extends android.app.Fragment {
         albumView = view.findViewById(R.id.music_list);
     }
 
+    private Runnable readAlbumRunnable = new Runnable() {
+        @Override
+        public void run() {
+            readAlbum(getActivity());
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    initView();
+
+                    if (MusicUtils.getInstance().launchPage == 3) {
+                        MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
+                    }
+
+                    if (albumAdapter != null)
+                        albumAdapter.notifyDataSetChanged();
+                    if (readAlbumRunnable != null)
+                        readAlbumRunnable = null;
+                }
+            });
+        }
+    };
+
+    private Runnable readDetailRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            readDetailMusic(getActivity());
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("album", albumTag);
+                    bundle.putString("from", "from album");
+
+                    bundle.putParcelableArrayList("musicList", albumDetailist);
+
+                    if (MusicList.albumFragment != null) {
+                        transaction.hide(MusicList.albumFragment);
+                    }
+                    transaction.setCustomAnimations(
+                            R.animator.fragment_slide_left_enter,
+                            R.animator.fragment_slide_left_exit,
+                            R.animator.fragment_slide_right_enter,
+                            R.animator.fragment_slide_right_exit);
+
+                    detailFragment = new AlbumDetailFragment();
+                    detailFragment.setArguments(bundle);
+                    transaction.add(R.id.content, detailFragment);
+                    transaction.commit();
+                    MusicUtils.getInstance().fromWhere = MusicUtils.getInstance().FROM_ALBUM_PAGE;
+                }
+            });
+        }
+    };
+
     //获取音乐各种信息
-    private void readMusic(Context context) {
+    private void readAlbum(Context context) {
 
         int flag = 0;
         Cursor cursor;
@@ -229,8 +266,8 @@ public class AlbumListFragment extends android.app.Fragment {
                         music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                         music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                        if (!music.getUri().contains(".wmv"))
-                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum])
+                        if (!music.getUri().contains(".wmv") && !music.getUri().contains(".mkv"))
+                            if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum])
                                 albumlist.add(music);
 
                     } else
@@ -257,10 +294,37 @@ public class AlbumListFragment extends android.app.Fragment {
                     case "notifyDataSetChanged":
                         albumAdapter.notifyDataSetChanged();
                         break;
+                    case "restart yourself":
+                        reCreateView();
+                        albumAdapter.notifyDataSetChanged();
+                        break;
                 }
             }
         }
     };
+
+    private void reCreateView() {
+        try {
+            Resources.Theme theme = getActivity().getTheme();
+            TypedValue appBgValue = new TypedValue();
+            TypedValue colorPrimaryValue = new TypedValue();
+
+            theme.resolveAttribute(R.attr.appBg, appBgValue, true);
+            theme.resolveAttribute(R.attr.colorPrimary, colorPrimaryValue, true);
+            Resources resources = getResources();
+
+            int appBg = ResourcesCompat.getColor(resources,
+                    appBgValue.resourceId, null);
+            int colorPrimary = ResourcesCompat.getColor(resources,
+                    colorPrimaryValue.resourceId, null);
+
+            albumView.setBackgroundColor(appBg);
+            getActivity().findViewById(R.id.toolbar).setBackgroundColor(colorPrimary);
+            MusicList.colorPri = colorPrimary;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onDestroyView() {

@@ -28,10 +28,12 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 
 import ironbear775.com.musicplayer.R;
+import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.ColorPickerDialog;
 import ironbear775.com.musicplayer.Util.MusicUtils;
 
@@ -45,7 +47,6 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
     private String[] time, enableDownload, lyric, startPage;
     private TextView filter;
     private TextView cache;
-    private MusicUtils musicUtils;
     private Dialog dialog;
     private TextView albumText;
     private TextView artistText;
@@ -69,9 +70,10 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
         startPage = new String[]{getResources().getString(R.string.slideBar_title_music),
                 getResources().getString(R.string.toolbar_title_artist),
+                getResources().getString(R.string.toolbar_title_album),
                 getResources().getString(R.string.toolbar_title_playlist),
-                getResources().getString(R.string.toolbar_title_folder),
-                getResources().getString(R.string.toolbar_title_recent_added)};
+                getResources().getString(R.string.toolbar_title_recent_added),
+                getResources().getString(R.string.toolbar_title_folder)};
         time = new String[]{"0s", "15s", "20s", "30s", "40s", "50s", "60s"};
 
         enableDownload = new String[]{getResources().getString(R.string.never),
@@ -80,7 +82,6 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
         lyric = new String[]{getResources().getString(R.string.netease_first), getResources().getString(R.string.netease),
                 getResources().getString(R.string.kugou)};
-        musicUtils = new MusicUtils(this);
 
         findViews();
 
@@ -130,14 +131,14 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         lyricText = findViewById(R.id.lyric_source);
         startText = findViewById(R.id.start_page);
 
-        cache.setText(musicUtils.getCacheSize(this));
+        cache.setText(MusicUtils.getInstance().getCacheSize(this));
 
         if (BaseActivity.isNight)
             filter.setTextColor(getResources().getColor(R.color.nightMainTextColor));
         else
             filter.setTextColor(getResources().getColor(R.color.lightMainTextColor));
         String t;
-        switch (MusicUtils.filterNum) {
+        switch (MusicUtils.getInstance().filterNum) {
             case 0:
                 t = getResources().getString(R.string.ignore) + " 0 " + getResources().getString(R.string.second);
                 filter.setText(t);
@@ -168,7 +169,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 break;
         }
 
-        switch (MusicUtils.downloadArtist) {
+        switch (MusicUtils.getInstance().downloadArtist) {
             case 0:
                 artistText.setText(getResources().getString(R.string.never));
                 break;
@@ -180,7 +181,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 break;
 
         }
-        switch (MusicUtils.downloadAlbum) {
+        switch (MusicUtils.getInstance().downloadAlbum) {
             case 0:
                 albumText.setText(getResources().getString(R.string.never));
                 break;
@@ -192,7 +193,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 break;
 
         }
-        switch (MusicUtils.loadlyric) {
+        switch (MusicUtils.getInstance().loadlyric) {
             case 0:
                 lyricText.setText(getResources().getString(R.string.netease_first_1));
                 break;
@@ -203,7 +204,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 lyricText.setText(getResources().getString(R.string.only_Kugou));
                 break;
         }
-        switch (MusicUtils.launchPage) {
+        switch (MusicUtils.getInstance().launchPage) {
             case 1:
                 startText.setText(R.string.slideBar_title_music);
                 break;
@@ -224,20 +225,20 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 break;
         }
 
-        defaultAlbumArt.setChecked(MusicUtils.enableDefaultCover);
-        colorNotification.setChecked(MusicUtils.enableColorNotification);
+        defaultAlbumArt.setChecked(MusicUtils.getInstance().enableDefaultCover);
+        colorNotification.setChecked(MusicUtils.getInstance().enableColorNotification);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            oldStyleNotification.setChecked(MusicUtils.useOldStyleNotification);
+            oldStyleNotification.setChecked(MusicUtils.getInstance().useOldStyleNotification);
         } else {
             oldStyleNotification.setVisibility(View.GONE);
         }
 
-        keepScreenOn.setChecked(MusicUtils.keepScreenOn);
-        loadWebLyric.setChecked(MusicUtils.loadWebLyric);
-        enableShuffle.setChecked(MusicUtils.enableShuffle);
-        enableSwipe.setChecked(MusicUtils.enableSwipeGesture);
-        enableTranslateLyric.setChecked(MusicUtils.enableTranslateLyric);
-        autoSwitchNightMode.setChecked(MusicUtils.autoSwitchNightMode);
+        keepScreenOn.setChecked(MusicUtils.getInstance().keepScreenOn);
+        loadWebLyric.setChecked(MusicUtils.getInstance().loadWebLyric);
+        enableShuffle.setChecked(MusicUtils.getInstance().enableShuffle);
+        enableSwipe.setChecked(MusicUtils.getInstance().enableSwipeGesture);
+        enableTranslateLyric.setChecked(MusicUtils.getInstance().enableTranslateLyric);
+        autoSwitchNightMode.setChecked(MusicUtils.getInstance().autoSwitchNightMode);
         changeMainWindow.setChecked(BaseActivity.changeMainWindow);
 
         defaultAlbumArt.setOnCheckedChangeListener(this);
@@ -268,54 +269,54 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
         switch (buttonView.getId()) {
             case R.id.use_default_cover:
-                MusicUtils.enableDefaultCover = isChecked;
-                editor.putBoolean("enableDefaultCover", MusicUtils.enableDefaultCover);
+                MusicUtils.getInstance().enableDefaultCover = isChecked;
+                editor.putBoolean("enableDefaultCover", MusicUtils.getInstance().enableDefaultCover);
                 editor.apply();
                 Intent intent2 = new Intent("enableDefaultCover");
                 sendBroadcast(intent2);
                 break;
             case R.id.color_notification:
-                MusicUtils.enableColorNotification = isChecked;
-                editor.putBoolean("enableColorNotification", MusicUtils.enableColorNotification);
+                MusicUtils.getInstance().enableColorNotification = isChecked;
+                editor.putBoolean("enableColorNotification", MusicUtils.getInstance().enableColorNotification);
                 editor.apply();
                 Intent intent3 = new Intent("enableColorNotification");
                 sendBroadcast(intent3);
                 break;
             case R.id.use_old_notification:
-                MusicUtils.useOldStyleNotification = isChecked;
-                editor.putBoolean("useOldStyleNotification", MusicUtils.useOldStyleNotification);
+                MusicUtils.getInstance().useOldStyleNotification = isChecked;
+                editor.putBoolean("useOldStyleNotification", MusicUtils.getInstance().useOldStyleNotification);
                 break;
             case R.id.keep_screen_on:
-                MusicUtils.keepScreenOn = isChecked;
-                editor.putBoolean("keepScreenOn", MusicUtils.keepScreenOn);
+                MusicUtils.getInstance().keepScreenOn = isChecked;
+                editor.putBoolean("keepScreenOn", MusicUtils.getInstance().keepScreenOn);
                 editor.apply();
                 sendBroadcast(new Intent("keep screen on"));
                 break;
             case R.id.load_web_lyric:
-                MusicUtils.loadWebLyric = isChecked;
-                editor.putBoolean("loadWebLyric", MusicUtils.loadWebLyric);
+                MusicUtils.getInstance().loadWebLyric = isChecked;
+                editor.putBoolean("loadWebLyric", MusicUtils.getInstance().loadWebLyric);
                 editor.apply();
                 break;
             case R.id.enable_shuffle:
-                MusicUtils.enableShuffle = isChecked;
-                editor.putBoolean("enableShuffle", MusicUtils.enableShuffle);
+                MusicUtils.getInstance().enableShuffle = isChecked;
+                editor.putBoolean("enableShuffle", MusicUtils.getInstance().enableShuffle);
                 editor.apply();
                 Intent intent5 = new Intent("enableShuffle");
                 sendBroadcast(intent5);
                 break;
             case R.id.swipe_gesture:
-                MusicUtils.enableSwipeGesture = isChecked;
-                editor.putBoolean("enableSwipeGesture", MusicUtils.enableSwipeGesture);
+                MusicUtils.getInstance().enableSwipeGesture = isChecked;
+                editor.putBoolean("enableSwipeGesture", MusicUtils.getInstance().enableSwipeGesture);
                 editor.apply();
                 break;
             case R.id.load_translate_lyric:
-                MusicUtils.enableTranslateLyric = isChecked;
-                editor.putBoolean("enableTranslateLyric", MusicUtils.enableTranslateLyric);
+                MusicUtils.getInstance().enableTranslateLyric = isChecked;
+                editor.putBoolean("enableTranslateLyric", MusicUtils.getInstance().enableTranslateLyric);
                 editor.apply();
                 break;
             case R.id.auto_night_mode:
-                MusicUtils.autoSwitchNightMode = isChecked;
-                editor.putBoolean("autoSwitchNightMode", MusicUtils.autoSwitchNightMode);
+                MusicUtils.getInstance().autoSwitchNightMode = isChecked;
+                editor.putBoolean("autoSwitchNightMode", MusicUtils.getInstance().autoSwitchNightMode);
                 editor.apply();
                 break;
             case R.id.change_main_window:
@@ -337,8 +338,8 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 dialog = ProgressDialog.show(Setting.this, null, getResources().getString(R.string.clear_cache));
 
                 new Thread(() -> {
-                    musicUtils.clearImageAllCache(getApplicationContext());
-                    if (musicUtils.getCacheSize(getApplicationContext()).equals("0.0Byte")) {
+                    MusicUtils.getInstance().clearImageAllCache(getApplicationContext());
+                    if (MusicUtils.getInstance().getCacheSize(getApplicationContext()).equals("0.0Byte")) {
                         Message message = new Message();
                         message.what = 13;
                         handler.sendMessage(message);
@@ -348,7 +349,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
             if (msg.what == 13 && dialog.isShowing()) {
                 dialog.dismiss();
             }
-            cache.setText(musicUtils.getCacheSize(getApplicationContext()));
+            cache.setText(MusicUtils.getInstance().getCacheSize(getApplicationContext()));
         }
     };
 
@@ -383,18 +384,18 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                     filterDialog = new AlertDialog.Builder(this);
 
                 filterDialog.setTitle("Ignore");
-                filterDialog.setSingleChoiceItems(time, MusicUtils.filterNum, (dialogInterface, i) -> {
-                    MusicUtils.filterNum = i;
+                filterDialog.setSingleChoiceItems(time, MusicUtils.getInstance().filterNum, (dialogInterface, i) -> {
+                    MusicUtils.getInstance().filterNum = i;
 
                     SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                    editor.putInt("filterNum", MusicUtils.filterNum);
+                    editor.putInt("filterNum", MusicUtils.getInstance().filterNum);
                     editor.apply();
                     if (BaseActivity.isNight)
                         filter.setTextColor(getResources().getColor(R.color.nightMainTextColor));
                     else
                         filter.setTextColor(getResources().getColor(R.color.lightMainTextColor));
                     String t;
-                    switch (MusicUtils.filterNum) {
+                    switch (MusicUtils.getInstance().filterNum) {
                         case 0:
                             t = getResources().getString(R.string.ignore) + " 0 " + getResources().getString(R.string.second);
                             filter.setText(t);
@@ -435,9 +436,13 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 if ((in.resolveActivity(getPackageManager()) != null)) {
                     startActivityForResult(in, 0);
                 } else {
-                    Intent i = new Intent(this, Equalizer.class);
-                    startActivity(i);
-
+                    if (!MusicService.isBluetoothHeadsetConnected) {
+                        Intent i = new Intent(getApplicationContext(), Equalizer.class);
+                        startActivity(i);
+                    } else {
+                        Toast.makeText(Setting.this, R.string.equalizer_cant_open,
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
             case R.id.match_artist_layout:
@@ -449,13 +454,13 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                     artistDialog = new AlertDialog.Builder(this);
 
                 artistDialog.setTitle(R.string.match_artist_cover);
-                artistDialog.setSingleChoiceItems(enableDownload, MusicUtils.downloadArtist, (dialogInterface, i) -> {
-                    MusicUtils.downloadArtist = i;
+                artistDialog.setSingleChoiceItems(enableDownload, MusicUtils.getInstance().downloadArtist, (dialogInterface, i) -> {
+                    MusicUtils.getInstance().downloadArtist = i;
 
                     SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                    editor.putInt("downloadArtist", MusicUtils.downloadArtist);
+                    editor.putInt("downloadArtist", MusicUtils.getInstance().downloadArtist);
                     editor.apply();
-                    switch (MusicUtils.downloadArtist) {
+                    switch (MusicUtils.getInstance().downloadArtist) {
                         case 0:
                             artistText.setText(getResources().getString(R.string.never));
                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(Setting.this);
@@ -465,8 +470,8 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
                             });
                             alertDialog.setPositiveButton(R.string.yes, (dialog14, which14) -> {
-                                File file = new File(MusicUtils.localPath, MusicUtils.artistFolder);
-                                MusicUtils.deleteDownloadImage(file);
+                                File file = new File(MusicUtils.getInstance().localPath, MusicUtils.getInstance().artistFolder);
+                                MusicUtils.getInstance().deleteDownloadImage(file);
 
                             });
                             alertDialog.show();
@@ -493,7 +498,7 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                 else
                     pageDialog = new AlertDialog.Builder(this);
                 pageDialog.setTitle(R.string.start_page);
-                pageDialog.setSingleChoiceItems(startPage, MusicUtils.launchPage-1, (dialogInterface, i) -> {
+                pageDialog.setSingleChoiceItems(startPage, MusicUtils.getInstance().launchPage-1, (dialogInterface, i) -> {
 
                     Log.d("TAG", "onClick: "+i);
                     switch (i+1) {
@@ -516,9 +521,9 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                             startText.setText(R.string.toolbar_title_folder);
                             break;
                     }
-                    MusicUtils.launchPage = i+1;
+                    MusicUtils.getInstance().launchPage = i+1;
                     SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                    editor.putInt("launchPage", MusicUtils.launchPage);
+                    editor.putInt("launchPage", MusicUtils.getInstance().launchPage);
                     editor.apply();
                     dialogInterface.cancel();
                 });
@@ -533,15 +538,15 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                     albumDialog = new AlertDialog.Builder(this);
 
                 albumDialog.setTitle(R.string.match_album_cover);
-                albumDialog.setSingleChoiceItems(enableDownload, MusicUtils.downloadAlbum, new DialogInterface.OnClickListener() {
+                albumDialog.setSingleChoiceItems(enableDownload, MusicUtils.getInstance().downloadAlbum, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        MusicUtils.downloadAlbum = i;
+                        MusicUtils.getInstance().downloadAlbum = i;
 
                         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                        editor.putInt("downloadAlbum", MusicUtils.downloadAlbum);
+                        editor.putInt("downloadAlbum", MusicUtils.getInstance().downloadAlbum);
                         editor.apply();
-                        switch (MusicUtils.downloadAlbum) {
+                        switch (MusicUtils.getInstance().downloadAlbum) {
                             case 0:
                                 albumText.setText(getResources().getString(R.string.never));
                                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(Setting.this);
@@ -551,8 +556,8 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
 
                                 });
                                 alertDialog.setPositiveButton(R.string.yes, (dialog12, which12) -> {
-                                    File file = new File(MusicUtils.localPath, MusicUtils.albumFolder);
-                                    MusicUtils.deleteDownloadImage(file);
+                                    File file = new File(MusicUtils.getInstance().localPath, MusicUtils.getInstance().albumFolder);
+                                    MusicUtils.getInstance().deleteDownloadImage(file);
                                 });
                                 alertDialog.show();
                                 break;
@@ -579,12 +584,12 @@ public class Setting extends BaseActivity implements Switch.OnCheckedChangeListe
                     builder = new AlertDialog.Builder(this);
 
                 builder.setTitle(R.string.update_lyric);
-                builder.setSingleChoiceItems(lyric, MusicUtils.loadlyric, (dialogInterface, i) -> {
-                    MusicUtils.loadlyric = i;
+                builder.setSingleChoiceItems(lyric, MusicUtils.getInstance().loadlyric, (dialogInterface, i) -> {
+                    MusicUtils.getInstance().loadlyric = i;
                     SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                    editor.putInt("loadlyric", MusicUtils.loadlyric);
+                    editor.putInt("loadlyric", MusicUtils.getInstance().loadlyric);
                     editor.apply();
-                    switch (MusicUtils.loadlyric) {
+                    switch (MusicUtils.getInstance().loadlyric) {
                         case 0:
                             lyricText.setText(getResources().getString(R.string.netease_first_1));
                             break;

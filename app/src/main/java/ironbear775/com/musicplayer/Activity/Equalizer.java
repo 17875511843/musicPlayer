@@ -45,13 +45,14 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
         toolbar.setTitle(R.string.equalizer);
         toolbar.setTitleTextColor(Color.WHITE);
         reset.setTextColor(Color.WHITE);
-        equalizerSwitch.setChecked(MusicUtils.enableEqualizer);
+        equalizerSwitch.setChecked(MusicUtils.getInstance().enableEqualizer);
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
         equalizer = new android.media.audiofx.Equalizer(0, MusicService.mediaPlayer.getAudioSessionId());
 
         setEqualizer();
@@ -169,8 +170,8 @@ public class Equalizer extends BaseActivity implements SeekBar.OnSeekBarChangeLi
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
         if (buttonView.getId() == R.id.equalizer_switch) {
-            MusicUtils.enableEqualizer = isChecked;
-            editor.putBoolean("enableEqualizer", MusicUtils.enableEqualizer);
+            MusicUtils.getInstance().enableEqualizer = isChecked;
+            editor.putBoolean("enableEqualizer", MusicUtils.getInstance().enableEqualizer);
             editor.apply();
             editor.commit();
         }

@@ -9,17 +9,19 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -45,14 +47,14 @@ import ironbear775.com.musicplayer.Util.PlaylistDbHelper;
 public class PlaylistDetailFragment extends Fragment {
 
     public static ArrayList<Music> musicList = new ArrayList<>();
-    public static int count = 0;
     public static int pos = 0;
     public static boolean isChange = false;
     public static String name;
     private RelativeLayout shuffleLayout;
     private boolean isClickable = true;
-    private MusicUtils musicUtils;
     private Toolbar toolbar;
+    private PlaylistDetailAdapter adapter;
+    private FastScrollRecyclerView listView;
 
     @Nullable
     @Override
@@ -63,6 +65,8 @@ public class PlaylistDetailFragment extends Fragment {
         musicList.clear();
 
         findView(view);
+
+        reCreateView();
 
         setHasOptionsMenu(true);
 
@@ -76,7 +80,7 @@ public class PlaylistDetailFragment extends Fragment {
         toolbar.setTitle(getArguments().getString("title"));
         toolbar.setTitleTextColor(Color.WHITE);
 
-        if (!MusicUtils.enableShuffle)
+        if (!MusicUtils.getInstance().enableShuffle)
             shuffleLayout.setVisibility(View.GONE);
         else
             shuffleLayout.setVisibility(View.VISIBLE);
@@ -87,23 +91,17 @@ public class PlaylistDetailFragment extends Fragment {
         filter.addAction("playlist delete item");
         filter.addAction("playlist swap item");
         filter.addAction("enableShuffle");
+        filter.addAction("restart yourself");
+        filter.addAction("PLAY_LIST_DETAIL_FRAGMENT_READ_MUSIC_FINISHED");
 
-        getActivity().registerReceiver(clickableReceiver,filter);
+        getActivity().registerReceiver(clickableReceiver, filter);
 
-        readList();
-
-        musicUtils = new MusicUtils(getActivity());
+        new Thread(readListRunnable).start();
 
         shuffleLayout.setOnClickListener(v -> {
-            if(musicList.size() > 0) {
-                count = 1;
-                MusicListFragment.count = 0;
-                AlbumDetailFragment.count = 0;
-                MusicRecentAddedFragment.count = 0;
-                ArtistDetailFragment.count = 0;
-                FolderDetailFragment.count = 0;
-                MusicList.count = 0;
-                musicUtils.shufflePlay(musicList,4);
+            if (musicList.size() > 0) {
+                MusicUtils.getInstance().playPage = 5;
+                MusicUtils.getInstance().shufflePlay(getActivity(),musicList, 4);
             }
         });
         return view;
@@ -112,8 +110,8 @@ public class PlaylistDetailFragment extends Fragment {
     private void findView(View view) {
         toolbar = view.findViewById(R.id.playlist_toolbar);
         shuffleLayout = view.findViewById(R.id.shuffle_playlist);
-        FastScrollRecyclerView listView = view.findViewById(R.id.playlist_detail_listView);
-        PlaylistDetailAdapter adapter = new PlaylistDetailAdapter(getActivity().getApplicationContext(), musicList, name);
+        listView = view.findViewById(R.id.playlist_detail_listView);
+        adapter = new PlaylistDetailAdapter(getActivity().getApplicationContext(), musicList, name);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.VERTICAL, false);
@@ -122,10 +120,10 @@ public class PlaylistDetailFragment extends Fragment {
         listView.setAdapter(adapter);
         listView.hasFixedSize();
 
-        adapter.setOnItemClickListener((view1, position) -> setClickAction(position));
+        adapter.setOnItemClickListener((view1, position) -> setClickAction(getActivity(),position));
 
-        ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(adapter,true,false,true);
-        ItemTouchHelper helper  = new ItemTouchHelper(callback);
+        ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(adapter, true, false, true);
+        ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(listView);
     }
 
@@ -161,7 +159,7 @@ public class PlaylistDetailFragment extends Fragment {
                 }
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.hide(this);
+                transaction.remove(this);
                 transaction.setCustomAnimations(
                         R.animator.fragment_slide_right_enter,
                         R.animator.fragment_slide_right_exit,
@@ -171,42 +169,52 @@ public class PlaylistDetailFragment extends Fragment {
                 );
                 transaction.show(MusicList.playlistFragment);
                 transaction.commit();
-                getActivity().getWindow().setStatusBarColor(0);
-
+                getActivity().getWindow().setStatusBarColor(MusicList.colorPri);
                 Intent intent = new Intent("set toolbar text");
-                intent.putExtra("title",R.string.toolbar_title_playlist);
+                intent.putExtra("title", R.string.toolbar_title_playlist);
                 getActivity().sendBroadcast(intent);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void setClickAction(int position) {
+    private void setClickAction(Context context,int position) {
         if (isClickable) {
             int progress = 0;
-            FolderDetailFragment.count = 0;
-            MusicListFragment.count = 0;
-            MusicRecentAddedFragment.count = 0;
-            AlbumDetailFragment.count = 0;
-            ArtistDetailFragment.count = 0;
-            MusicList.count = 0;
-            count = 1;
+            MusicUtils.getInstance().playPage = 5;
 
-            musicUtils.startMusic(position, progress,4);
+            MusicUtils.getInstance().startMusic(context,position, progress, 4);
 
             Intent intent = new Intent("set footBar");
             Intent intent1 = new Intent("set PlayOrPause");
-            intent.putExtra("footTitle",musicList.get(position).getTitle());
-            intent.putExtra("footArtist",musicList.get(position).getArtist());
-            intent1.putExtra("PlayOrPause",R.drawable.footplaywhite);
+            intent.putExtra("footTitle", musicList.get(position).getTitle());
+            intent.putExtra("footArtist", musicList.get(position).getArtist());
+            intent1.putExtra("PlayOrPause", R.drawable.play_to_pause_white_anim);
             getActivity().sendBroadcast(intent);
             getActivity().sendBroadcast(intent1);
 
-            musicUtils.getFootAlbumArt(position,musicList,MusicUtils.FROM_ADAPTER);
+            MusicUtils.getInstance().getFootAlbumArt(context,position, musicList, MusicUtils.getInstance().FROM_ADAPTER);
 
             pos = position;
         }
     }
+
+    private Runnable readListRunnable = new Runnable() {
+        @Override
+        public void run() {
+            readList();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (adapter != null)
+                        adapter.notifyDataSetChanged();
+                    if (readListRunnable != null)
+                        readListRunnable = null;
+                }
+            });
+        }
+    };
 
     private void readList() {
 
@@ -218,7 +226,7 @@ public class PlaylistDetailFragment extends Fragment {
         if (cursor.moveToFirst()) {
             do {
                 Music music = new Music();
-                music.setTitle( cursor.getString(cursor.getColumnIndex("title")));
+                music.setTitle(cursor.getString(cursor.getColumnIndex("title")));
                 music.setArtist(cursor.getString(cursor.getColumnIndex("artist")));
                 music.setAlbumArtUri(cursor.getString(cursor.getColumnIndex("albumArtUri")));
                 music.setAlbum(cursor.getString(cursor.getColumnIndex("album")));
@@ -236,7 +244,7 @@ public class PlaylistDetailFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null) {
-                switch (action){
+                switch (action) {
                     case "SetClickable_True":
                         isClickable = true;
                         shuffleLayout.setClickable(true);
@@ -249,16 +257,46 @@ public class PlaylistDetailFragment extends Fragment {
                         isChange = true;
                         break;
                     case "enableShuffle":
-                        if (!MusicUtils.enableShuffle)
+                        if (!MusicUtils.getInstance().enableShuffle)
                             shuffleLayout.setVisibility(View.GONE);
                         else
                             shuffleLayout.setVisibility(View.VISIBLE);
 
                         break;
+                    case "restart yourself":
+                        reCreateView();
+                        if (adapter != null)
+                            adapter.notifyDataSetChanged();
+                        break;
                 }
             }
         }
     };
+
+    private void reCreateView() {
+        try {
+            Resources.Theme theme = getActivity().getTheme();
+            TypedValue appBgValue = new TypedValue();
+            TypedValue colorPrimaryValue = new TypedValue();
+
+            theme.resolveAttribute(R.attr.appBg, appBgValue, true);
+            theme.resolveAttribute(R.attr.colorPrimary, colorPrimaryValue, true);
+            Resources resources = getResources();
+
+            int appBg = ResourcesCompat.getColor(resources,
+                    appBgValue.resourceId, null);
+            int colorPrimary = ResourcesCompat.getColor(resources,
+                    colorPrimaryValue.resourceId, null);
+
+            toolbar.setBackgroundColor(colorPrimary);
+            shuffleLayout.setBackgroundColor(colorPrimary);
+            listView.setBackgroundColor(appBg);
+
+            MusicList.colorPri = colorPrimary;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onDestroyView() {

@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.ArtistListFragment;
@@ -79,14 +81,15 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
     }
 
 
+    @NonNull
     @Override
-    public ArtistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ArtistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.artist_item_layout, parent, false);
         return new ArtistViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ArtistViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ArtistViewHolder holder, final int position) {
 
         holder.setData(position);
         if (mOnItemClickListener != null) {
@@ -115,29 +118,29 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
         File file1 = new File(dir, newKeyWord);
 
-        if (MusicUtils.downloadArtist != 0) {
-            if (file1.exists() && MusicUtils.isImageGood(file1)) {
+        if (MusicUtils.getInstance().downloadArtist != 0) {
+            if (file1.exists() && MusicUtils.getInstance().isImageGood(file1)) {
                 Glide.with(mContext)
-                        .load(file1)
                         .asBitmap()
-                        .placeholder(drawable)
+                        .load(file1)
+                        .apply(new RequestOptions().placeholder(drawable))
                         .into(holder.iv);
             } else {
                 holder.iv.setImageDrawable(drawable);
-                if ((MusicUtils.haveWIFI(mContext) && MusicUtils.downloadArtist == 2) ||
-                        (MusicUtils.haveData(mContext) && MusicUtils.downloadArtist == 1)||
-                        (MusicUtils.haveWIFI(mContext) && MusicUtils.downloadArtist == 1)) {
-                    MusicUtils.artistImage(holder.iv, mContext, mList.get(position).getArtist(),
+                if ((MusicUtils.getInstance().haveWIFI(mContext) && MusicUtils.getInstance().downloadArtist == 2) ||
+                        (MusicUtils.getInstance().haveData(mContext) && MusicUtils.getInstance().downloadArtist == 1)||
+                        (MusicUtils.getInstance().haveWIFI(mContext) && MusicUtils.getInstance().downloadArtist == 1)) {
+                    MusicUtils.getInstance().artistImage(holder.iv, mContext, mList.get(position).getArtist(),
                             drawable, (Activity) mContext);
                 }
 
             }
         } else {
-            if (file1.exists() && MusicUtils.isImageGood(file1)) {
+            if (file1.exists() && MusicUtils.getInstance().isImageGood(file1)) {
                 Glide.with(mContext)
-                        .load(file1)
                         .asBitmap()
-                        .placeholder(drawable)
+                        .load(file1)
+                        .apply(new RequestOptions().placeholder(drawable))
                         .into(holder.iv);
             } else {
                 holder.iv.setImageDrawable(drawable);
@@ -164,9 +167,18 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
         public void setData(int position) {
             Set<Integer> positionSet = ArtistListFragment.positionSet;
-            if (MusicUtils.isSelectAll) {
+            if (MusicUtils.getInstance().isSelectAll) {
                 positionSet = MusicList.listPositionSet;
             }
+
+            if (BaseActivity.isNight) {
+                tv_title.setTextColor(itemView.getResources().getColor(
+                        R.color.nightMainTextColor));
+            }else {
+                tv_title.setTextColor(itemView.getResources().getColor(
+                        R.color.lightMainTextColor));
+            }
+
             if (positionSet.contains(position)) {
                 itemView.setBackgroundResource(R.color.items_selected_bg_color);
             } else {

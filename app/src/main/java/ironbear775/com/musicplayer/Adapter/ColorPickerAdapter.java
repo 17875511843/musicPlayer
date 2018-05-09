@@ -54,7 +54,7 @@ public class ColorPickerAdapter extends ArrayAdapter<ColorItem> {
             viewHolder.name.setTextColor(view.getResources().getColor(item.getColor()));
             viewHolder.name.setText(view.getResources().getString(item.getName()));
 
-            if (item.getChecked() && item.getName()==MusicUtils.themeName)
+            if (item.getChecked() && item.getName()== MusicUtils.getInstance().themeName)
                 viewHolder.checked.setVisibility(View.VISIBLE);
             else{
                 viewHolder.checked.setVisibility(View.GONE);

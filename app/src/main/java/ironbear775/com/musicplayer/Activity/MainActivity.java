@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import com.bumptech.glide.Glide;
+
 /**
  * Created by ironbear on 2017/11/6.
  */
@@ -17,6 +19,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         SharedPreferences SharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(getApplicationContext());
+
 
         boolean isFirstStart = SharedPreferences.getBoolean("firstStart", true);
 

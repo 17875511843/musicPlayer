@@ -17,8 +17,9 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.NotificationTarget;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.ByteArrayOutputStream;
 
@@ -104,25 +105,26 @@ public class Notification {
 
         NotificationTarget notificationTarget = new NotificationTarget(
                 context,
-                remoteViews,
                 R.id.noti_album_art,
+                remoteViews,
                 notification,
-                1);
+                1
+        );
 
         NotificationTarget smallNotificationTarget = new NotificationTarget(
                 context,
-                smallRemoteViews,
                 R.id.noti_album_art,
+                smallRemoteViews,
                 notification,
                 1);
 
 
-        if (MusicUtils.enableColorNotification && msg.obj.equals(MusicUtils.messageGood)) {
+        if (MusicUtils.getInstance().enableColorNotification && msg.obj.equals(MusicUtils.getInstance().messageGood)) {
             remoteViews.setTextColor(R.id.noti_title, msg.arg1);
             remoteViews.setTextColor(R.id.noti_others, msg.arg2);
             smallRemoteViews.setTextColor(R.id.noti_title, msg.arg1);
             smallRemoteViews.setTextColor(R.id.noti_others, msg.arg2);
-        } else if (MusicUtils.isFlyme) {
+        } else if (MusicUtils.getInstance().isFlyme) {
             remoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
             remoteViews.setTextColor(R.id.noti_others, ContextCompat.getColor(context, R.color.md_white_1000));
             smallRemoteViews.setTextColor(R.id.noti_title, ContextCompat.getColor(context, R.color.md_white_1000));
@@ -142,14 +144,14 @@ public class Notification {
         smallRemoteViews.setTextViewText(R.id.noti_others,
                 music.getArtist());
 
-        if (MusicUtils.enableColorNotification) {
+        if (MusicUtils.getInstance().enableColorNotification) {
             remoteViews.setImageViewResource(R.id.noti_play_pause, id);
             smallRemoteViews.setImageViewResource(R.id.noti_play_pause, id);
         } else {
-            if (MusicUtils.isFlyme && id == R.drawable.footplay) {
+            if (MusicUtils.getInstance().isFlyme && id == R.drawable.footplay) {
                 remoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footplaywhite);
                 smallRemoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footplaywhite);
-            } else if (MusicUtils.isFlyme && id == R.drawable.footpause) {
+            } else if (MusicUtils.getInstance().isFlyme && id == R.drawable.footpause) {
                 remoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footpausewhite);
                 smallRemoteViews.setImageViewResource(R.id.noti_play_pause, R.drawable.footpausewhite);
             } else {
@@ -168,8 +170,8 @@ public class Notification {
 
         if (MusicService.mediaPlayer.isPlaying()) {
 
-            if (MusicUtils.enableColorNotification &&
-                    msg.obj.equals(MusicUtils.messageGood)) {
+            if (MusicUtils.getInstance().enableColorNotification &&
+                    msg.obj.equals(MusicUtils.getInstance().messageGood)) {
                 Bitmap image = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
                 image.eraseColor(msg.what);
 
@@ -185,32 +187,34 @@ public class Notification {
 
                 if (stream != null) {
                     Glide.with(context.getApplicationContext())
-                            .load(stream.toByteArray())
                             .asBitmap()
-                            .centerCrop()
-                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .load(stream.toByteArray())
+                            .apply(new RequestOptions()
+                                    .centerCrop()
+                                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
                             .into(notificationTarget);
                     Glide.with(context.getApplicationContext())
-                            .load(stream.toByteArray())
                             .asBitmap()
-                            .centerCrop()
-                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .load(stream.toByteArray())
+                            .apply(new RequestOptions()
+                                    .centerCrop()
+                                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
                             .into(smallNotificationTarget);
                 } else {
                     Glide.with(context.getApplicationContext())
-                            .load(R.drawable.default_album_art)
                             .asBitmap()
+                            .load(R.drawable.default_album_art)
                             .into(notificationTarget);
                     Glide.with(context.getApplicationContext())
-                            .load(R.drawable.default_album_art)
                             .asBitmap()
+                            .load(R.drawable.default_album_art)
                             .into(smallNotificationTarget);
                 }
             } else {
                 remoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
                 smallRemoteViews.setImageViewResource(R.id.noti_background, R.color.transparent_color);
 
-                if (MusicUtils.isFlyme) {
+                if (MusicUtils.getInstance().isFlyme) {
                     remoteViews.setImageViewResource(R.id.noti_next, R.drawable.next_white);
                     remoteViews.setImageViewResource(R.id.noti_last, R.drawable.previous_white);
 
@@ -228,25 +232,27 @@ public class Notification {
 
                 if (stream != null) {
                     Glide.with(context)
-                            .load(stream.toByteArray())
                             .asBitmap()
-                            .centerCrop()
-                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .load(stream.toByteArray())
+                            .apply(new RequestOptions()
+                                    .centerCrop()
+                                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
                             .into(notificationTarget);
                     Glide.with(context)
-                            .load(stream.toByteArray())
                             .asBitmap()
-                            .centerCrop()
-                            .signature(new StringSignature(String.valueOf(System.currentTimeMillis())))
+                            .load(stream.toByteArray())
+                            .apply(new RequestOptions()
+                                    .centerCrop()
+                                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))))
                             .into(smallNotificationTarget);
                 } else {
                     Glide.with(context.getApplicationContext())
-                            .load(R.drawable.default_album_art)
                             .asBitmap()
+                            .load(R.drawable.default_album_art)
                             .into(notificationTarget);
                     Glide.with(context.getApplicationContext())
-                            .load(R.drawable.default_album_art)
                             .asBitmap()
+                            .load(R.drawable.default_album_art)
                             .into(smallNotificationTarget);
                 }
             }
@@ -310,9 +316,9 @@ public class Notification {
                 .addAction(R.drawable.previous_white, "Previous", LastPIntent) // #0
                 .addAction(id, "Pause", PlayPIntent)  // #1
                 .addAction(R.drawable.next_white, "Next", NextPIntent)     // #2
-                .addAction(R.drawable.ic_close_white_24dp,"Clear",ClearPIntent)
+                .addAction(R.drawable.cancel_white, "Clear", ClearPIntent)  // #3
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(new MediaSessionCompat(context, "das").getSessionToken())
+                        .setMediaSession(new MediaSessionCompat(context, "mbr").getSessionToken())
                         .setShowActionsInCompactView(0, 1, 2))
                 .setShowWhen(false)
                 .setContentIntent(pendingIntent)
@@ -351,5 +357,4 @@ public class Notification {
             notificationManager.createNotificationChannel(notificationChannel);
         }
     }
-
 }

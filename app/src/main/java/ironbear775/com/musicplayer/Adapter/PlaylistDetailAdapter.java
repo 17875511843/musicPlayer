@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,8 +106,9 @@ public class PlaylistDetailAdapter extends RecyclerView.Adapter<PlaylistDetailAd
     }
 
 
+    @NonNull
     @Override
-    public PlaylistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.playlist_detail_item_layout, parent, false);
         if (BaseActivity.isNight)
             view.setBackgroundResource(R.color.nightBg);
@@ -116,7 +116,7 @@ public class PlaylistDetailAdapter extends RecyclerView.Adapter<PlaylistDetailAd
     }
 
     @Override
-    public void onBindViewHolder(PlaylistViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
          if (mOnItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> {
                 if (isClickable) {
@@ -129,8 +129,8 @@ public class PlaylistDetailAdapter extends RecyclerView.Adapter<PlaylistDetailAd
         holder.tv_others.setText(mList.get(position).getArtist());
         holder.iv.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
 
-        MusicUtils musicUtils = new MusicUtils(mContext);
-        musicUtils.setAlbumCoverToAdapter(mList.get(position),holder.iv,MusicUtils.FROM_ADAPTER);
+        MusicUtils.getInstance().setAlbumCoverToAdapter(mContext,mList.get(position),holder.iv,
+                MusicUtils.getInstance().FROM_ADAPTER);
     }
 
     @Override
@@ -150,8 +150,13 @@ public class PlaylistDetailAdapter extends RecyclerView.Adapter<PlaylistDetailAd
             tv_title = itemView.findViewById(R.id.playlist_tv_title);
             tv_others =  itemView.findViewById(R.id.playlist_tv_others);
             if (BaseActivity.isNight){
+                itemView.setBackgroundResource(R.color.nightBg);
                 tv_title.setTextColor(itemView.getResources().getColor(R.color.nightMainTextColor));
                 tv_others.setTextColor(itemView.getResources().getColor(R.color.nightSubTextColor));
+            }else {
+                itemView.setBackgroundResource(R.color.lightBg);
+                tv_title.setTextColor(itemView.getResources().getColor(R.color.lightMainTextColor));
+                tv_others.setTextColor(itemView.getResources().getColor(R.color.lightSubTextColor));
             }
         }
 

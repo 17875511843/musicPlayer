@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.security.Key;
+import java.security.KeyRep;
+
 /**
  * Created by ironbear on 2017/4/29.
  */
@@ -23,25 +26,28 @@ public class MediaButtonReceiver extends BroadcastReceiver {
             int keyAction = keyEvent.getAction();
 
             String TAG = "MediaButtonReceiver";
+            Log.d(TAG, "keyCode: " + keyCode + " keyAction:" + keyAction);
             if (KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && keyAction == KeyEvent.ACTION_UP) {
                 Intent in = new Intent("NEXT");
-                context.sendBroadcast(in);Log.d(TAG, "5");
+                context.sendBroadcast(in);
             }
-            if (KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE == keyCode && keyAction == KeyEvent.ACTION_UP) {
+
+            if ((KeyEvent.KEYCODE_MEDIA_PLAY == keyCode
+                    || KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode
+                    || KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE == keyCode
+                    || KeyEvent.KEYCODE_HEADSETHOOK == keyCode
+            ) && keyAction == KeyEvent.ACTION_UP) {
                 Intent in = new Intent("PlAYORPAUSE");
                 context.sendBroadcast(in);
             }
-            if (KeyEvent.KEYCODE_HEADSETHOOK == keyCode  && keyAction == KeyEvent.ACTION_UP) {
-                Intent in = new Intent("PlAYORPAUSE");
-                context.sendBroadcast(in);Log.d(TAG, "2");
-            }
+
             if (KeyEvent.KEYCODE_MEDIA_PREVIOUS == keyCode && keyAction == KeyEvent.ACTION_UP) {
                 Intent in = new Intent("PREVIOUS");
-                context.sendBroadcast(in);Log.d(TAG, "3");
+                context.sendBroadcast(in);
             }
             if (KeyEvent.KEYCODE_MEDIA_STOP == keyCode && keyAction == KeyEvent.ACTION_UP) {
                 Intent in = new Intent("STOP");
-                context.sendBroadcast(in);Log.d(TAG, "4");
+                context.sendBroadcast(in);
             }
         }
     }

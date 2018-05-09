@@ -7,13 +7,17 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,10 +42,13 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
 
 public class FolderFragment extends android.app.Fragment {
     public static ArrayList<Playlist> playlists = new ArrayList<>();
+    public static ArrayList<Music> musicList = new ArrayList<>();
     private FolderAdapter adapter;
     public static final Set<Integer> positionSet = new HashSet<>();
     private FastScrollRecyclerView folderView;
     public static FolderDetailFragment folderDetailFragment;
+    private String folderTag;
+    private String folder;
 
     @Nullable
     @Override
@@ -49,21 +56,23 @@ public class FolderFragment extends android.app.Fragment {
         View view = inflater.inflate(R.layout.list_layout, container, false);
         findView(view);
 
+        reCreateView();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("remove");
+        filter.addAction("restart yourself");
         getActivity().registerReceiver(clickableReceiver, filter);
 
         playlists.clear();
-        readFolder(getActivity());
+        new Thread(readMusicRunnable).start();
 
         initView();
 
-        if (MusicUtils.launchPage == 6) {
+        if (MusicUtils.getInstance().launchPage == 6) {
 
-            MusicUtils.setLaunchPage(getActivity(),MusicUtils.FROM_ADAPTER);
+            MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
         }
 
         return view;
@@ -78,24 +87,74 @@ public class FolderFragment extends android.app.Fragment {
         adapter = new FolderAdapter(getActivity(), playlists);
         folderView.setAdapter(adapter);
 
-        if (playlists.size() > 0) {
-            adapter.setOnItemClickListener((view, position) -> setClickAction(position));
-        }
+        adapter.setOnItemClickListener((view, position) -> setClickAction(position));
+
     }
 
     private void setClickAction(int position) {
-        String foldertTag = playlists.get(position).getName();
-        String folder = playlists.get(position).getCount();
+        folderTag = playlists.get(position).getName();
+        folder = playlists.get(position).getCount();
 
-        ArrayList<Music> folderMusicList = new ArrayList<>();
-        folderMusicList.clear();
-        Cursor cursor = getActivity().getBaseContext().getContentResolver().query(
+        new Thread(readFolderMusicRunnable).start();
+    }
+
+    private Runnable readFolderMusicRunnable = new Runnable() {
+        @Override
+        public void run() {
+            readMusic(getActivity());
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("folder", folderTag);
+                    bundle.putString("folderPath", folder);
+                    bundle.putParcelableArrayList("musicList", musicList);
+
+                    if (MusicList.folderFragment != null) {
+                        transaction.hide(MusicList.folderFragment);
+                    }
+                    transaction.setCustomAnimations(
+                            R.animator.fragment_slide_left_enter,
+                            R.animator.fragment_slide_left_exit,
+                            R.animator.fragment_slide_right_enter,
+                            R.animator.fragment_slide_right_exit);
+                    folderDetailFragment = new FolderDetailFragment();
+                    folderDetailFragment.setArguments(bundle);
+                    transaction.add(R.id.content, folderDetailFragment);
+                    transaction.commit();
+
+                }
+            });
+        }
+    };
+    private Runnable readMusicRunnable = new Runnable() {
+        @Override
+        public void run() {
+            readFolder(getActivity());
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (adapter != null)
+                        adapter.notifyDataSetChanged();
+                    if (readMusicRunnable != null)
+                        readMusicRunnable = null;
+                }
+            });
+        }
+    };
+
+    private void readMusic(Context context) {
+        musicList.clear();
+        Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, MediaStore.Audio.Media.DATA + " LIKE?",
-                new String[]{"%" + foldertTag + "%"},
+                new String[]{"%" + folderTag + "%"},
                 MediaStore.Audio.Media.TITLE);
 
-        if (MusicUtils.isFlyme) {
+        if (MusicUtils.getInstance().isFlyme) {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -113,14 +172,14 @@ public class FolderFragment extends android.app.Fragment {
                         music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                         music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                        if (!music.getUri().contains(".wmv")) {
-                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
+                        if (!music.getUri().contains(".wmv") && !music.getUri().contains(".mkv")) {
+                            if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum]) {
 
                                 data = music.getUri();
                                 int p = data.lastIndexOf("/");
 
                                 if ((data.substring(0, p)).equals(folder)) {
-                                    folderMusicList.add(music);
+                                    musicList.add(music);
                                 }
 
                             }
@@ -149,14 +208,14 @@ public class FolderFragment extends android.app.Fragment {
                             music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
                             music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
-                            if (!music.getUri().contains(".wmv")) {
-                                if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
+                            if (!music.getUri().contains(".wmv") && !music.getUri().contains(".mkv")) {
+                                if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum]) {
 
                                     data = music.getUri();
                                     int p = data.lastIndexOf("/");
 
                                     if ((data.substring(0, p)).equals(folder)) {
-                                        folderMusicList.add(music);
+                                        musicList.add(music);
                                     }
 
                                 }
@@ -167,33 +226,8 @@ public class FolderFragment extends android.app.Fragment {
                 cursor.close();
             }
         }
-
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Bundle bundle = new Bundle();
-        bundle.putString("folder", foldertTag);
-        bundle.putString("folderPath", folder);
-        bundle.putParcelableArrayList("musicList", folderMusicList);
-
-        if (MusicList.folderFragment != null) {
-            transaction.hide(MusicList.folderFragment);
-        }
-        transaction.setCustomAnimations(
-                R.animator.fragment_slide_left_enter,
-                R.animator.fragment_slide_left_exit,
-                R.animator.fragment_slide_right_enter,
-                R.animator.fragment_slide_right_exit);
-        folderDetailFragment = new FolderDetailFragment();
-        folderDetailFragment.setArguments(bundle);
-        transaction.add(R.id.content, folderDetailFragment);
-        transaction.commit();
-
     }
 
-    private void findView(View view) {
-        folderView = view.findViewById(R.id.music_list);
-
-    }
 
     private void readFolder(Context context) {
         ArrayList<String> name = new ArrayList<>();
@@ -206,9 +240,10 @@ public class FolderFragment extends android.app.Fragment {
                 do {
                     int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
 
-                    if (duration >= MusicUtils.time[MusicUtils.filterNum]) {
+                    if (duration >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum]) {
                         String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
 
+                        Log.d("TAG", "readFolder: "+data);
                         int p = data.lastIndexOf("/");
                         int s = data.substring(0, p).lastIndexOf("/");
 
@@ -234,6 +269,10 @@ public class FolderFragment extends android.app.Fragment {
         }
     }
 
+    private void findView(View view) {
+        folderView = view.findViewById(R.id.music_list);
+    }
+
     private final BroadcastReceiver clickableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -249,17 +288,43 @@ public class FolderFragment extends android.app.Fragment {
                     case "remove":
                         String path = intent.getStringExtra("folderName");
                         for (int i = 0; i < playlists.size(); i++) {
-                            if (playlists.get(i).getCount().equals(path)){
+                            if (playlists.get(i).getCount().equals(path)) {
                                 playlists.remove(i);
                                 adapter.notifyDataSetChanged();
                                 break;
                             }
                         }
                         break;
+                    case "restart yourself":
+                        reCreateView();
+                        adapter.notifyDataSetChanged();
+                        break;
                 }
             }
         }
     };
+
+    private void reCreateView() {
+        try {
+            Resources.Theme theme = getActivity().getTheme();
+            TypedValue appBgValue = new TypedValue();
+            TypedValue colorPrimaryValue = new TypedValue();
+
+            theme.resolveAttribute(R.attr.appBg, appBgValue, true);
+            theme.resolveAttribute(R.attr.colorPrimary, colorPrimaryValue, true);
+            Resources resources = getResources();
+
+            int appBg = ResourcesCompat.getColor(resources,
+                    appBgValue.resourceId, null);
+            int colorPrimary = ResourcesCompat.getColor(resources,
+                    colorPrimaryValue.resourceId, null);
+            folderView.setBackgroundColor(appBg);
+            MusicList.colorPri = colorPrimary;
+            getActivity().findViewById(R.id.toolbar).setBackgroundColor(colorPrimary);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onDestroyView() {

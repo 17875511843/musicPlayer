@@ -35,6 +35,7 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:text="@string/placeholder"
             android:textColor="?attr/subTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
     </LinearLayout>
@@ -62,7 +63,7 @@
             android:layout_height="wrap_content"
             android:textColor="?attr/subTextColor"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:text="@string/add_to_list"/>
+            android:text="@string/placeholder"/>
     </LinearLayout>
 
     <LinearLayout
@@ -89,7 +90,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textColor="?attr/subTextColor"
-            android:text="@string/add_to_list"/>
+            android:text="@string/placeholder"/>
     </LinearLayout>
 
     <LinearLayout
@@ -116,7 +117,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:text="@string/add_to_list"/>
+            android:text="@string/placeholder"/>
     </LinearLayout>
 
     <LinearLayout
@@ -143,7 +144,7 @@
             android:textColor="?attr/subTextColor"
             android:layout_height="wrap_content"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:text="@string/add_to_list"/>
+            android:text="@string/placeholder"/>
     </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
@@ -168,6 +169,7 @@
             android:layout_width="0dp"
             android:textColor="?attr/subTextColor"
             android:layout_height="wrap_content"
+            android:text="@string/placeholder"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
     </LinearLayout>
     <LinearLayout
@@ -190,6 +192,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:layout_weight="1"
+            android:text="@string/placeholder"
             android:textColor="?attr/subTextColor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

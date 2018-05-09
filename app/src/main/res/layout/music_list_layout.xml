@@ -67,21 +67,19 @@
 
         </RelativeLayout>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/footPlayOrPause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_marginBottom="34dp"
             android:layout_marginEnd="20dp"
-            android:backgroundTint="?attr/colorPrimary"
-            app:borderWidth="0dp"
-            app:elevation="5dp"
-            app:fabSize="normal"
+            app:fab_colorRipple="?attr/colorAccent"
+            app:fab_colorPressed="?attr/colorPrimaryDark"
+            app:fab_colorNormal="?attr/colorPrimary"
+            app:fab_size="normal"
             app:layout_anchor="@id/blank1"
-            app:layout_anchorGravity="bottom|right"
-            app:pressedTranslationZ="10dp"
-            app:rippleColor="?attr/colorPrimaryDark" />
+            app:layout_anchorGravity="bottom|right"/>
     </android.support.design.widget.CoordinatorLayout>
 
     <include layout="@layout/music_slide_layout"

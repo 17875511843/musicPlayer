@@ -24,10 +24,6 @@ import java.util.ArrayList;
 
 import ironbear775.com.musicplayer.Adapter.MusicAdapter;
 import ironbear775.com.musicplayer.Class.Music;
-import ironbear775.com.musicplayer.Fragment.AlbumDetailFragment;
-import ironbear775.com.musicplayer.Fragment.MusicListFragment;
-import ironbear775.com.musicplayer.Fragment.MusicRecentAddedFragment;
-import ironbear775.com.musicplayer.Fragment.PlaylistDetailFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Service.MusicService;
 import ironbear775.com.musicplayer.Util.MusicUtils;
@@ -42,7 +38,6 @@ public class SearchActivity extends BaseActivity {
     public static ArrayList<Music> musicList = new ArrayList<>();
     private FastScrollRecyclerView listview;
     private MusicAdapter adapter;
-    private MusicUtils musicUtils;
     public static int count = 0;
 
     @Override
@@ -50,10 +45,10 @@ public class SearchActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_layout);
 
-        musicUtils = new MusicUtils(this);
         findView();
         IntentFilter filter = new IntentFilter();
         filter.addAction("notifyDataSetChanged");
+        filter.addAction("SEARCH_FINISHED");
         registerReceiver(clickableReceiver, filter);
 
         setSupportActionBar(toolbar);
@@ -72,74 +67,20 @@ public class SearchActivity extends BaseActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                String searchTag = s.toString();
+                String searchTag = s.toString().trim();
                 musicList.clear();
                 if (searchTag.length() >= 1) {
-                    Cursor cursor = getContentResolver()
-                            .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                    null, MediaStore.Audio.Media.TITLE + " LIKE?",
-                                    new String[]{"%" + searchTag + "%"},
-                                    MediaStore.Audio.Media.TITLE);
-                    if (cursor != null) {
-                        if (cursor.moveToFirst()) {
-                            do {
-                                Music music = new Music();
-
-                                music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                                music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-
-                                music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                        , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                                music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                                music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                                music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                                music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                                music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-
-                                if (!music.getUri().contains(".wmv")) {
-                                    if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
-                                        musicList.add(music);
-                                    }
-                                }
-                            } while (cursor.moveToNext());
-                        }
-
-                        cursor = getContentResolver()
-                                .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                        null, MediaStore.Audio.Media.ARTIST + " LIKE?",
-                                        new String[]{"%" + searchTag + "%"},
-                                        MediaStore.Audio.Media.ARTIST);
-                        if (cursor != null) {
-                            if (cursor.moveToFirst()) {
-                                do {
-                                    Music music = new Music();
-
-                                    music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                                    music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-
-                                    music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                            , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                                    music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                    music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                                    music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                                    music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                                    music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                                    music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-
-                                    if (!music.getUri().contains(".wmv")) {
-                                        if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
-                                            musicList.add(music);
-                                        }
-                                    }
-                                } while (cursor.moveToNext());
-                            }
-
-                            cursor = getContentResolver()
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Cursor cursor = getContentResolver()
                                     .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                            null, MediaStore.Audio.Media.ALBUM + " LIKE?",
-                                            new String[]{"%" + searchTag + "%"},
-                                            MediaStore.Audio.Media.ALBUM);
+                                            null,
+                                            MediaStore.Audio.Media.TITLE + " LIKE? OR " +
+                                                    MediaStore.Audio.Media.ALBUM + " LIKE? OR " +
+                                                    MediaStore.Audio.Media.ARTIST + " LIKE?",
+                                            new String[]{"%" + searchTag + "%", "%" + searchTag + "%", "%" + searchTag + "%"},
+                                            MediaStore.Audio.Media.TITLE);
                             if (cursor != null) {
                                 if (cursor.moveToFirst()) {
                                     do {
@@ -158,58 +99,20 @@ public class SearchActivity extends BaseActivity {
                                         music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
 
                                         if (!music.getUri().contains(".wmv")) {
-                                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
+                                            if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum]) {
                                                 musicList.add(music);
                                             }
                                         }
                                     } while (cursor.moveToNext());
                                 }
-                            }
 
-                            cursor = getContentResolver()
-                                    .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                                            null, MediaStore.Audio.Media.DATA + " LIKE?",
-                                            new String[]{"%" + searchTag + "%"},
-                                            MediaStore.Audio.Media.DATA);
-                            if (cursor != null) {
-                                if (cursor.moveToFirst()) {
-                                    do {
-                                        Music music = new Music();
-
-                                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-                                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
-
-                                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart")
-                                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-                                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-                                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-                                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-                                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
-
-                                        if (!music.getUri().contains(".wmv")) {
-                                            if (music.getDuration() >= MusicUtils.time[MusicUtils.filterNum]) {
-                                                musicList.add(music);
-                                            }
-                                        }
-                                    } while (cursor.moveToNext());
-                                }
                                 cursor.close();
+                                sendBroadcast(new Intent("SEARCH_FINISHED"));
                             }
-                            listview.setVisibility(View.VISIBLE);
-                            adapter.notifyDataSetChanged();
-
-                            if (musicList.size() == 0)
-                                listview.setVisibility(View.GONE);
-
-                        } else {
-                            listview.setVisibility(View.GONE);
                         }
-                    }
-                } else {
+                    }).start();
+                } else
                     listview.setVisibility(View.GONE);
-                }
 
             }
 
@@ -219,10 +122,11 @@ public class SearchActivity extends BaseActivity {
         });
     }
 
+
     private void findView() {
-        toolbar =  findViewById(R.id.search_toolbar);
+        toolbar = findViewById(R.id.search_toolbar);
         searchEdit = findViewById(R.id.search_edit);
-        listview =  findViewById(R.id.search_result_list);
+        listview = findViewById(R.id.search_result_list);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         listview.setLayoutManager(manager);
 
@@ -244,15 +148,9 @@ public class SearchActivity extends BaseActivity {
 
     private void setClickAction(int position) {
 
-        MusicListFragment.count = 0;
-        MusicRecentAddedFragment.count = 0;
-        AlbumDetailFragment.count = 0;
-        PlaylistDetailFragment.count = 0;
-        MusicListFragment.count = 0;
-        count = 1;
-
-        musicUtils.startMusic(position, 0, 7);
-
+       
+        MusicUtils.getInstance().startMusic(this,position, 0, 7);
+        
         Intent intent = new Intent("update_cover");
         sendBroadcast(intent);
     }
@@ -283,6 +181,13 @@ public class SearchActivity extends BaseActivity {
                 switch (action) {
                     case "notifyDataSetChanged":
                         adapter.notifyDataSetChanged();
+                        break;
+                    case "SEARCH_FINISHED":
+                        listview.setVisibility(View.VISIBLE);
+                        adapter.notifyDataSetChanged();
+
+                        if (musicList.size() == 0)
+                            listview.setVisibility(View.GONE);
                         break;
                 }
             }
