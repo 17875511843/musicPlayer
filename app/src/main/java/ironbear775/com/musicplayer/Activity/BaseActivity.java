@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.Calendar;
 
 import ironbear775.com.musicplayer.R;
@@ -124,9 +126,16 @@ public class BaseActivity extends AppCompatActivity {
             else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
                 setTheme(R.style.DefaultAppThemeBlueGreyNoChangeMainWindowColor);
         }
-
+        MobclickAgent.openActivityDurationTrack(false);
     }
-
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

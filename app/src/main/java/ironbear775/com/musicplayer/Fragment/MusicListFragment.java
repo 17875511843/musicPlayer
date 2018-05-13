@@ -28,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +52,15 @@ public class MusicListFragment extends android.app.Fragment {
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView musicView;
     private Toolbar toolbar;
     private RelativeLayout shuffle;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("FolderFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("FolderFragment");
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

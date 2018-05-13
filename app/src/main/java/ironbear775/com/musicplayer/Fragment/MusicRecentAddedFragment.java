@@ -27,6 +27,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +52,15 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView musicView;
     private Toolbar toolbar;
     private RelativeLayout shuffle;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("MusicRecentAddedFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("MusicRecentAddedFragment");
+    }
 
     @Nullable
     @Override
@@ -93,7 +104,6 @@ public class MusicRecentAddedFragment extends android.app.Fragment {
         initView();
 
         if (MusicUtils.getInstance().launchPage == 5) {
-
             MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
         }
 

@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -50,6 +51,15 @@ public class FolderFragment extends android.app.Fragment {
     private String folderTag;
     private String folder;
 
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("FolderFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("FolderFragment");
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -71,7 +81,6 @@ public class FolderFragment extends android.app.Fragment {
         initView();
 
         if (MusicUtils.getInstance().launchPage == 6) {
-
             MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
         }
 

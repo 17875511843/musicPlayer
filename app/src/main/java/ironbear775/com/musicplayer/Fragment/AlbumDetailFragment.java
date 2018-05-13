@@ -35,6 +35,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.umeng.analytics.MobclickAgent;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,6 +67,15 @@ public class AlbumDetailFragment extends Fragment {
     public static int id;
     public static int playColor;
     private FastScrollRecyclerView albumListView;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("AlbumDetailFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("AlbumDetailFragment");
+    }
 
     @Nullable
     @Override

@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,6 +48,15 @@ public class FolderDetailFragment extends Fragment {
     private Toolbar toolbar;
     private RelativeLayout shuffle;
     private String folderPath;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("FolderDetailFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("FolderDetailFragment");
+    }
 
     @Nullable
     @Override

@@ -46,6 +46,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.umeng.analytics.MobclickAgent;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -94,6 +95,15 @@ public class ArtistDetailFragment extends Fragment {
     private FastScrollRecyclerView songListView;
     private String albumID;
     private String albumTag;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("ArtistDetailFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("ArtistDetailFragment");
+    }
 
     @Nullable
     @Override

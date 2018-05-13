@@ -22,6 +22,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,6 +47,16 @@ public class AlbumListFragment extends android.app.Fragment {
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView albumView;
     private String albumID;
     private String albumTag;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("AlbumListFragment");
+    }
+
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("AlbumListFragment");
+    }
 
     @Nullable
     @Override
@@ -81,7 +93,7 @@ public class AlbumListFragment extends android.app.Fragment {
                 public void onItemClick(View view, int position) {
                     if (MusicList.actionMode != null) {
                         //多选状态
-                        MusicUtils.getInstance().addOrRemoveItem(getActivity(),position, positionSet, albumAdapter);
+                        MusicUtils.getInstance().addOrRemoveItem(getActivity(), position, positionSet, albumAdapter);
                     } else {
                         setClickAction(position);
                     }

@@ -27,6 +27,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +60,15 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
     private boolean isClickable = true;
     private ListView playlist;
 
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("PlaylistFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("PlaylistFragment");
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,7 +87,6 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         reCreateView();
 
         if (MusicUtils.getInstance().launchPage == 4) {
-
             MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
         }
 

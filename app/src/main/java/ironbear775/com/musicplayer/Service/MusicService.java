@@ -619,7 +619,7 @@ public class MusicService extends Service {
             }
         }
 
-        if (bitmap == null) {
+        if (bitmap == null && music != null) {
             File file = MusicUtils.getInstance().getAlbumCoverFile(music.getArtist(), music.getAlbum());
             BitmapFactory.Options options = new BitmapFactory.Options();
             if (file.exists()) {
@@ -642,39 +642,41 @@ public class MusicService extends Service {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !MusicUtils.getInstance().useOldStyleNotification) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !MusicUtils.getInstance().useOldStyleNotification && music != null) {
             notification.createNotification(getApplicationContext(), id, music, bitmap);
         } else {
-            if (bitmap != null) {
+            if (MusicService.music != null) {
+                if (bitmap != null) {
 
-                Bitmap finalBitmap = bitmap;
-                Palette.from(bitmap).generate(palette -> {
+                    Bitmap finalBitmap = bitmap;
+                    Palette.from(bitmap).generate(palette -> {
 
-                    Palette.Swatch swatch = palette.getVibrantSwatch();
-                    if (swatch != null) {
-                        msg.what = swatch.getRgb();
-                        msg.arg1 = swatch.getTitleTextColor();
-                        msg.arg2 = swatch.getBodyTextColor();
-                        msg.obj = MusicUtils.getInstance().messageGood;
-
-                    } else {
-                        swatch = palette.getMutedSwatch();
+                        Palette.Swatch swatch = palette.getVibrantSwatch();
                         if (swatch != null) {
                             msg.what = swatch.getRgb();
                             msg.arg1 = swatch.getTitleTextColor();
                             msg.arg2 = swatch.getBodyTextColor();
                             msg.obj = MusicUtils.getInstance().messageGood;
+
                         } else {
-                            msg.obj = MusicUtils.getInstance().messageBad;
+                            swatch = palette.getMutedSwatch();
+                            if (swatch != null) {
+                                msg.what = swatch.getRgb();
+                                msg.arg1 = swatch.getTitleTextColor();
+                                msg.arg2 = swatch.getBodyTextColor();
+                                msg.obj = MusicUtils.getInstance().messageGood;
+                            } else {
+                                msg.obj = MusicUtils.getInstance().messageBad;
+                            }
                         }
-                    }
+                        notification.createNotification(getBaseContext(), id,
+                                MusicService.music, msg, finalBitmap);
+                    });
+                } else {
+                    msg.obj = MusicUtils.getInstance().messageNull;
                     notification.createNotification(getBaseContext(), id,
-                            MusicService.music, msg, finalBitmap);
-                });
-            } else {
-                msg.obj = MusicUtils.getInstance().messageNull;
-                notification.createNotification(getBaseContext(), id,
-                        MusicService.music, msg, null);
+                            MusicService.music, msg, null);
+                }
             }
         }
 

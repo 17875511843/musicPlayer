@@ -19,7 +19,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.cache.ExternalCacheDiskCacheFactory;
@@ -85,7 +87,9 @@ public class MusicUtils {
     public int FROM_ARTIST_DETAIl_PAGE = 2;
     public int FROM_ALBUM_PAGE = 3;
     public int fromWhere;
+    private final String apkFolder = "MusicPlayer/apk";
     private final String lyricFolder = "MusicPlayer/lyric";
+
 
     public final String localPath = Environment.getExternalStorageDirectory().getAbsolutePath();
     public final String artistFolder = "MusicPlayer/artist";
@@ -106,10 +110,10 @@ public class MusicUtils {
     public boolean enableTranslateLyric = true;
     public boolean autoSwitchNightMode = true;
     public boolean isFlyme = false;
+    public boolean isPlayed = false;
     public int playPage = 0; //当前点击播放的页面 1.MusicListFragment 2.MusicRecentAddedFragment
     // 3.ArtistDetailFragment 4.AlbumDetailFragment 5.PlaylistDetailFragment 6.FolderDetailFragment 7.MusicList
     public boolean isArtistlistFragmentOpen = false;
-    public boolean isAlbumlistFragmentOpen = false;
     public int sleepTime = 30;
     public int themeName = R.string.color_Pink;
     public int checkPosition = 0;
@@ -119,7 +123,7 @@ public class MusicUtils {
     public int launchPage = 1;//1,2,3,4,5,6 music,artist,album,playlist,recent,folder
     public int updateMusic = 0;//0,1 netease,kugou
     public int loadlyric = 0;//0,1,2 netease frist,netease,kugou
-    public int pos = 1;
+    public int pos = 0;
     public final String messageGood = "good";
     public final String messageBad = "error";
     public final String messageNull = "null";
@@ -158,7 +162,6 @@ public class MusicUtils {
     }
 
     public void startMusic(Context context, int position, int progress, int from) {
-
         Intent serviceIntent = new Intent(context, MusicService.class);//intent转跳
 
         serviceIntent.setAction("musiclist");
@@ -170,6 +173,8 @@ public class MusicUtils {
             playPage = 7;
 
         context.startService(serviceIntent); //开启服务
+
+        context.sendBroadcast(new Intent("show footbar"));
     }
 
     //设置底部栏专辑封面
@@ -339,6 +344,7 @@ public class MusicUtils {
             }
             Call call = null;
             if (requestBuilder != null) {
+
                 call = client.newCall(requestBuilder.build());
             }
             if (call != null) {
@@ -581,6 +587,7 @@ public class MusicUtils {
     public void getWebLyric(Context context, String songTitle, String singer,
                             boolean showLyric, boolean embed) {
         String newSinger, newSongTitle;
+        //替换特殊字符
         if (singer.contains("&"))
             newSinger = singer.replaceFirst("&", "%26");
         else
@@ -593,10 +600,12 @@ public class MusicUtils {
         OkHttpClient client = new OkHttpClient();
         try {
 
+            //接口API
             String Path = "http://music.163.com/api/search/pc?s=";
             URL u = new URL(Path + newSongTitle + " " + newSinger
                     + " &type=1");
 
+            //请求头参数
             FormBody body = new FormBody.Builder()
                     .add("Host", "music.163.com")
                     .add("Connection", "keep-alive")
@@ -609,6 +618,7 @@ public class MusicUtils {
             builder = new Request.Builder()
                     .post(body).url(u);
 
+            cancelNetCall();
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
@@ -642,8 +652,6 @@ public class MusicUtils {
                                                    @NonNull Response response) throws IOException {
                                 if (response.isSuccessful()) {
                                     String webLyric = response.body().string();
-
-                                    //saveLyricFile("1", "1",false, false, webLyric, false, false);
                                     try {
                                         JSONObject main = new JSONObject(webLyric);
 
@@ -751,6 +759,7 @@ public class MusicUtils {
             builder = new Request.Builder()
                     .post(body).url(u);
 
+            cancelNetCall();
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
@@ -798,6 +807,8 @@ public class MusicUtils {
             URL u = new URL(hashPath + newSongTitle + " " + newSinger
                     + "&page=1&pagesize=30&userid=-1&clientver=&platform=WebFilter&tag=em&filter=2&iscorrection=1&privilege_filter=0&_=1493445518061");
             builder = new Request.Builder().url(u);
+
+            cancelNetCall();
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
@@ -809,7 +820,6 @@ public class MusicUtils {
                 public void onResponse(@NonNull Call call,
                                        @NonNull Response response) throws IOException {
                     String result = response.body().string();
-
                     String hashkey;
                     String album_id;
 
@@ -1390,6 +1400,8 @@ public class MusicUtils {
             builder = new Request.Builder()
                     .post(body).url(u);
 
+            cancelNetCall();
+
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
@@ -1460,6 +1472,7 @@ public class MusicUtils {
             builder = new Request.Builder()
                     .post(body).url(u);
 
+            cancelNetCall();
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
@@ -1521,6 +1534,7 @@ public class MusicUtils {
             builder = new Request.Builder()
                     .post(body).url(u);
 
+            cancelNetCall();
             call = client.newCall(builder.build());
             call.enqueue(new Callback() {
                 @Override
@@ -2039,16 +2053,13 @@ public class MusicUtils {
             context.sendBroadcast(intent1);
 
         } else {
-            /*if (MusicList.first) {
-
-                MusicListFragment.readMusic(context);
-                MusicList.list = MusicListFragment.musicList;
-                MusicList.shufflelist = MusicListFragment.musicList;
-            }*/
 
             if (MusicService.isRandom) {
                 if (MusicList.shufflelist != null
                         && MusicList.shufflelist.size() > 0) {
+
+                    if (pos > MusicList.shufflelist.size())
+                        pos = 0;
 
                     Intent intent = new Intent("set footBar");
                     Intent intent1 = new Intent("set PlayOrPause");
@@ -2063,6 +2074,9 @@ public class MusicUtils {
             } else {
                 if (MusicList.list != null
                         && MusicList.list.size() > 0) {
+
+                    if (pos > MusicList.list.size())
+                        pos = 0;
 
                     Intent intent = new Intent("set footBar");
                     Intent intent1 = new Intent("set PlayOrPause");
@@ -2128,4 +2142,137 @@ public class MusicUtils {
                 new TypeToken<ArrayList<Music>>() {
                 }.getType());
     }
+
+    public void checkUpdate(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        int versionCode;
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            versionCode = packageInfo.versionCode;
+
+            String UPDATE_URL = "http://www.wanandroid.com/tools/mockapi/5636/iornbear775_musicplayer_check_update";
+            requestBuilder = new Request.Builder()
+                    .url(new URL(UPDATE_URL));
+
+            Call call;
+            if (requestBuilder != null) {
+
+                call = client.newCall(requestBuilder.build());
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Toast.makeText(context, "检查更新失败", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        String result = response.body().string();
+                        try {
+                            JSONObject object = new JSONObject(result);
+                            JSONObject data = object.getJSONObject("data");
+                            int newVersionCode = data.getInt("versionCode");
+
+                            if (newVersionCode > versionCode) {
+                                String versionName = data.getString("versionName");
+                                String downloadUrl = data.getString("downloadUrl");
+                                String intro = data.getString("intro");
+
+                                Intent intent = new Intent("new version");
+                                intent.putExtra("versionName", versionName);
+                                intent.putExtra("downloadUrl", downloadUrl);
+                                intent.putExtra("intro", intro);
+                                context.sendBroadcast(intent);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+
+        } catch (PackageManager.NameNotFoundException | MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void downloadApk(String url, String filename, OnDownloadListener listener) {
+        requestBuilder = new Request.Builder()
+                .url(url);
+
+        Call call;
+        if (requestBuilder != null) {
+
+            call = client.newCall(requestBuilder.build());
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    listener.onDownloadFailed();
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    InputStream is = null;
+                    byte[] buf = new byte[2048];
+                    int len;
+                    FileOutputStream fos = null;
+
+                    File dir = new File(Environment.getExternalStorageDirectory(), apkFolder);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+                    try {
+                        is = response.body() != null ? response.body().byteStream() : null;
+                        long total = response.body() != null ? response.body().contentLength() : 0;
+                        File downloadFile = new File(dir, filename + ".apk");
+                        fos = new FileOutputStream(downloadFile);
+                        long sum = 0;
+                        if (is != null) {
+                            while ((len = is.read(buf)) != -1) {
+                                fos.write(buf, 0, len);
+                                sum += len;
+                                int progress = (int) (sum * 1.0f / total * 100);
+                                listener.onDownloading(progress);
+                            }
+                            fos.flush();
+                            listener.onDownloadSuccess();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        listener.onDownloadFailed();
+                    } finally {
+                        try {
+                            if (is != null)
+                                is.close();
+                        } catch (IOException ignored) {
+                        }
+                        try {
+                            if (fos != null)
+                                fos.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    public interface OnDownloadListener {
+        /**
+         * 下载成功
+         */
+        void onDownloadSuccess();
+
+        /**
+         * @param progress 下载进度
+         */
+        void onDownloading(int progress);
+
+        /**
+         * 下载失败
+         */
+        void onDownloadFailed();
+    }
+
 }

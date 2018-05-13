@@ -24,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +49,15 @@ public class ArtistListFragment extends Fragment {
     private com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView artistView;
     private String artist;
 
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("ArtistListFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("ArtistListFragment");
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -66,8 +77,6 @@ public class ArtistListFragment extends Fragment {
 
         artistlist.clear();
         new Thread(readArtistRunnable).start();
-
-
 
         return view;
     }
@@ -127,7 +136,6 @@ public class ArtistListFragment extends Fragment {
                     initView();
 
                     if (MusicUtils.getInstance().launchPage == 2) {
-
                         MusicUtils.getInstance().setLaunchPage(getActivity(), MusicUtils.getInstance().FROM_ADAPTER);
                     }
                     if (artistAdapter != null)

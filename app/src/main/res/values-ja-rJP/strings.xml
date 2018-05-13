@@ -162,14 +162,18 @@
     <string name="select_local_album_cover">ローカルアルバム写真を選ぶ</string>
     <string name="option">オプション</string>
     <string name="placeholder">-</string>
+    <string name="find_new_version">利用できる新しいバージョン</string>
     <string name="new_version_title">更新情報</string>
-    <string name="new_version_text">- 新增中文繁体和日语，感谢酷友Rou17提供翻译
-        \n- 修复播放列表无法保存和点击的bug
-        \n- 修复部分歌词闪退bug</string>
+    <string name="new_version_text">- 修改界面为第一次启动隐藏低栏
+        \n- 修复16：9屏幕下显示标题遮挡问题，同时修复一些bug
+        \n- 翻译歌词与原歌词同时显示</string>
     <string name="donate">寄付</string>
     <string name="contact_me">グループに参加</string>
     <string name="check_qq_installed">QQはインストールしてません</string>
     <string name="check_alipay_installed">Alipayはインストールしてません</string>
     <string name="check_coolapk_installed">Coolapkはインストールしてません</string>
     <string name="rate">評価</string>
+    <string name="download_now">今ダウンロードしますか?</string>
+    <string name="download_failed">ダウンロード失敗</string>
+
 </resources>

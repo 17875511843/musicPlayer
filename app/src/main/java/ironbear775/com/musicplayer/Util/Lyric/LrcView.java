@@ -13,13 +13,16 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import ironbear775.com.musicplayer.R;
 
@@ -64,7 +67,7 @@ public class LrcView extends View {
     private void init(AttributeSet attrs) {
         TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.LrcView);
         mTextSize = ta.getDimension(R.styleable.LrcView_lrcTextSize, LrcUtils.sp2px(getContext(), 12));
-        mDividerHeight = ta.getDimension(R.styleable.LrcView_lrcDividerHeight, LrcUtils.dp2px(getContext(), 16));
+        mDividerHeight = ta.getDimension(R.styleable.LrcView_lrcDividerHeight, LrcUtils.dp2px(getContext(), 20));
         mAnimationDuration = ta.getInt(R.styleable.LrcView_lrcAnimationDuration, 1000);
         mAnimationDuration = (mAnimationDuration < 0) ? 1000 : mAnimationDuration;
         mNormalColor = ta.getColor(R.styleable.LrcView_lrcNormalTextColor, 0xFFFFFFFF);
@@ -162,6 +165,7 @@ public class LrcView extends View {
         reset();
 
         setFlag(lrcFile);
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<File, Integer, List<LrcEntry>> loadLrcTask = new AsyncTask<File, Integer, List<LrcEntry>>() {
             @Override
             protected List<LrcEntry> doInBackground(File... params) {
@@ -185,10 +189,13 @@ public class LrcView extends View {
      * @param lrcText 歌词文本
      */
     public void loadLrc(final String lrcText) {
+        //重置操作
         reset();
 
         setFlag(lrcText);
 
+        //异步加载歌词
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<String, Integer, List<LrcEntry>> loadLrcTask = new AsyncTask<String, Integer, List<LrcEntry>>() {
             @Override
             protected List<LrcEntry> doInBackground(String... params) {
@@ -198,6 +205,7 @@ public class LrcView extends View {
             @Override
             protected void onPostExecute(List<LrcEntry> lrcEntries) {
                 if (getFlag() == lrcText) {
+                    //加载成功后将歌词加入到集合准备显示
                     onLrcLoaded(lrcEntries);
                     setFlag(null);
                 }
@@ -210,6 +218,21 @@ public class LrcView extends View {
     private void onLrcLoaded(List<LrcEntry> entryList) {
 
         if (entryList != null && !entryList.isEmpty()) {
+            LrcEntry next = null;
+            ListIterator<LrcEntry> iterator = entryList.listIterator();
+            if (entryList.size() > 2)
+                next = iterator.next();
+
+            //将时间轴相同的歌词合并显示，通常原歌词和翻译歌词具有相同的时间轴
+            while (iterator.hasNext()) {
+                LrcEntry current = next;
+                next = iterator.next();
+                if (current != null && current.getTime() == next.getTime()) {
+                    current.setText(current.getText() + "\n" + next.getText());
+                    iterator.remove();
+                }
+            }
+            //加载排序合并完成好的歌词集合
             mLrcEntryList.addAll(entryList);
         }
 
@@ -217,7 +240,7 @@ public class LrcView extends View {
             initEntryList();
             initNextTime();
         }
-
+        //刷新UI重新绘制
         postInvalidate();
     }
 
@@ -289,7 +312,7 @@ public class LrcView extends View {
         if (getWidth() == 0) {
             return;
         }
-
+        //排序
         Collections.sort(mLrcEntryList);
 
         for (LrcEntry lrcEntry : mLrcEntryList) {

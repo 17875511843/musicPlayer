@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 
@@ -55,6 +56,15 @@ public class PlaylistDetailFragment extends Fragment {
     private Toolbar toolbar;
     private PlaylistDetailAdapter adapter;
     private FastScrollRecyclerView listView;
+
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart("PlaylistDetailFragment");
+    }
+    public void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("PlaylistDetailFragment");
+    }
 
     @Nullable
     @Override
