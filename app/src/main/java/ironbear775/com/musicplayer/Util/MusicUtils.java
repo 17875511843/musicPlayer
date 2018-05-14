@@ -59,6 +59,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Fragment.MusicListFragment;
@@ -212,9 +213,9 @@ public class MusicUtils {
         ArrayList<Music> tempList = (ArrayList<Music>) musicList.clone();
 
         for (int i = 0; i < tempList.size(); i++) {
+            //使用随机整数，将列表项进行交换，达到生成随机列表的目的
             swap(tempList, i, randInt(i, tempList.size() - 1));
         }
-
         return tempList;
     }
 
@@ -372,18 +373,20 @@ public class MusicUtils {
                                 URL url = new URL(ImageUrl);
                                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                                 is = new BufferedInputStream(connection.getInputStream());
-
+                                //获取缓存输入流
                                 BitmapFactory.Options opt = new BitmapFactory.Options();
-
+                                //设置bitmap编码减少体积
                                 opt.inPreferredConfig = Bitmap.Config.RGB_565;
+                                //根据输入流生成bitmap
                                 Bitmap bitmap = BitmapFactory.decodeStream(is, null, opt);
 
                                 is.close();
 
                                 if (bitmap != null) {
-
+                                    //保存为文件
                                     FileOutputStream fos = null;
                                     try {
+                                        // /压缩体积
                                         fos = new FileOutputStream(file);
                                         if (bitmap.getByteCount() > 3000000) {
                                             bitmap.compress(Bitmap.CompressFormat.JPEG, 30, fos);
@@ -556,6 +559,7 @@ public class MusicUtils {
         return key;
     }
 
+    //是否使用WIFI
     public boolean haveWIFI(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = null;
@@ -565,6 +569,7 @@ public class MusicUtils {
         return activeNetInfo != null && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI;
     }
 
+    //是否使用移动流量
     public boolean haveData(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetInfo = null;
@@ -700,15 +705,15 @@ public class MusicUtils {
                                            @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String webLyric = response.body().string();
-
-                            //Log.d("web", webLyric);
                             try {
                                 JSONObject main = new JSONObject(webLyric);
 
                                 if (enableTranslateLyric
                                         && main.has("tlyric")) {
+                                    //如果开启显示翻译歌词并且返回数据中含有翻译歌词，则同时获取翻译和原版歌词
                                     showTranslateLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                                 } else if (main.has("lrc")) {
+                                    //只获取原版歌词
                                     showOriginalLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                                 } else {
                                     sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
@@ -772,11 +777,8 @@ public class MusicUtils {
                 public void onResponse(@NonNull Call call,
                                        @NonNull Response response) throws IOException {
                     String result = response.body().string();
-
-                    //Log.d("Result", "Result: " + result);
-                    String id = parseJsonFromNetease(result, songTitle);
-
-                    //Log.d("ID", "" + id);
+                    String id = parseJsonFromNetease(result, songTitle);//匹配歌曲ID
+                    //根据ID获取歌词
                     getLyricFromNeteaseById(context, id, songTitle, singer, showLyric, embed, isUpdate);
                 }
             });
@@ -924,15 +926,16 @@ public class MusicUtils {
             }
 
             JSONObject oLrc = main.getJSONObject("lrc");
+            //若两种歌词都存在，获取翻译歌词和原始歌词
             if (oLrc.has("lyric") && !oLrc.get("lyric").toString().equals("")) {
-
                 oLyric = oLrc.getString("lyric");
-
+                //使用换行符进行切割
                 String[] tArray = tLyric.split("\\n");
                 String[] oArray = oLyric.split("\\n");
-                ArrayList<String> oArrayList = formatLyric(oArray);
-                ArrayList<String> tArrayList = formatLyric(tArray);
+                ArrayList<String> oArrayList = formatLyric(oArray);//规格化原始歌词
+                ArrayList<String> tArrayList = formatLyric(tArray);//规格化翻译歌词
 
+                //保存歌词到本地，便于下次使用
                 saveLyricFile(context, songTitle, singer, showLyric,
                         embed, mergeLyric(oArrayList, tArrayList), true, isUpdate);
             } else {
@@ -953,6 +956,7 @@ public class MusicUtils {
                 char c = lyric.charAt(0);
                 if (c == '[') {
                     count--;
+                    //使用递归思想进行切分
                     arrayList.add(lyric.substring(0, p + 1) + lyric.substring(lyric.lastIndexOf("]") + 1));
                     splitMultiTime(lyric.substring(p + 1), arrayList, count);
                 }
@@ -2161,7 +2165,7 @@ public class MusicUtils {
                 call.enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Toast.makeText(context, "检查更新失败", Toast.LENGTH_SHORT).show();
+
                     }
 
                     @Override

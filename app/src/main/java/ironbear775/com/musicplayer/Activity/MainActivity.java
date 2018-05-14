@@ -13,29 +13,26 @@ import com.bumptech.glide.Glide;
  * Created by ironbear on 2017/11/6.
  */
 
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences SharedPreferences = PreferenceManager
+        SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(getApplicationContext());
 
 
-        boolean isFirstStart = SharedPreferences.getBoolean("firstStart", true);
+        boolean isFirstStart = sharedPreferences.getBoolean("firstStart", true);
 
         try {
             int versionCode = getPackageManager().getPackageInfo(getPackageName(), 0)
                     .versionCode;
-            int oldVersionCode = SharedPreferences.getInt("versionCode", 0);
+            int oldVersionCode = sharedPreferences.getInt("versionCode", 0);
 
-            SharedPreferences.Editor editor = SharedPreferences.edit();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt("versionCode", versionCode);
             editor.apply();
 
             if (isFirstStart) {
-                editor.putBoolean("firstStart", false);
-                editor.apply();
-
                 Intent i = new Intent(MainActivity.this, MyIntroActivity.class);
                 startActivity(i);
             } else {

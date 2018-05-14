@@ -42,7 +42,7 @@ import ironbear775.com.musicplayer.Util.PlaylistDialog;
  */
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHolder>
-        implements FastScrollRecyclerView.SectionedAdapter{
+        implements FastScrollRecyclerView.SectionedAdapter {
     private static final int TYPE_NORMAL = 1;  //说明是不带有header和footer的
     private final LayoutInflater mInflater;
     private final Activity mActivity;
@@ -53,8 +53,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
     @Override
     public String getSectionName(int position) {
         if (position >= 0) {
-            return mList.get(position ).getTitle().substring(0, 1).toUpperCase(Locale.ENGLISH);
-        }else
+            return mList.get(position).getTitle().substring(0, 1).toUpperCase(Locale.ENGLISH);
+        } else
             return "#";
     }
 
@@ -115,13 +115,13 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
         }
         if (getItemViewType(position) == TYPE_NORMAL) {
             holder.item_menu.setOnClickListener(v -> {
-                PopupMenu popupMenu = new PopupMenu(mActivity,holder.item_menu);
+                PopupMenu popupMenu = new PopupMenu(mActivity, holder.item_menu);
                 popupMenu.inflate(R.menu.new_menu);
                 popupMenu.setOnMenuItemClickListener(item -> {
-                    switch (item.getItemId()){
+                    switch (item.getItemId()) {
                         case R.id.menu_add:
                             Set<Integer> listPositionSet = new HashSet<>();
-                            switch (MusicList.Mod){
+                            switch (MusicList.Mod) {
                                 case 1:
                                     listPositionSet = MusicListFragment.positionSet;
                                     break;
@@ -133,12 +133,12 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
                                     break;
                             }
                             listPositionSet.add(position);
-                            PlaylistDialog dialog = new PlaylistDialog(mActivity,listPositionSet, mList);
+                            PlaylistDialog dialog = new PlaylistDialog(mActivity, listPositionSet, mList);
                             dialog.show();
                             break;
                         case R.id.menu_delete:
 
-                            AlertDialog.Builder alertDialog= new AlertDialog.Builder(mActivity);
+                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(mActivity);
 
                             alertDialog.setTitle(R.string.delete_alert_title);
                             alertDialog.setMessage(mList.get(position).getTitle());
@@ -153,16 +153,16 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
                                         MediaStore.Audio.Media.DATA + "=?",
                                         new String[]{uri});
                                 File file = new File(uri);
-                                if (file.isFile()){
+                                if (file.isFile()) {
                                     if (file.delete()) {
                                         if (MusicService.musicService != null
-                                                &&MusicService.mediaPlayer.isPlaying()
-                                                &&mList.get(position).getUri().equals(MusicService.music.getUri())) {
+                                                && MusicService.mediaPlayer.isPlaying()
+                                                && mList.get(position).getUri().equals(MusicService.music.getUri())) {
                                             Intent intentNext = new Intent("delete current music success");
                                             mActivity.sendBroadcast(intentNext);
                                         }
                                         Intent intent = new Intent("notifyDataSetChanged");
-                                        switch (MusicList.Mod){
+                                        switch (MusicList.Mod) {
                                             case 1:
                                                 MusicListFragment.musicList.remove(position);
                                                 break;
@@ -173,17 +173,18 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
                                                 FolderDetailFragment.musicList.remove(position);
                                                 break;
                                         }
-                                        if (SearchActivity.musicList!=null && SearchActivity.musicList.size()>0){
+                                        if (SearchActivity.musicList != null && SearchActivity.musicList.size() > 0
+                                                && SearchActivity.musicList.size() > position) {
                                             SearchActivity.musicList.remove(position);
                                         }
                                         mActivity.sendBroadcast(intent);
                                         Intent intent1 = new Intent("show snackBar");
-                                        intent1.putExtra("text id",R.string.success);
+                                        intent1.putExtra("text id", R.string.success);
                                         mActivity.sendBroadcast(intent1);
 
-                                    }else {
+                                    } else {
                                         Intent intent1 = new Intent("show snackBar");
-                                        intent1.putExtra("text id",R.string.failed);
+                                        intent1.putExtra("text id", R.string.failed);
                                         mActivity.sendBroadcast(intent1);
                                     }
                                 }
@@ -192,12 +193,12 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
                             break;
                         case R.id.play_next:
                             Intent intent1 = new Intent("play next");
-                            intent1.putExtra("from",1);
-                            intent1.putExtra("uri",mList.get(position).getUri());
+                            intent1.putExtra("from", 1);
+                            intent1.putExtra("uri", mList.get(position).getUri());
                             mActivity.sendBroadcast(intent1);
                             break;
                         case R.id.menu_detail:
-                            DetailDialog detailDialog = new DetailDialog(mActivity,mList,position);
+                            DetailDialog detailDialog = new DetailDialog(mActivity, mList, position);
                             detailDialog.show();
                             break;
                         case R.id.tag_edit:
@@ -206,8 +207,8 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
                                 Intent intent = new Intent(mActivity, TagEditActivity.class);
                                 intent.putExtra("music", (Parcelable) mList.get(position));
                                 mActivity.startActivity(intent);
-                            }else {
-                                Toast.makeText(mActivity,R.string.open_failed,Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(mActivity, R.string.open_failed, Toast.LENGTH_SHORT).show();
                             }
                             break;
                     }
@@ -216,12 +217,12 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
                 popupMenu.show();
             });
 
-            holder.iv.setTag(R.id.item_url, mList.get(position).getTitle()+mList.get(position).getArtist());
+            holder.iv.setTag(R.id.item_url, mList.get(position).getTitle() + mList.get(position).getArtist());
             holder.tv_title.setText(mList.get(position).getTitle());
-            String others = mList.get(position).getArtist()+"-"+mList.get(position).getAlbum();
+            String others = mList.get(position).getArtist() + "-" + mList.get(position).getAlbum();
             holder.tv_others.setText(others);
 
-            MusicUtils.getInstance().setAlbumCoverToAdapter(mActivity,mList.get(position),holder.iv,
+            MusicUtils.getInstance().setAlbumCoverToAdapter(mActivity, mList.get(position), holder.iv,
                     MusicUtils.getInstance().FROM_ADAPTER);
 
         }
@@ -233,7 +234,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
         return mList.size();
     }
 
-    class MusicViewHolder extends RecyclerView.ViewHolder   {
+    class MusicViewHolder extends RecyclerView.ViewHolder {
         final ImageView iv;
         final TextView tv_title;
         final TextView tv_others;
@@ -247,11 +248,11 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
             item_menu = itemView.findViewById(R.id.item_menu);
         }
 
-        public void setData(int position){
+        public void setData(int position) {
             Set<Integer> positionSet = new HashSet<>();
-            if (MusicUtils.getInstance().isSelectAll){
+            if (MusicUtils.getInstance().isSelectAll) {
                 positionSet = MusicList.listPositionSet;
-            }else {
+            } else {
                 switch (MusicList.Mod) {
                     case 1:
                         positionSet = MusicListFragment.positionSet;
@@ -268,14 +269,14 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
             if (BaseActivity.isNight) {
                 tv_title.setTextColor(itemView.getResources().getColor(
                         R.color.nightMainTextColor));
-            }else {
+            } else {
                 tv_title.setTextColor(itemView.getResources().getColor(
                         R.color.lightMainTextColor));
             }
 
-            if (positionSet.contains(position)){
+            if (positionSet.contains(position)) {
                 itemView.setBackgroundResource(R.color.items_selected_bg_color);
-            }else {
+            } else {
                 itemView.setBackground(null);
             }
         }

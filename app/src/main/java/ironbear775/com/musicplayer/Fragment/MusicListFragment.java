@@ -247,31 +247,6 @@ public class MusicListFragment extends android.app.Fragment {
                     do {
 
                         Music music = new Music();
-                        music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID))); //获取歌曲ID
-                        music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE))); //获取歌曲文件大小
-
-                        music.setAlbumArtUri(String.valueOf(ContentUris.withAppendedId(
-                                Uri.parse("content://media/external/audio/albumart")
-                                , cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))));
-                        //获取歌曲专辑封面uri
-                        music.setUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))); //获取歌曲uri
-                        music.setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))); //获取歌曲标题
-                        music.setAlbum_id(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))); //获取歌曲专辑ID
-                        music.setAlbum(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))); //获取歌曲专辑名称
-                        music.setArtist(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))); //获取歌曲艺术家名称
-                        music.setDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));  //获取歌曲时长
-
-                        if (!music.getUri().contains(".wmv") && !music.getUri().contains(".mkv")) {
-                            if (music.getDuration() >= MusicUtils.getInstance().time[MusicUtils.getInstance().filterNum])
-                                musicList.add(music);
-                        }
-                    } while (cursor.moveToNext());
-                    cursor.close();
-                }
-                if (cursor.moveToFirst()) {
-                    do {
-
-                        Music music = new Music();
                         music.setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
                         music.setSize(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)));
 

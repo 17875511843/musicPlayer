@@ -88,6 +88,9 @@ import com.mpatric.mp3agic.NotSupportedException;
 import com.mpatric.mp3agic.UnsupportedTagException;
 import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.nononsenseapps.filepicker.Utils;
+import com.yanzhenjie.permission.Action;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.Permission;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -198,15 +201,18 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     private ImageView last, next;
     private AnimatedVectorDrawable playToPauseDrawable, pauseToPlayDrawable;
     private AnimatedVectorDrawable playToPauseWhiteDrawable, pauseToPlayWhiteDrawable;
+    private boolean isConn;
 
     private final ServiceConnection conn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             musicService = ((MusicService.MusicBinder) iBinder).getService();
+            isConn = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            isConn = false;
         }
     };
 
@@ -261,23 +267,73 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
         findView();
 
-        init();
+        slideUp = new SlideUpBuilder(slideView)
+                .withStartGravity(Gravity.BOTTOM)
+                .withGesturesEnabled(true)
+                .withTouchableAreaDp(1000)
+                .withGesturesEnabled(true)
+                .withStartState(SlideUp.State.HIDDEN)
+                .withListeners(new SlideUp.Listener.Events() {
+                    @Override
+                    public void onSlide(float percent) {
+                        slideView.setAlpha(1 - (percent / 100));
+                    }
 
-        toolbar.inflateMenu(R.menu.menu_short);
+                    @Override
+                    public void onVisibilityChanged(int visibility) {
+                        if (visibility == View.GONE) {
 
-        if (getIntent().getBooleanExtra("Start Activity", false)) {
-            sendBroadcast(new Intent("open activity"));
-        }
+                            Intent intent = new Intent("SetClickable_True");
+                            sendBroadcast(intent);
 
-        int height = headerTitle.getHeight() - headerTitle.getPaddingTop() - headerTitle.getPaddingBottom();
-        float textSize = headerTitle.getTextSize();
+                            MusicUtils.getInstance().cancelNetCall();
+                            lyricView.setVisibility(View.GONE);
+                            blurBG.setVisibility(View.GONE);
+                            if (MusicUtils.getInstance().isPlayed && footBar.getVisibility() == View.GONE) {
+                                footBar.setVisibility(View.VISIBLE);
+                                PlayOrPause.show(true);
+                            }
+                        }
+                    }
+                })
+                .build();
 
-        Log.d("TAG", "height: " + height);
-        Log.d("TAG", "textSize: " + textSize);
+        AndPermission.with(this)
+                .runtime()
+                .permission(Permission.Group.STORAGE)
+                .onGranted(new Action<List<String>>() {
+                    @Override
+                    public void onAction(List<String> data) {
+                        init();
+
+                        toolbar.inflateMenu(R.menu.menu_short);
+
+                        if (getIntent().getBooleanExtra("Start Activity", false)) {
+                            sendBroadcast(new Intent("open activity"));
+                        }
+
+                        int height = headerTitle.getHeight() - headerTitle.getPaddingTop() - headerTitle.getPaddingBottom();
+                        float textSize = headerTitle.getTextSize();
+
+                        Log.d("TAG", "height: " + height);
+                        Log.d("TAG", "textSize: " + textSize);
 
 
-        footBar.setVisibility(View.GONE);
-        PlayOrPause.hide(false);
+                        footBar.setVisibility(View.GONE);
+                        PlayOrPause.hide(false);
+                    }
+                })
+                .onDenied(new Action<List<String>>() {
+                    @Override
+                    public void onAction(List<String> data) {
+                        Toast.makeText(MusicList.this, R.string.need_permission, Toast.LENGTH_LONG)
+                                .show();
+                        removeALLActivity();
+                    }
+                })
+                .start();
+
+
     }
 
 
@@ -404,36 +460,6 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
         initSlideDrawer();
 
-        slideUp = new SlideUpBuilder(slideView)
-                .withStartGravity(Gravity.BOTTOM)
-                .withGesturesEnabled(true)
-                .withTouchableAreaDp(1000)
-                .withGesturesEnabled(true)
-                .withStartState(SlideUp.State.HIDDEN)
-                .withListeners(new SlideUp.Listener.Events() {
-                    @Override
-                    public void onSlide(float percent) {
-                        slideView.setAlpha(1 - (percent / 100));
-                    }
-
-                    @Override
-                    public void onVisibilityChanged(int visibility) {
-                        if (visibility == View.GONE) {
-
-                            Intent intent = new Intent("SetClickable_True");
-                            sendBroadcast(intent);
-
-                            MusicUtils.getInstance().cancelNetCall();
-                            lyricView.setVisibility(View.GONE);
-                            blurBG.setVisibility(View.GONE);
-                            if (MusicUtils.getInstance().isPlayed && footBar.getVisibility() == View.GONE) {
-                                footBar.setVisibility(View.VISIBLE);
-                                PlayOrPause.show(true);
-                            }
-                        }
-                    }
-                })
-                .build();
 
         MusicUtils.getInstance().checkUpdate(this);
     }
@@ -594,25 +620,13 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     }
 
     private void quit() {
-        unbindService(conn);
+        if (isConn)
+            unbindService(conn);
 
         if (MusicService.mediaPlayer != null && !MusicService.mediaPlayer.isPlaying()) {
 
             sendBroadcast(new Intent("save data"));
             flag = 0;
-
-            /*Intent intent = new Intent(MusicList.this, MusicService.class);
-            NotificationManager notificationManager = (NotificationManager)
-                    getSystemService(NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                notificationManager.cancel(1);
-            }
-
-            musicService.stopForeground(true);
-            stopService(intent);
-
-            finish();
-            System.exit(0);*/
         }
 
         unregisterReceiver(musicFinishReceiver);

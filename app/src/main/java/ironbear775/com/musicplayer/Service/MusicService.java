@@ -624,18 +624,20 @@ public class MusicService extends Service {
             BitmapFactory.Options options = new BitmapFactory.Options();
             if (file.exists()) {
                 bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-                if (bitmap.getByteCount() > 3000000) {
-                    options.inSampleSize = 5;
-                } else if (bitmap.getByteCount() > 2500000) {
-                    options.inSampleSize = 4;
-                } else if (bitmap.getByteCount() > 2000000) {
-                    options.inSampleSize = 3;
-                } else if (bitmap.getByteCount() > 1250000) {
-                    options.inSampleSize = 2;
-                } else {
-                    options.inSampleSize = 1;
+                if (bitmap!= null) {
+                    if (bitmap.getByteCount() > 3000000) {
+                        options.inSampleSize = 5;
+                    } else if (bitmap.getByteCount() > 2500000) {
+                        options.inSampleSize = 4;
+                    } else if (bitmap.getByteCount() > 2000000) {
+                        options.inSampleSize = 3;
+                    } else if (bitmap.getByteCount() > 1250000) {
+                        options.inSampleSize = 2;
+                    } else {
+                        options.inSampleSize = 1;
+                    }
+                    bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
                 }
-                bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
             } else {
                 options.inSampleSize = 5;
                 bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_album_art, options);

@@ -27,6 +27,7 @@ public class IntroFragment extends android.support.v4.app.Fragment {
         Button button = view.findViewById(R.id.intro_permission);
         button.setOnClickListener(v -> ActivityCompat.requestPermissions(getActivity(),
                 new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.SYSTEM_ALERT_WINDOW}, 1));
         return view;
     }
