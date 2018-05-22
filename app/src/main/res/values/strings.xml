@@ -175,5 +175,6 @@
     <string name="rate">Rate this app</string>
     <string name="download_now">Download Now?</string>
     <string name="download_failed">Download failed</string>
+    <string name="check_update_failed">Check Update Failed</string>
     <string name="need_permission">The app is short of permissions and can not work properly</string>
 </resources>

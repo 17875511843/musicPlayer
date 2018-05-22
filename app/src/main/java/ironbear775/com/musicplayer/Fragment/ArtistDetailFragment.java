@@ -62,6 +62,7 @@ import ironbear775.com.musicplayer.Adapter.ArtistDetailAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
 import ironbear775.com.musicplayer.Util.SquareImageView;
 
 /**
@@ -356,7 +357,8 @@ public class ArtistDetailFragment extends Fragment {
 
         songListView.setNestedScrollingEnabled(false);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
+        albumListView.setLayoutManager(linearLayoutManager);
 
         songListView.setLayoutManager(linearLayoutManager);
         songAdapter = new ArtistDetailAdapter(getActivity(), musicList);

@@ -36,6 +36,7 @@ import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.Class.Playlist;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
 
 /**
  * Created by ironbear on 2017/5/13.
@@ -89,9 +90,9 @@ public class FolderFragment extends android.app.Fragment {
 
     private void initView() {
         folderView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(
-                getActivity(), LinearLayout.VERTICAL, false);
-        folderView.setLayoutManager(layoutManager);
+
+        MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
+        folderView.setLayoutManager(linearLayoutManager);
 
         adapter = new FolderAdapter(getActivity(), playlists);
         folderView.setAdapter(adapter);

@@ -175,5 +175,6 @@
     <string name="rate">評価</string>
     <string name="download_now">今ダウンロードしますか?</string>
     <string name="download_failed">ダウンロード失敗</string>
+    <string name="check_update_failed">更新の失敗</string>
     <string name="need_permission">アプリの許可の短いきちんと働くことができません</string>
 </resources>

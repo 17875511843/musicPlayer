@@ -175,5 +175,6 @@
     <string name="rate">去评分</string>
     <string name="download_now">要现在下载吗?</string>
     <string name="download_failed">下载失败</string>
+    <string name="check_update_failed">检查更新失败</string>
     <string name="need_permission">程序缺少权限，无法正常工作</string>
 </resources>

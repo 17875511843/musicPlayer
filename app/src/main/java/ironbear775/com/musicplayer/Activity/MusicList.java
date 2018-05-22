@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -297,6 +298,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     }
                 })
                 .build();
+        slideUp.hideImmediately();
 
         AndPermission.with(this)
                 .runtime()
@@ -311,13 +313,6 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         if (getIntent().getBooleanExtra("Start Activity", false)) {
                             sendBroadcast(new Intent("open activity"));
                         }
-
-                        int height = headerTitle.getHeight() - headerTitle.getPaddingTop() - headerTitle.getPaddingBottom();
-                        float textSize = headerTitle.getTextSize();
-
-                        Log.d("TAG", "height: " + height);
-                        Log.d("TAG", "textSize: " + textSize);
-
 
                         footBar.setVisibility(View.GONE);
                         PlayOrPause.hide(false);
@@ -1440,7 +1435,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     public Runnable runnable1 = new Runnable() {
         @Override
         public void run() {
-            if (MusicService.mediaPlayer.isPlaying()) {
+            if (MusicService.mediaPlayer != null && MusicService.mediaPlayer.isPlaying()) {
                 lyricView.updateTime(MusicService.mediaPlayer.getCurrentPosition());
             }
             handler1.postDelayed(this, 100);
@@ -1662,37 +1657,39 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         public void run() {
 
             if (slideUp.isVisible()) {
-                musicProgress.setMax(MusicService.mediaPlayer.getDuration());
-                musicProgress.setProgress(MusicService.mediaPlayer.getCurrentPosition());
-                musicProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (MusicService.mediaPlayer != null) {
+                    musicProgress.setMax(MusicService.mediaPlayer.getDuration());
+                    musicProgress.setProgress(MusicService.mediaPlayer.getCurrentPosition());
+                    musicProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                            MusicService.mediaPlayer.seekTo(seekBar.getProgress());
+                            lyricView.onDrag(seekBar.getProgress());
+                        }
+                    });
+
+                    current.setText(time.format(MusicService.mediaPlayer.getCurrentPosition()));
+                    if (MusicService.mediaPlayer.isPlaying()) {
+                        String albumText = getResources().getString(R.string.album) + MusicService.music.getAlbum();
+                        String artistText = getResources().getString(R.string.artist) + MusicService.music.getArtist();
+                        album.setText(albumText);
+                        title.setText(MusicService.music.getTitle());
+                        artist.setText(artistText);
+                        setImageButtonBG();
+                        duration.setText(time.format(MusicService.mediaPlayer.getDuration()));
+                    } else {
+                        setImageButtonBG();
                     }
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        MusicService.mediaPlayer.seekTo(seekBar.getProgress());
-                        lyricView.onDrag(seekBar.getProgress());
-                    }
-                });
-
-                current.setText(time.format(MusicService.mediaPlayer.getCurrentPosition()));
-                if (MusicService.mediaPlayer.isPlaying()) {
-                    String albumText = getResources().getString(R.string.album) + MusicService.music.getAlbum();
-                    String artistText = getResources().getString(R.string.artist) + MusicService.music.getArtist();
-                    album.setText(albumText);
-                    title.setText(MusicService.music.getTitle());
-                    artist.setText(artistText);
-                    setImageButtonBG();
-                    duration.setText(time.format(MusicService.mediaPlayer.getDuration()));
-                } else {
-                    setImageButtonBG();
                 }
-
             }
 
             handler.postDelayed(runnable, 1000);
@@ -2714,57 +2711,78 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         }
     }
 
+    private boolean isDownloadCancel = false;
+
+    //下载安装包
     private void downloadApk(String uri, String filename) {
+        File dir = new File(Environment.getExternalStorageDirectory(), "MusicPlayer/apk");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File file = (new File(dir, filename + ".apk"));
+
         ProgressDialog dialog = new ProgressDialog(MusicList.this);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         dialog.setCancelable(false);
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.delete_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                isDownloadCancel = true;
                 MusicUtils.getInstance().cancelNetCall();
+                if (file.exists())
+                    file.delete();
             }
         });
 
         dialog.show();
-        MusicUtils.getInstance().downloadApk(uri, filename, new MusicUtils.OnDownloadListener() {
-            @Override
-            public void onDownloadSuccess() {
-                dialog.dismiss();
-                File dir = new File(Environment.getExternalStorageDirectory(), "MusicPlayer/apk");
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
-                    File file = (new File(dir, filename + ".apk"));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    Uri apkUri = FileProvider.getUriForFile(MusicList.this,
-                            "ironbear775.com.musicplayer.provider", file);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-                } else {
-                    intent.setDataAndType(Uri.fromFile(new File(dir, filename + ".apk")),
-                            "application/vnd.android.package-archive");
-                }
-                startActivity(intent);
-            }
 
-            @Override
-            public void onDownloading(int progress) {
-                dialog.setProgress(progress);
-            }
+        if (file.exists()) {
+            installApk(dir, file, filename);
+            dialog.dismiss();
+        } else {
 
-            @Override
-            public void onDownloadFailed() {
-                dialog.dismiss();
-                MusicList.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MusicList.this, R.string.download_failed, Toast.LENGTH_SHORT).show();
+            MusicUtils.getInstance().downloadApk(uri, filename, new MusicUtils.OnDownloadListener() {
+                @Override
+                public void onDownloadSuccess() {
+                    dialog.dismiss();
+                    if (!isDownloadCancel) {
+                        installApk(dir, file, filename);
                     }
-                });
-            }
-        });
+                }
+
+                @Override
+                public void onDownloading(int progress) {
+                    dialog.setProgress(progress);
+                }
+
+                @Override
+                public void onDownloadFailed() {
+                    dialog.dismiss();
+                    Looper.prepare();
+                    Toast.makeText(MusicList.this, R.string.download_failed, Toast.LENGTH_SHORT).show();
+                    Looper.loop();
+
+                    if (file.exists())
+                        file.delete();
+                }
+            });
+        }
+    }
+
+    //安装apk
+    private void installApk(File dir, File file, String filename) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Uri apkUri = FileProvider.getUriForFile(MusicList.this,
+                    "ironbear775.com.musicplayer.provider", file);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+        } else {
+            intent.setDataAndType(Uri.fromFile(new File(dir, filename + ".apk")),
+                    "application/vnd.android.package-archive");
+        }
+        startActivity(intent);
     }
 
     /**

@@ -705,15 +705,15 @@ public class MusicUtils {
                                            @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String webLyric = response.body().string();
+
+                            //Log.d("web", webLyric);
                             try {
                                 JSONObject main = new JSONObject(webLyric);
 
                                 if (enableTranslateLyric
                                         && main.has("tlyric")) {
-                                    //如果开启显示翻译歌词并且返回数据中含有翻译歌词，则同时获取翻译和原版歌词
                                     showTranslateLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                                 } else if (main.has("lrc")) {
-                                    //只获取原版歌词
                                     showOriginalLyric(context, main, songTitle, singer, showLyric, embed, isUpdate);
                                 } else {
                                     sendLyricNotFoundBroadcast(context, showLyric, embed, isUpdate);
@@ -777,8 +777,11 @@ public class MusicUtils {
                 public void onResponse(@NonNull Call call,
                                        @NonNull Response response) throws IOException {
                     String result = response.body().string();
-                    String id = parseJsonFromNetease(result, songTitle);//匹配歌曲ID
-                    //根据ID获取歌词
+
+                    //Log.d("Result", "Result: " + result);
+                    String id = parseJsonFromNetease(result, songTitle);
+
+                    //Log.d("ID", "" + id);
                     getLyricFromNeteaseById(context, id, songTitle, singer, showLyric, embed, isUpdate);
                 }
             });
@@ -926,16 +929,15 @@ public class MusicUtils {
             }
 
             JSONObject oLrc = main.getJSONObject("lrc");
-            //若两种歌词都存在，获取翻译歌词和原始歌词
             if (oLrc.has("lyric") && !oLrc.get("lyric").toString().equals("")) {
+
                 oLyric = oLrc.getString("lyric");
-                //使用换行符进行切割
+
                 String[] tArray = tLyric.split("\\n");
                 String[] oArray = oLyric.split("\\n");
-                ArrayList<String> oArrayList = formatLyric(oArray);//规格化原始歌词
-                ArrayList<String> tArrayList = formatLyric(tArray);//规格化翻译歌词
+                ArrayList<String> oArrayList = formatLyric(oArray);
+                ArrayList<String> tArrayList = formatLyric(tArray);
 
-                //保存歌词到本地，便于下次使用
                 saveLyricFile(context, songTitle, singer, showLyric,
                         embed, mergeLyric(oArrayList, tArrayList), true, isUpdate);
             } else {
@@ -956,7 +958,6 @@ public class MusicUtils {
                 char c = lyric.charAt(0);
                 if (c == '[') {
                     count--;
-                    //使用递归思想进行切分
                     arrayList.add(lyric.substring(0, p + 1) + lyric.substring(lyric.lastIndexOf("]") + 1));
                     splitMultiTime(lyric.substring(p + 1), arrayList, count);
                 }
@@ -2155,17 +2156,20 @@ public class MusicUtils {
             versionCode = packageInfo.versionCode;
 
             String UPDATE_URL = "http://www.wanandroid.com/tools/mockapi/5636/iornbear775_musicplayer_check_update";
-            requestBuilder = new Request.Builder()
-                    .url(new URL(UPDATE_URL));
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(UPDATE_URL)
+                    .build();
 
-            Call call;
-            if (requestBuilder != null) {
+            if (request != null) {
 
-                call = client.newCall(requestBuilder.build());
+                Call call = client.newCall(request);
                 call.enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                        Looper.prepare();
+                        Toast.makeText(context,R.string.check_update_failed,Toast.LENGTH_SHORT).show();
+                        Looper.loop();
                     }
 
                     @Override
@@ -2195,7 +2199,7 @@ public class MusicUtils {
                 });
             }
 
-        } catch (PackageManager.NameNotFoundException | MalformedURLException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
 

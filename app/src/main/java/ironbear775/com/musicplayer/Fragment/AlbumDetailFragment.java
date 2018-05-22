@@ -49,6 +49,7 @@ import ironbear775.com.musicplayer.Adapter.AlbumDetailAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
 import ironbear775.com.musicplayer.Util.SquareImageView;
 
 /**
@@ -204,7 +205,7 @@ public class AlbumDetailFragment extends Fragment {
         albumListView = view.findViewById(R.id.album_detail_list);
         albumListView.setHasFixedSize(true);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
         albumListView.setLayoutManager(linearLayoutManager);
 
         albumArt.setOnLongClickListener(view1 -> {

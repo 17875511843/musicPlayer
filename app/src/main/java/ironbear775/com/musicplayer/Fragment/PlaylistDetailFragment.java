@@ -39,6 +39,7 @@ import ironbear775.com.musicplayer.Adapter.PlaylistDetailAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
 import ironbear775.com.musicplayer.Util.PlaylistDbHelper;
 
 /**
@@ -123,9 +124,9 @@ public class PlaylistDetailFragment extends Fragment {
         listView = view.findViewById(R.id.playlist_detail_listView);
         adapter = new PlaylistDetailAdapter(getActivity().getApplicationContext(), musicList, name);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(),
-                LinearLayoutManager.VERTICAL, false);
-        listView.setLayoutManager(layoutManager);
+
+        MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
+        listView.setLayoutManager(linearLayoutManager);
 
         listView.setAdapter(adapter);
         listView.hasFixedSize();

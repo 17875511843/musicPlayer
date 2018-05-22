@@ -156,14 +156,14 @@ public class BaseActivity extends AppCompatActivity {
 
     // 添加Activity方法
     public void addActivity() {
-        application.addActivity_(oContext);// 调用myApplication的添加Activity方法
+        application.addActivity(oContext);// 调用myApplication的添加Activity方法
     }
     //销毁当个Activity方法
     public void removeActivity() {
-        application.removeActivity_(oContext);// 调用myApplication的销毁单个Activity方法
+        application.removeActivity(oContext);// 调用myApplication的销毁单个Activity方法
     }
     //销毁所有Activity方法
     public void removeALLActivity() {
-        application.removeALLActivity_();// 调用myApplication的销毁所有Activity方法
+        application.removeALLActivity();// 调用myApplication的销毁所有Activity方法
     }
 }

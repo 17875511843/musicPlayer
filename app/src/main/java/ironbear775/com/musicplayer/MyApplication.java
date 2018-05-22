@@ -19,7 +19,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        oList = new ArrayList<Activity>();
+        oList = new ArrayList<>();
 
         UMConfigure.init(this, "5af7b675a40fa375ab0000de", "CoolApk", UMConfigure.DEVICE_TYPE_PHONE, null);
         UMConfigure.setLogEnabled(true);
@@ -29,7 +29,7 @@ public class MyApplication extends Application {
     /**
      * 添加Activity
      */
-    public void addActivity_(Activity activity) {
+    public void addActivity(Activity activity) {
     // 判断当前集合中不存在该Activity
         if (!oList.contains(activity)) {
             oList.add(activity);//把当前Activity添加到集合中
@@ -39,7 +39,7 @@ public class MyApplication extends Application {
     /**
      * 销毁单个Activity
      */
-    public void removeActivity_(Activity activity) {
+    public void removeActivity(Activity activity) {
     //判断当前集合中存在该Activity
         if (oList.contains(activity)) {
             oList.remove(activity);//从集合中移除
@@ -50,7 +50,7 @@ public class MyApplication extends Application {
     /**
      * 销毁所有的Activity
      */
-    public void removeALLActivity_() {
+    public void removeALLActivity() {
         //通过循环，把集合中的所有Activity销毁
         for (Activity activity : oList) {
             activity.finish();

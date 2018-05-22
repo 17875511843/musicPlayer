@@ -39,6 +39,7 @@ import ironbear775.com.musicplayer.Adapter.MusicAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
+import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
 
 /**
  * Created by ironbear on 2017/1/24.
@@ -175,9 +176,9 @@ public class MusicListFragment extends android.app.Fragment {
     private void initView() {
 
         musicView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(
-                getActivity(), LinearLayoutManager.VERTICAL, false);
-        musicView.setLayoutManager(layoutManager);
+
+        MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
+        musicView.setLayoutManager(linearLayoutManager);
 
         initAdapter();
 
