@@ -20,20 +20,24 @@ public class OpenActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        path = Objects.requireNonNull(getIntent().getData()).getPath();
+        try {
+            path = Objects.requireNonNull(getIntent().getData()).getPath();
 
-        receiver = new OpenFileReceiver();
-        registerReceiver(receiver, new IntentFilter("open activity"));
+            receiver = new OpenFileReceiver();
+            registerReceiver(receiver, new IntentFilter("open activity"));
 
-        if (!ActivityCollector.isActivityExist(MusicList.class)) {
+            if (!ActivityCollector.isActivityExist(MusicList.class)) {
 
-            Intent intent = new Intent(this, MusicList.class);
-            intent.putExtra("Start Activity", true);
-            startActivity(intent);
+                Intent intent = new Intent(this, MusicList.class);
+                intent.putExtra("Start Activity", true);
+                startActivity(intent);
 
-        } else {
-            send();
-            startActivity(new Intent(this, MusicList.class));
+            } else {
+                send();
+                startActivity(new Intent(this, MusicList.class));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

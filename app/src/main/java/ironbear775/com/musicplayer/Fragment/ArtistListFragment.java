@@ -35,7 +35,6 @@ import ironbear775.com.musicplayer.Adapter.ArtistAdapter;
 import ironbear775.com.musicplayer.Class.Music;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Util.MusicUtils;
-import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
 
 /**
  * Created by ironbear on 2017/1/26.
@@ -54,6 +53,7 @@ public class ArtistListFragment extends Fragment {
         super.onResume();
         MobclickAgent.onPageStart("ArtistListFragment");
     }
+
     public void onPause() {
         super.onPause();
         MobclickAgent.onPageEnd("ArtistListFragment");
@@ -84,9 +84,9 @@ public class ArtistListFragment extends Fragment {
 
     private void initView() {
         artistView.setHasFixedSize(true);
-
-        MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
-        artistView.setLayoutManager(linearLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(
+                getActivity(), LinearLayout.VERTICAL, false);
+        artistView.setLayoutManager(layoutManager);
 
         artistAdapter = new ArtistAdapter(getActivity(), artistlist);
         artistView.setAdapter(artistAdapter);
@@ -97,7 +97,7 @@ public class ArtistListFragment extends Fragment {
                 public void onItemClick(View view, int position) {
                     if (MusicList.actionMode != null) {
                         //多选状态
-                        MusicUtils.getInstance().addOrRemoveItem(getActivity(),position, positionSet, artistAdapter);
+                        MusicUtils.getInstance().addOrRemoveItem(getActivity(), position, positionSet, artistAdapter);
                     } else {
                         setClickAction(position);
                     }
@@ -314,17 +314,21 @@ public class ArtistListFragment extends Fragment {
             if (action != null) {
                 switch (action) {
                     case "SetClickable_True":
-                        artistAdapter.setClickable(true);
+                        if (artistAdapter != null)
+                            artistAdapter.setClickable(true);
                         break;
                     case "SetClickable_False":
-                        artistAdapter.setClickable(false);
+                        if (artistAdapter != null)
+                            artistAdapter.setClickable(false);
                         break;
                     case "notifyDataSetChanged":
-                        artistAdapter.notifyDataSetChanged();
+                        if (artistAdapter != null)
+                            artistAdapter.notifyDataSetChanged();
                         break;
                     case "restart yourself":
                         reCreateView();
-                        artistAdapter.notifyDataSetChanged();
+                        if (artistAdapter != null)
+                            artistAdapter.notifyDataSetChanged();
                         break;
                 }
             }
