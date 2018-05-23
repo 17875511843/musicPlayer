@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
@@ -1430,6 +1431,17 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 }
             }
         }
+
+        if (resultCode == RESULT_OK && requestCode == 2222) {
+            //再次执行上面的流程，包含权限判等
+            File dir = new File(Environment.getExternalStorageDirectory(), "MusicPlayer/apk");
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File file = (new File(dir, apkName + ".apk"));
+
+            installApk(dir,file,apkName);
+        }
     }
 
     public Runnable runnable1 = new Runnable() {
@@ -2699,7 +2711,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
 
-                                        downloadApk(downloadUrl, "music_player" + versionName);
+                                        apkName = "music_player" + versionName;
+                                        downloadApk(downloadUrl, apkName);
                                     }
                                 })
                                 .setNegativeButton(R.string.no, null);
@@ -2711,6 +2724,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         }
     }
 
+    private String apkName;
     private boolean isDownloadCancel = false;
 
     //下载安装包
@@ -2772,6 +2786,20 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     //安装apk
     private void installApk(File dir, File file, String filename) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if(getPackageManager().canRequestPackageInstalls()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Uri apkUri = FileProvider.getUriForFile(MusicList.this,
+                        "ironbear775.com.musicplayer.provider", file);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                startActivity(intent);
+            }else{
+                Intent intent1 =new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                startActivityForResult(intent1, 2222);
+
+            }
+        }else
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Uri apkUri = FileProvider.getUriForFile(MusicList.this,
