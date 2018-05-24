@@ -2063,7 +2063,7 @@ public class MusicUtils {
                 if (MusicList.shufflelist != null
                         && MusicList.shufflelist.size() > 0) {
 
-                    if (pos > MusicList.shufflelist.size())
+                    if (pos > MusicList.shufflelist.size() - 1)
                         pos = 0;
 
                     Intent intent = new Intent("set footBar");
@@ -2080,7 +2080,7 @@ public class MusicUtils {
                 if (MusicList.list != null
                         && MusicList.list.size() > 0) {
 
-                    if (pos > MusicList.list.size())
+                    if (pos > MusicList.list.size() - 1)
                         pos = 0;
 
                     Intent intent = new Intent("set footBar");
@@ -2168,7 +2168,7 @@ public class MusicUtils {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Looper.prepare();
-                        Toast.makeText(context,R.string.check_update_failed,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.check_update_failed, Toast.LENGTH_SHORT).show();
                         Looper.loop();
                     }
 
