@@ -63,6 +63,7 @@
     <string name="other">他の設定</string>
     <string name="about">について</string>
     <string name="download">ダウンロード</string>
+    <string name="downloading">ダウンロード中…</string>
     <string name="settings">設定</string>
     <string name="version">バージョン</string>
     <string name="developer">開発者</string>

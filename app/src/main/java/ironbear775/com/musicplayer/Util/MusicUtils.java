@@ -2148,12 +2148,26 @@ public class MusicUtils {
                 }.getType());
     }
 
+    public void deleteApk() {
+        File dir = new File(Environment.getExternalStorageDirectory(), apkFolder);
+        if (dir.isDirectory()) {
+            File files[] = dir.listFiles();
+            for (File file : files) {
+                if (file.getAbsolutePath().endsWith(".apk")) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
     public void checkUpdate(Context context) {
         PackageManager packageManager = context.getPackageManager();
         int versionCode;
         try {
             PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
             versionCode = packageInfo.versionCode;
+
+            String TEST_URL = "http://www.wanandroid.com/tools/mockapi/5636/ironbear775_musicplayer_test";
 
             String UPDATE_URL = "http://www.wanandroid.com/tools/mockapi/5636/iornbear775_musicplayer_check_update";
             OkHttpClient client = new OkHttpClient();
@@ -2206,6 +2220,7 @@ public class MusicUtils {
     }
 
     public void downloadApk(String url, String filename, OnDownloadListener listener) {
+
         requestBuilder = new Request.Builder()
                 .url(url);
 
@@ -2213,6 +2228,7 @@ public class MusicUtils {
         if (requestBuilder != null) {
 
             call = client.newCall(requestBuilder.build());
+
             call.enqueue(new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -2232,6 +2248,7 @@ public class MusicUtils {
                     }
                     try {
                         is = response.body() != null ? response.body().byteStream() : null;
+
                         long total = response.body() != null ? response.body().contentLength() : 0;
                         File downloadFile = new File(dir, filename + ".apk");
                         fos = new FileOutputStream(downloadFile);
@@ -2240,6 +2257,7 @@ public class MusicUtils {
                             while ((len = is.read(buf)) != -1) {
                                 fos.write(buf, 0, len);
                                 sum += len;
+
                                 int progress = (int) (sum * 1.0f / total * 100);
                                 listener.onDownloading(progress);
                             }

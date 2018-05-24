@@ -4,6 +4,7 @@ package ironbear775.com.musicplayer.Activity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -456,7 +457,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
         initSlideDrawer();
 
-
+        MusicUtils.getInstance().deleteApk();
         MusicUtils.getInstance().checkUpdate(this);
     }
 
@@ -2736,7 +2737,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         File file = (new File(dir, filename + ".apk"));
 
         ProgressDialog dialog = new ProgressDialog(MusicList.this);
-        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        dialog.setMessage(getResources().getString(R.string.downloading));
         dialog.setCancelable(false);
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.delete_cancel), new DialogInterface.OnClickListener() {
             @Override
@@ -2766,7 +2767,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
                 @Override
                 public void onDownloading(int progress) {
-                    dialog.setProgress(progress);
+
                 }
 
                 @Override
