@@ -14,32 +14,31 @@
             android:id="@+id/music_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways"
             android:background="?attr/colorPrimary"
-            >
+            app:layout_scrollFlags="scroll|enterAlways">
 
         </android.support.v7.widget.Toolbar>
 
-        <include layout="@layout/shuffle"
-            app:layout_collapseMode="pin"/>
+        <include
+            layout="@layout/shuffle"
+            app:layout_collapseMode="pin" />
 
     </android.support.design.widget.AppBarLayout>
+
     <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
         android:id="@+id/music_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/appBg"
         android:scrollbars="none"
-        app:fastScrollPopupBackgroundSize="56dp"
-        app:fastScrollPopupTextSize="24sp"
         app:fastScrollAutoHide="true"
         app:fastScrollAutoHideDelay="500"
+        app:fastScrollPopupBackgroundSize="56dp"
         app:fastScrollPopupBgColor="?attr/colorPrimary"
         app:fastScrollPopupTextColor="@color/white"
+        app:fastScrollPopupTextSize="24sp"
         app:fastScrollThumbColor="?attr/colorPrimary"
         app:fastScrollTrackColor="?attr/colorControlHighlight"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-    </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
-
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </android.support.design.widget.CoordinatorLayout>

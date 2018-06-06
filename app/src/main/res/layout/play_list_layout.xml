@@ -1,60 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical">
+
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <RelativeLayout
             android:id="@+id/create_playlist"
-            android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:layout_alignParentTop="true"
             android:background="?attr/colorPrimary"
             android:clickable="true"
             android:focusable="true">
 
             <ImageView
                 android:id="@+id/create_cancel"
-                android:layout_alignParentStart="true"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="14dp"
                 android:layout_marginTop="10dp"
                 android:src="@drawable/cancel_white"
                 android:visibility="gone" />
+
             <EditText
                 android:id="@+id/create_input"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/create_cancel"
-                android:layout_toStartOf="@+id/create_submit"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_centerVertical="true"
                 android:layout_marginStart="30dp"
-                android:maxLines="1"
-                android:ellipsize="end"
+                android:layout_toEndOf="@+id/create_cancel"
+                android:layout_toStartOf="@+id/create_submit"
                 android:background="@null"
+                android:ellipsize="end"
                 android:hint="@string/input_name"
+                android:maxLines="1"
+
                 android:textColor="@color/white"
                 android:textColorHint="?attr/subTextColor"
                 android:textCursorDrawable="@null"
-                android:visibility="gone"
-                />
+                android:visibility="gone" />
+
             <ImageView
                 android:id="@+id/create_submit"
-                android:layout_alignParentEnd="true"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="14dp"
                 android:layout_marginEnd="14dp"
+                android:layout_marginStart="14dp"
                 android:layout_marginTop="10dp"
                 android:src="@drawable/submit"
                 android:visibility="gone" />
@@ -67,9 +70,10 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="14dp"
                 android:layout_marginTop="10dp"
-                android:src="@drawable/add_white"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:src="@drawable/add_white" />
+
             <TextView
                 android:id="@+id/create_new"
                 android:layout_width="wrap_content"
@@ -90,9 +94,8 @@
 
     <ListView
         android:id="@+id/playlist_listView"
-        android:background="?attr/appBg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-    </ListView>
+        android:background="?attr/appBg"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 </android.support.design.widget.CoordinatorLayout>

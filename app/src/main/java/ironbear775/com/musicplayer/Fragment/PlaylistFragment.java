@@ -1,6 +1,7 @@
 package ironbear775.com.musicplayer.Fragment;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -21,6 +22,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -64,6 +67,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         super.onResume();
         MobclickAgent.onPageStart("PlaylistFragment");
     }
+
     public void onPause() {
         super.onPause();
         MobclickAgent.onPageEnd("PlaylistFragment");
@@ -111,6 +115,28 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         cursor.close();
         dbHelper1.close();
         database.close();
+    }
+
+    public static void requestFocuse(EditText editText) {
+        editText.setFocusable(true);
+        editText.setFocusableInTouchMode(true);
+        editText.requestFocus();
+    }
+
+    public static void showSoftKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+
+        }
+    }
+
+    public static void hideSoftKeyboard(Activity activity, EditText editText) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+
+        }
     }
 
     private void findView(final View view) {
@@ -198,20 +224,24 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.create_submit:
-                String name = input.getText().toString();
+                String name = input.getText().toString().trim();
                 if (name.equals("")) {
 
                     Intent intent1 = new Intent("show snackBar");
                     intent1.putExtra("text id", R.string.must_have_name);
                     getActivity().sendBroadcast(intent1);
                 } else {
-                    input.setText("");
                     for (int i = 0; i < list.size(); i++) {
                         if (list.get(i).getName().equals(name)) {
                             flag = 1;
+                            Intent intent1 = new Intent("show snackBar");
+                            intent1.putExtra("text id", R.string.already_have);
+                            getActivity().sendBroadcast(intent1);
+                            input.setText("");
                             break;
                         }
                     }
+
                     if (flag == 0) {
                         Playlist p = new Playlist(name, "");
                         list.add(p);
@@ -243,12 +273,15 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                         dbHelper2.close();
                         database.close();
                         flag = 0;
+
+                        icon.setVisibility(View.VISIBLE);
+                        createText.setVisibility(View.VISIBLE);
+                        input.setVisibility(View.GONE);
+                        cancel.setVisibility(View.GONE);
+                        submit.setVisibility(View.GONE);
+                        input.setText("");
+                        hideSoftKeyboard(getActivity(),input);
                     }
-                    icon.setVisibility(View.VISIBLE);
-                    createText.setVisibility(View.VISIBLE);
-                    input.setVisibility(View.GONE);
-                    cancel.setVisibility(View.GONE);
-                    submit.setVisibility(View.GONE);
                 }
                 break;
             case R.id.create_cancel:
@@ -258,6 +291,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                 input.setVisibility(View.GONE);
                 cancel.setVisibility(View.GONE);
                 submit.setVisibility(View.GONE);
+                hideSoftKeyboard(getActivity(),input);
                 break;
             case R.id.create_playlist:
                 icon.setVisibility(View.GONE);
@@ -265,6 +299,8 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                 input.setVisibility(View.VISIBLE);
                 cancel.setVisibility(View.VISIBLE);
                 submit.setVisibility(View.VISIBLE);
+                requestFocuse(input);
+                showSoftKeyboard(getActivity());
                 break;
         }
     }
@@ -291,6 +327,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
             }
         }
     };
+
     private void reCreateView() {
         try {
             Resources.Theme theme = getActivity().getTheme();
@@ -316,6 +353,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
     }
+
     @Override
     public void onDestroyView() {
         getActivity().unregisterReceiver(clickableReceiver);

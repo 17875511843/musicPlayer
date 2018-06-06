@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -62,6 +63,7 @@ public class PlaylistDetailFragment extends Fragment {
         super.onResume();
         MobclickAgent.onPageStart("PlaylistDetailFragment");
     }
+
     public void onPause() {
         super.onPause();
         MobclickAgent.onPageEnd("PlaylistDetailFragment");
@@ -85,7 +87,6 @@ public class PlaylistDetailFragment extends Fragment {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
 
         getActivity().sendBroadcast(new Intent("set toolbar gone"));
         toolbar.setTitle(getArguments().getString("title"));
@@ -112,7 +113,7 @@ public class PlaylistDetailFragment extends Fragment {
         shuffleLayout.setOnClickListener(v -> {
             if (musicList.size() > 0) {
                 MusicUtils.getInstance().playPage = 5;
-                MusicUtils.getInstance().shufflePlay(getActivity(),musicList, 4);
+                MusicUtils.getInstance().shufflePlay(getActivity(), musicList, 4);
             }
         });
         return view;
@@ -124,14 +125,14 @@ public class PlaylistDetailFragment extends Fragment {
         listView = view.findViewById(R.id.playlist_detail_listView);
         adapter = new PlaylistDetailAdapter(getActivity().getApplicationContext(), musicList, name);
 
-
         MyLinearLayoutManager linearLayoutManager = new MyLinearLayoutManager(getActivity());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         listView.setLayoutManager(linearLayoutManager);
 
         listView.setAdapter(adapter);
         listView.hasFixedSize();
 
-        adapter.setOnItemClickListener((view1, position) -> setClickAction(getActivity(),position));
+        adapter.setOnItemClickListener((view1, position) -> setClickAction(getActivity(), position));
 
         ItemTouchHelper.Callback callback = new RVHItemTouchHelperCallback(adapter, true, false, true);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
@@ -189,12 +190,12 @@ public class PlaylistDetailFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setClickAction(Context context,int position) {
+    private void setClickAction(Context context, int position) {
         if (isClickable) {
             int progress = 0;
             MusicUtils.getInstance().playPage = 5;
 
-            MusicUtils.getInstance().startMusic(context,position, progress, 4);
+            MusicUtils.getInstance().startMusic(context, position, progress, 4);
 
             Intent intent = new Intent("set footBar");
             Intent intent1 = new Intent("set PlayOrPause");
@@ -204,7 +205,7 @@ public class PlaylistDetailFragment extends Fragment {
             getActivity().sendBroadcast(intent);
             getActivity().sendBroadcast(intent1);
 
-            MusicUtils.getInstance().getFootAlbumArt(context,position, musicList, MusicUtils.getInstance().FROM_ADAPTER);
+            MusicUtils.getInstance().getFootAlbumArt(context, position, musicList, MusicUtils.getInstance().FROM_ADAPTER);
 
             pos = position;
         }
@@ -220,6 +221,7 @@ public class PlaylistDetailFragment extends Fragment {
 
                     if (adapter != null)
                         adapter.notifyDataSetChanged();
+
                     if (readListRunnable != null)
                         readListRunnable = null;
                 }

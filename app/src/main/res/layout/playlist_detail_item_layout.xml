@@ -1,43 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:foreground="?android:attr/selectableItemBackground"
-    android:background="@color/listView_bg_color">
+    android:orientation="horizontal">
+
     <ImageView
-        android:padding="15dp"
         android:id="@+id/playlist_iv_image"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:padding="15dp"
         android:scaleType="centerCrop" />
 
     <RelativeLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="80dp">
+        android:layout_height="80dp"
+        android:orientation="vertical">
+
         <TextView
-            android:paddingTop="10dp"
-            android:paddingBottom="5dp"
-            android:layout_alignParentTop="true"
-            android:gravity="center_vertical"
             android:id="@+id/playlist_tv_title"
-            android:layout_marginStart="3dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textColor="@color/black"/>
-        <TextView
-            android:layout_below="@+id/playlist_tv_title"
-            android:gravity="center_vertical"
-            android:id="@+id/playlist_tv_others"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="3dp"
-            android:maxLines="1"
             android:ellipsize="end"
-            android:textColor="@color/black"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingBottom="5dp"
+            android:paddingTop="10dp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/playlist_tv_others"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/playlist_tv_title"
+            android:layout_marginStart="3dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:textColor="@color/black" />
     </RelativeLayout>
 
 </LinearLayout>

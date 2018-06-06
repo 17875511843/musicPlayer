@@ -1092,37 +1092,55 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
         String newSongTitle, newSinger;
 
-        newSongTitle = MusicService.music.getTitle();
+        if (MusicService.music != null) {
+            newSongTitle = MusicService.music.getTitle();
 
-        if (MusicService.music.getTitle().contains("/")) {
-            newSongTitle = MusicService.music.getTitle().replace("/", "_");
-        }
+            if (MusicService.music.getTitle().contains("/")) {
+                newSongTitle = MusicService.music.getTitle().replace("/", "_");
+            }
 
-        newSinger = MusicService.music.getArtist();
+            newSinger = MusicService.music.getArtist();
 
-        if (MusicService.music.getArtist().contains("/")) {
-            newSinger = MusicService.music.getArtist().replace("/", "_");
-        }
+            if (MusicService.music.getArtist().contains("/")) {
+                newSinger = MusicService.music.getArtist().replace("/", "_");
+            }
 
-        File file = new File(
-                Environment.getExternalStorageDirectory().getAbsolutePath() + "/MusicPlayer/lyric",
-                newSongTitle + "_" + newSinger + ".lrc");
+            File file = new File(
+                    Environment.getExternalStorageDirectory().getAbsolutePath() + "/MusicPlayer/lyric",
+                    newSongTitle + "_" + newSinger + ".lrc");
 
-        if (MusicUtils.getInstance().downloadAlbum == 2 && MusicUtils.getInstance().haveWIFI(context)
-                || MusicUtils.getInstance().downloadAlbum == 1) {
+            if (MusicUtils.getInstance().downloadAlbum == 2 && MusicUtils.getInstance().haveWIFI(context)
+                    || MusicUtils.getInstance().downloadAlbum == 1) {
 
-            Bitmap bitmap = GetAlbumArt.getAlbumArtBitmap(context, MusicService.music.getAlbumArtUri(), 1);
-            if (bitmap != null) {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                Glide.with(context)
-                        .load(stream.toByteArray())
-                        .apply(RequestOptions
-                                .bitmapTransform(new BlurTransformation(23, 4))
-                                .placeholder(R.drawable.default_album_art)
-                                .error(R.drawable.default_album_art))
-                        .transition(DrawableTransitionOptions.withCrossFade(500))
-                        .into(blurBG);
+                Bitmap bitmap = GetAlbumArt.getAlbumArtBitmap(context, MusicService.music.getAlbumArtUri(), 1);
+                if (bitmap != null) {
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    Glide.with(context)
+                            .load(stream.toByteArray())
+                            .apply(RequestOptions
+                                    .bitmapTransform(new BlurTransformation(23, 4))
+                                    .placeholder(R.drawable.default_album_art)
+                                    .error(R.drawable.default_album_art))
+                            .transition(DrawableTransitionOptions.withCrossFade(500))
+                            .into(blurBG);
+                } else {
+                    File blurFile = MusicUtils.getInstance().getAlbumCoverFile(MusicService.music.getArtist(), MusicService.music.getAlbum());
+                    if (blurFile.exists()) {
+                        Glide.with(context)
+                                .load(blurFile)
+                                .apply(RequestOptions
+                                        .bitmapTransform(new BlurTransformation(23, 4))
+                                        .placeholder(R.drawable.default_album_art)
+                                        .error(R.drawable.default_album_art))
+                                .transition(DrawableTransitionOptions.withCrossFade(500))
+                                .into(blurBG);
+
+                    } else {
+                        MusicUtils.getInstance().getAlbumCover(this, MusicService.music.getArtist(),
+                                MusicService.music.getAlbum(), MusicUtils.getInstance().FROM_MAINIMAGE);
+                    }
+                }
             } else {
                 File blurFile = MusicUtils.getInstance().getAlbumCoverFile(MusicService.music.getArtist(), MusicService.music.getAlbum());
                 if (blurFile.exists()) {
@@ -1136,89 +1154,73 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                             .into(blurBG);
 
                 } else {
-                    MusicUtils.getInstance().getAlbumCover(this, MusicService.music.getArtist(),
-                            MusicService.music.getAlbum(), MusicUtils.getInstance().FROM_MAINIMAGE);
+                    Glide.with(context)
+                            .load(MusicService.music.getAlbumArtUri())
+                            .apply(RequestOptions
+                                    .bitmapTransform(new BlurTransformation(23, 4))
+                                    .placeholder(R.drawable.default_album_art)
+                                    .error(R.drawable.default_album_art))
+                            .transition(DrawableTransitionOptions.withCrossFade(500))
+                            .into(blurBG);
                 }
             }
-        } else {
-            File blurFile = MusicUtils.getInstance().getAlbumCoverFile(MusicService.music.getArtist(), MusicService.music.getAlbum());
-            if (blurFile.exists()) {
-                Glide.with(context)
-                        .load(blurFile)
-                        .apply(RequestOptions
-                                .bitmapTransform(new BlurTransformation(23, 4))
-                                .placeholder(R.drawable.default_album_art)
-                                .error(R.drawable.default_album_art))
-                        .transition(DrawableTransitionOptions.withCrossFade(500))
-                        .into(blurBG);
+            blurBG.setVisibility(View.VISIBLE);
+            lyricView.loadLrc("");
+            lyricView.setVisibility(View.VISIBLE);
 
-            } else {
-                Glide.with(context)
-                        .load(MusicService.music.getAlbumArtUri())
-                        .apply(RequestOptions
-                                .bitmapTransform(new BlurTransformation(23, 4))
-                                .placeholder(R.drawable.default_album_art)
-                                .error(R.drawable.default_album_art))
-                        .transition(DrawableTransitionOptions.withCrossFade(500))
-                        .into(blurBG);
-            }
-        }
-        blurBG.setVisibility(View.VISIBLE);
-        lyricView.loadLrc("");
-        lyricView.setVisibility(View.VISIBLE);
+            if (MusicService.music.getUri().contains(".mp3")) {
+                try {
 
-        if (MusicService.music.getUri().contains(".mp3")) {
-            try {
+                    Mp3File f = new Mp3File(MusicService.music.getUri());
 
-                Mp3File f = new Mp3File(MusicService.music.getUri());
+                    if (f.hasId3v2Tag()) {
+                        String lyric = f.getId3v2Tag().getLyrics();
 
-                if (f.hasId3v2Tag()) {
-                    String lyric = f.getId3v2Tag().getLyrics();
+                        if (lyric != null) {
 
-                    if (lyric != null) {
-
-                        String[] array = lyric.split("\\n");
-                        for (String line : array) {
-                            if (line.startsWith("[")) {
-                                canScroll = true;
+                            String[] array = lyric.split("\\n");
+                            for (String line : array) {
+                                if (line.startsWith("[")) {
+                                    canScroll = true;
+                                }
                             }
-                        }
 
-                        if (canScroll) {
-                            lyricView.loadLrc(lyric);
-                            handler1.post(runnable1);
+                            if (canScroll) {
+                                lyricView.loadLrc(lyric);
+                                handler1.post(runnable1);
+                            } else if (MusicUtils.getInstance().enableTranslateLyric) {
+                                setTranslateLyricFromFile(context, newSongTitle, newSinger);
+                            }
                         } else if (MusicUtils.getInstance().enableTranslateLyric) {
                             setTranslateLyricFromFile(context, newSongTitle, newSinger);
+                        } else if (file.exists()) {
+                            lyricView.loadLrc(file);
+                            handler1.post(runnable1);
+                        } else {
+                            searchLyric(context);
                         }
-                    } else if (MusicUtils.getInstance().enableTranslateLyric) {
-                        setTranslateLyricFromFile(context, newSongTitle, newSinger);
-                    } else if (file.exists()) {
-                        lyricView.loadLrc(file);
-                        handler1.post(runnable1);
                     } else {
-                        searchLyric(context);
+                        if (MusicUtils.getInstance().enableTranslateLyric) {
+                            setTranslateLyricFromFile(context, newSongTitle, newSinger);
+                        } else if (file.exists()) {
+                            lyricView.loadLrc(file);
+                            handler.post(runnable1);
+                        } else {
+                            searchLyric(context);
+                        }
                     }
-                } else {
-                    if (MusicUtils.getInstance().enableTranslateLyric) {
-                        setTranslateLyricFromFile(context, newSongTitle, newSinger);
-                    } else if (file.exists()) {
-                        lyricView.loadLrc(file);
-                        handler.post(runnable1);
-                    } else {
-                        searchLyric(context);
-                    }
-                }
 
-            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
-                e.printStackTrace();
+                } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                    e.printStackTrace();
+                }
+            } else if (MusicUtils.getInstance().enableTranslateLyric) {
+                setTranslateLyricFromFile(context, newSongTitle, newSinger);
+            } else if (file.exists()) {
+                lyricView.loadLrc(file);
+                handler1.post(runnable1);
+            } else {
+                searchLyric(context);
             }
-        } else if (MusicUtils.getInstance().enableTranslateLyric) {
-            setTranslateLyricFromFile(context, newSongTitle, newSinger);
-        } else if (file.exists()) {
-            lyricView.loadLrc(file);
-            handler1.post(runnable1);
-        } else {
-            searchLyric(context);
         }
     }
 
@@ -1441,7 +1443,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
             }
             File file = (new File(dir, apkName + ".apk"));
 
-            installApk(dir,file,apkName);
+            installApk(dir, file, apkName);
         }
     }
 
@@ -2706,8 +2708,9 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         AlertDialog.Builder updateDailog = new AlertDialog.Builder(MusicList.this)
                                 .setTitle(R.string.find_new_version)
                                 .setMessage(getResources().getString(R.string.version) + versionName
-                                        + "\n" + getResources().getString(R.string.new_version_title) + intro
-                                        + "\n" + getResources().getString(R.string.download_now))
+                                        + "\n" + getResources().getString(R.string.new_version_title)
+                                        + "\n" + intro
+                                        + "\n\n" + getResources().getString(R.string.download_now))
                                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -2788,20 +2791,19 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     private void installApk(File dir, File file, String filename) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if(getPackageManager().canRequestPackageInstalls()){
+            if (getPackageManager().canRequestPackageInstalls()) {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 Uri apkUri = FileProvider.getUriForFile(MusicList.this,
                         "ironbear775.com.musicplayer.provider", file);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
                 startActivity(intent);
-            }else{
-                Intent intent1 =new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+            } else {
+                Intent intent1 = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
                 startActivityForResult(intent1, 2222);
 
             }
-        }else
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Uri apkUri = FileProvider.getUriForFile(MusicList.this,
                     "ironbear775.com.musicplayer.provider", file);

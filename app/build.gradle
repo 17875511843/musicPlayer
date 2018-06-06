@@ -6,8 +6,8 @@ android {
         applicationId "ironbear775.com.musicplayer"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 80
-        versionName "2.0.2"
+        versionCode 81
+        versionName "2.0.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }

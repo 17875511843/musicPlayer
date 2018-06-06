@@ -136,11 +136,10 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                             }
 
                         }
-                        database.close();
-                        dbHelper.close();
-                        database1.close();
-                        getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                     }
+                    dbHelper.close();
+                    database1.close();
+                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                 }).start();
             } else if (MusicList.isAlbum) {
                 new Thread(() -> {
@@ -210,7 +209,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                             }
                         }
                     }
-                    database.close();
+
                     database1.close();
                     dbHelper.close();
                     getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
@@ -269,12 +268,13 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                             }
                         }
                     }
-                    database.close();
+
                     database1.close();
                     dbHelper.close();
                     getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                 }).start();
 
+                database.close();
             }
         });
     }

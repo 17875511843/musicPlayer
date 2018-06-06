@@ -1,6 +1,7 @@
 package ironbear775.com.musicplayer.Fragment;
 
 
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -45,7 +46,7 @@ import ironbear775.com.musicplayer.Util.MyLinearLayoutManager;
  * Created by ironbear on 2017/1/24.
  */
 
-public class MusicListFragment extends android.app.Fragment {
+public class MusicListFragment extends Fragment {
     public static ArrayList<Music> musicList = new ArrayList<>();
     public static int pos = 0;
     public static final Set<Integer> positionSet = new HashSet<>();

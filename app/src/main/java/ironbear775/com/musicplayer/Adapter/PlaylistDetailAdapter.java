@@ -8,7 +8,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -150,11 +152,10 @@ public class PlaylistDetailAdapter extends RecyclerView.Adapter<PlaylistDetailAd
             tv_title = itemView.findViewById(R.id.playlist_tv_title);
             tv_others =  itemView.findViewById(R.id.playlist_tv_others);
             if (BaseActivity.isNight){
-                itemView.setBackgroundResource(R.color.nightBg);
+
                 tv_title.setTextColor(itemView.getResources().getColor(R.color.nightMainTextColor));
                 tv_others.setTextColor(itemView.getResources().getColor(R.color.nightSubTextColor));
             }else {
-                itemView.setBackgroundResource(R.color.lightBg);
                 tv_title.setTextColor(itemView.getResources().getColor(R.color.lightMainTextColor));
                 tv_others.setTextColor(itemView.getResources().getColor(R.color.lightSubTextColor));
             }

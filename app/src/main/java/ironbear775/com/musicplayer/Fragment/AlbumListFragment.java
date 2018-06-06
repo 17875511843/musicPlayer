@@ -38,7 +38,7 @@ import ironbear775.com.musicplayer.Util.MusicUtils;
  * Created by ironbear on 2017/1/24.
  */
 
-public class AlbumListFragment extends android.app.Fragment {
+public class AlbumListFragment extends Fragment {
     public static final ArrayList<Music> albumlist = new ArrayList<>();
     public static final ArrayList<Music> albumDetailist = new ArrayList<>();
     public static Fragment detailFragment;
