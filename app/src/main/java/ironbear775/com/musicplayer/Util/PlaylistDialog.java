@@ -1,5 +1,6 @@
 package ironbear775.com.musicplayer.Util;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -57,11 +58,13 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
     private ArrayList<Music> musicList;
     private Dialog dialog;
     private DialogReceiver receiver;
+    private Context mContext;
 
     public PlaylistDialog(Context context, Set<Integer> positionSet, ArrayList<Music> musicArrayList) {
         super(context);
         playlistPositionSet = positionSet;
         musicList = musicArrayList;
+        mContext = context;
     }
 
     @Override
@@ -75,7 +78,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
         filter.addAction("ADD_TO_PLAYLIST_FINISHED");
         filter.addAction("READ_PLAYLIST_FINISHED");
         filter.addAction("CREATE_PLAYLIST_FINISHED");
-        getContext().registerReceiver(receiver, filter);
+        mContext.registerReceiver(receiver, filter);
 
         findView();
         new Thread(readListRunnable).start();
@@ -88,14 +91,14 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
             for (char a : abc) {
                 table.append((int) a);
             }
-            dialog = ProgressDialog.show(getContext(), null, getContext().getResources().getString(string.adding));
+            dialog = ProgressDialog.show(mContext, null, mContext.getResources().getString(string.adding));
             final Message message = new Message();
             message.what = 1;
             dialog.show();
             if (!MusicList.isAlbum && !MusicList.isArtist) {
                 new Thread(() -> {
 
-                    PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
+                    PlaylistDbHelper dbHelper = new PlaylistDbHelper(mContext,
                             table.toString() + ".db", name);
                     SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                     for (int pos : playlistPositionSet) {
@@ -139,12 +142,12 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                     }
                     dbHelper.close();
                     database1.close();
-                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
+                    mContext.sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                 }).start();
             } else if (MusicList.isAlbum) {
                 new Thread(() -> {
 
-                    PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
+                    PlaylistDbHelper dbHelper = new PlaylistDbHelper(mContext,
                             table.toString() + ".db", name);
                     SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                     for (int pos : playlistPositionSet) {
@@ -154,14 +157,14 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                             Cursor cursor;
                             if ("from album in artist".equals(MusicList.fromWhere)
                                     && !"".equals(MusicList.artistInAlbum)) {
-                                cursor = getContext().getContentResolver().query(
+                                cursor = mContext.getContentResolver().query(
                                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                         null,
                                         MediaStore.Audio.Media.ALBUM + "=? and " + MediaStore.Audio.Media.ARTIST + "=?",
                                         new String[]{albumTag, MusicList.artistInAlbum},
                                         MediaStore.Audio.Media.TITLE);
                             } else {
-                                cursor = getContext().getContentResolver().query(
+                                cursor =mContext.getContentResolver().query(
                                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                         null,
                                         MediaStore.Audio.Media.ALBUM + "=?",
@@ -212,12 +215,12 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
 
                     database1.close();
                     dbHelper.close();
-                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
+                    mContext.sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
 
                 }).start();
             } else if (MusicList.isArtist) {
 
-                PlaylistDbHelper dbHelper = new PlaylistDbHelper(getContext(),
+                PlaylistDbHelper dbHelper = new PlaylistDbHelper(mContext,
                         table.toString() + ".db", name);
                 SQLiteDatabase database1 = dbHelper.getWritableDatabase();
                 new Thread(() -> {
@@ -225,7 +228,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
 
                         if (pos < musicList.size()) {
                             String artistTag = musicList.get(pos).getArtist();
-                            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                            Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                                     null, MediaStore.Audio.Media.ARTIST + "=?", new String[]{artistTag}, MediaStore.Audio.Media.TITLE);
 
                             if (cursor != null && cursor.moveToFirst()) {
@@ -271,7 +274,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
 
                     database1.close();
                     dbHelper.close();
-                    getContext().sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
+                    mContext.sendBroadcast(new Intent("ADD_TO_PLAYLIST_FINISHED"));
                 }).start();
 
                 database.close();
@@ -283,7 +286,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
         @Override
         public void run() {
             readList();
-            getContext().sendBroadcast(new Intent("READ_PLAYLIST_FINISHED"));
+            mContext.sendBroadcast(new Intent("READ_PLAYLIST_FINISHED"));
         }
     };
 
@@ -293,7 +296,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                 + "id integer primary key autoincrement, "
                 + "title text,"
                 + "count integer)";
-        dbHelper1 = new PlaylistDbHelper(getContext(), "playlist.db", db);
+        dbHelper1 = new PlaylistDbHelper(mContext, "playlist.db", db);
         database = dbHelper1.getWritableDatabase();
         cursor = database.query("playlist", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
@@ -315,7 +318,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
         createSubmit = findViewById(id.dialog_create_submit);
         createEdit = findViewById(id.dialog_create_input);
         playlist = findViewById(id.dialog_listView);
-        adapter = new PlaylistAdapter(getContext(),
+        adapter = new PlaylistAdapter(mContext,
                 layout.playlist_item_layout, PlaylistFragment.list);
         playlist.setAdapter(adapter);
 
@@ -333,6 +336,9 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                 createEdit.setVisibility(View.VISIBLE);
                 createNewIcon.setVisibility(View.GONE);
                 createNewText.setVisibility(View.GONE);
+                MusicUtils.requestFocus(createEdit);
+                if (mContext instanceof Activity)
+                    MusicUtils.showSoftKeyboard((Activity) mContext);
                 break;
             case id.dialog_create_cancel:
                 createEdit.setText("");
@@ -341,6 +347,8 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                 createEdit.setVisibility(View.GONE);
                 createNewIcon.setVisibility(View.VISIBLE);
                 createNewText.setVisibility(View.VISIBLE);
+                if (mContext instanceof Activity)
+                    MusicUtils.hideSoftKeyboard((Activity) mContext, createEdit);
                 break;
             case id.dialog_create_submit:
                 String name = createEdit.getText().toString();
@@ -368,32 +376,36 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                                 .setDuration(1000)
                                 .show();
                     } else if (flag == 0) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                String db = "create table " + table.toString() + " ("
-                                        + "id integer primary key autoincrement, "
-                                        + "title text,"
-                                        + "artist text,"
-                                        + "albumArtUri text, "
-                                        + "album text, "
-                                        + "uri text )";
-                                dbHelper1 = new PlaylistDbHelper(getContext(), table.toString() + ".db", db);
-                                dbHelper1.getWritableDatabase();
+                        String db = "create table " + table.toString() + " ("
+                                + "id integer primary key autoincrement, "
+                                + "title text,"
+                                + "artist text,"
+                                + "albumArtUri text, "
+                                + "album text, "
+                                + "uri text )";
+                        dbHelper1 = new PlaylistDbHelper(mContext, table.toString() + ".db", db);
+                        dbHelper1.getWritableDatabase();
 
-                                PlaylistDbHelper dbHelper2 = new PlaylistDbHelper(getContext(), "playlist.db", db);
-                                database = dbHelper2.getWritableDatabase();
-                                ContentValues value = new ContentValues();
-                                value.put("title", name);
-                                database.insert("playlist", null, value);
-                                database.close();
-                                dbHelper2.close();
-                                flag = 0;
-                                Playlist p = new Playlist(name, "");
-                                PlaylistFragment.list.add(p);
-                                getContext().sendBroadcast(new Intent("CREATE_PLAYLIST_FINISHED"));
-                            }
-                        }).start();
+                        PlaylistDbHelper dbHelper2 = new PlaylistDbHelper(mContext, "playlist.db", db);
+                        database = dbHelper2.getWritableDatabase();
+                        ContentValues value = new ContentValues();
+                        value.put("title", name);
+                        database.insert("playlist", null, value);
+                        database.close();
+                        dbHelper2.close();
+                        flag = 0;
+                        Playlist p = new Playlist(name, "");
+                        PlaylistFragment.list.add(p);
+                        mContext.sendBroadcast(new Intent("CREATE_PLAYLIST_FINISHED"));
+
+                        createEdit.setText("");
+                        createSubmit.setVisibility(View.GONE);
+                        createCancel.setVisibility(View.GONE);
+                        createEdit.setVisibility(View.GONE);
+                        createNewIcon.setVisibility(View.VISIBLE);
+                        createNewText.setVisibility(View.VISIBLE);
+                        if (mContext instanceof Activity)
+                            MusicUtils.hideSoftKeyboard((Activity) mContext, createEdit);
                     }
 
                 }
@@ -410,7 +422,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
                 case "ADD_TO_PLAYLIST_FINISHED":
                     if (dialog != null && dialog.isShowing()) {
                         dialog.dismiss();
-                        Snackbar.make(playlist, getContext().getResources().getString(string.added), Snackbar.LENGTH_LONG)
+                        Snackbar.make(playlist, mContext.getResources().getString(string.added), Snackbar.LENGTH_LONG)
                                 .setDuration(1000)
                                 .show();
                     }
@@ -438,7 +450,7 @@ public class PlaylistDialog extends Dialog implements View.OnClickListener {
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: ");
-        getContext().unregisterReceiver(receiver);
+        mContext.unregisterReceiver(receiver);
     }
 }
 

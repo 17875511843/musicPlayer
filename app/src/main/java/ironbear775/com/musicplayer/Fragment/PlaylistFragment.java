@@ -117,28 +117,6 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         database.close();
     }
 
-    public static void requestFocuse(EditText editText) {
-        editText.setFocusable(true);
-        editText.setFocusableInTouchMode(true);
-        editText.requestFocus();
-    }
-
-    public static void showSoftKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
-
-        }
-    }
-
-    public static void hideSoftKeyboard(Activity activity, EditText editText) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-
-        }
-    }
-
     private void findView(final View view) {
         icon = view.findViewById(R.id.create_playlist_icon);
         createText = view.findViewById(R.id.create_new);
@@ -280,7 +258,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                         cancel.setVisibility(View.GONE);
                         submit.setVisibility(View.GONE);
                         input.setText("");
-                        hideSoftKeyboard(getActivity(),input);
+                        MusicUtils.hideSoftKeyboard(getActivity(),input);
                     }
                 }
                 break;
@@ -291,7 +269,7 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                 input.setVisibility(View.GONE);
                 cancel.setVisibility(View.GONE);
                 submit.setVisibility(View.GONE);
-                hideSoftKeyboard(getActivity(),input);
+                MusicUtils.hideSoftKeyboard(getActivity(),input);
                 break;
             case R.id.create_playlist:
                 icon.setVisibility(View.GONE);
@@ -299,8 +277,8 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
                 input.setVisibility(View.VISIBLE);
                 cancel.setVisibility(View.VISIBLE);
                 submit.setVisibility(View.VISIBLE);
-                requestFocuse(input);
-                showSoftKeyboard(getActivity());
+                MusicUtils.requestFocus(input);
+                MusicUtils.showSoftKeyboard(getActivity());
                 break;
         }
     }
