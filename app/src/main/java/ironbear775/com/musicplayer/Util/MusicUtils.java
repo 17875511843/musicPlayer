@@ -19,7 +19,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -49,7 +48,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.MulticastSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,10 +59,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ironbear775.com.musicplayer.Activity.BaseActivity;
 import ironbear775.com.musicplayer.Activity.MusicList;
 import ironbear775.com.musicplayer.Class.Music;
-import ironbear775.com.musicplayer.Fragment.MusicListFragment;
 import ironbear775.com.musicplayer.R;
 import ironbear775.com.musicplayer.Service.MusicService;
 import okhttp3.Call;
@@ -707,7 +703,6 @@ public class MusicUtils {
                                            @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String webLyric = response.body().string();
-
                             //Log.d("web", webLyric);
                             try {
                                 JSONObject main = new JSONObject(webLyric);
@@ -779,10 +774,8 @@ public class MusicUtils {
                 public void onResponse(@NonNull Call call,
                                        @NonNull Response response) throws IOException {
                     String result = response.body().string();
-
                     //Log.d("Result", "Result: " + result);
                     String id = parseJsonFromNetease(result, songTitle);
-
                     //Log.d("ID", "" + id);
                     getLyricFromNeteaseById(context, id, songTitle, singer, showLyric, embed, isUpdate);
                 }
@@ -854,6 +847,7 @@ public class MusicUtils {
                                     if (response.isSuccessful()) {
                                         String webLyric = response.body().string();
 
+                                        saveLyricFile(context,"1","1",false,false,webLyric,false,false);
                                         String lyric;
                                         try {
                                             JSONObject main = new JSONObject(webLyric);
@@ -2324,4 +2318,6 @@ public class MusicUtils {
 
         }
     }
+
+
 }

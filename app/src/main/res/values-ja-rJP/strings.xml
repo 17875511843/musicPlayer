@@ -165,8 +165,11 @@
     <string name="placeholder">-</string>
     <string name="find_new_version">利用できる新しいバージョン</string>
     <string name="new_version_title">更新情報</string>
-    <string name="new_version_text">- 修复添加播放列表闪退的bug
-        \n- 添加新建列表错误提示</string>
+    <string name="new_version_text">- 优化自动切换主题
+        \n- 修改播放界面长按操作逻辑，更加易于触发
+        \n- 界面微调
+        \n- 从文件打开播放支持未扫描的音乐
+        \n- 修复bug若干</string>
     <string name="donate">寄付</string>
     <string name="contact_me">グループに参加</string>
     <string name="check_qq_installed">QQはインストールしてません</string>

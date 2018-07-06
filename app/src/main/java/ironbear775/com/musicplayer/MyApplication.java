@@ -30,7 +30,7 @@ public class MyApplication extends Application {
      * 添加Activity
      */
     public void addActivity(Activity activity) {
-    // 判断当前集合中不存在该Activity
+        // 判断当前集合中不存在该Activity
         if (!oList.contains(activity)) {
             oList.add(activity);//把当前Activity添加到集合中
         }
@@ -40,7 +40,7 @@ public class MyApplication extends Application {
      * 销毁单个Activity
      */
     public void removeActivity(Activity activity) {
-    //判断当前集合中存在该Activity
+        //判断当前集合中存在该Activity
         if (oList.contains(activity)) {
             oList.remove(activity);//从集合中移除
             activity.finish();//销毁当前Activity

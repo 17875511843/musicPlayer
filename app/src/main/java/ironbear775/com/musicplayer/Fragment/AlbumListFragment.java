@@ -70,6 +70,7 @@ public class AlbumListFragment extends Fragment {
         filter.addAction("SetClickable_False");
         filter.addAction("SetClickable_True");
         filter.addAction("notifyDataSetChanged");
+        filter.addAction("restart yourself");
         getActivity().registerReceiver(clickableReceiver, filter);
 
         albumlist.clear();

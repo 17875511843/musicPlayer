@@ -116,7 +116,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHol
         if (getItemViewType(position) == TYPE_NORMAL) {
             holder.item_menu.setOnClickListener(v -> {
                 PopupMenu popupMenu = new PopupMenu(mActivity, holder.item_menu);
-                popupMenu.inflate(R.menu.new_menu);
+                popupMenu.inflate(R.menu.menu_item_popup);
                 popupMenu.setOnMenuItemClickListener(item -> {
                     switch (item.getItemId()) {
                         case R.id.menu_add:

@@ -4,7 +4,6 @@ package ironbear775.com.musicplayer.Activity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -52,7 +51,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -61,7 +59,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -78,6 +76,7 @@ import com.mancj.slideup.SlideUp;
 import com.mancj.slideup.SlideUpBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.interfaces.OnCheckedChangeListener;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
@@ -108,6 +107,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -196,7 +196,6 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     private final SimpleDateFormat time = new SimpleDateFormat("mm:ss");
     private int progress = 0;
     private float xUp, yDown, yUp, xDown;
-    private long pressTime, releaseTime;
     private float density;
     private String nowPlayingAlbum, nowPlayingArtist;
     private boolean backWasPressedInActionMode = false;
@@ -218,6 +217,9 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
             isConn = false;
         }
     };
+
+    public MusicList() {
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -335,10 +337,11 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
 
     private void openMusicFromFile(Intent intent) {
+        String path = intent.getStringExtra("path");
         Cursor cursor = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 null, MediaStore.Audio.Media.DATA + "=?",
-                new String[]{intent.getStringExtra("path")},
+                new String[]{path},
                 MediaStore.Audio.Media.TITLE);
 
         Music music = new Music();
@@ -360,19 +363,59 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 cursor.close();
             }
 
-            startMusic(music);
-            footTitle.setText(music.getTitle());
-            footArtist.setText(music.getArtist());
+            startPlay(music);
 
-            if (slideUp.isVisible()) {
-                setAlbumCoverToMainImageView(MusicList.this, music,
-                        MusicUtils.getInstance().FROM_MAINIMAGE);
-            }
         } catch (Exception e) {
-            Toast.makeText(MusicList.this, R.string.unknown_error, Toast.LENGTH_SHORT)
-                    .show();
+            File file = new File(path);
+            if (file.getAbsolutePath().contains(".mp3") || file.getAbsolutePath().contains(".MP3")) {
+                try {
+                    Mp3File mp3File = new Mp3File(file);
+                    ID3v2 tag = mp3File.getId3v2Tag();
+                    if (tag != null) {
+                        music.setUri(path);
+                        music.setTitle(tag.getTitle());
+                        music.setAlbum(tag.getAlbum());
+                        music.setArtist(tag.getArtist());
+                        music.setDuration(tag.getLength());
+
+                        startPlay(music);
+
+                    } else {
+                        Toast.makeText(MusicList.this, R.string.unknown_error, Toast.LENGTH_SHORT)
+                                .show();
+                    }
+
+                } catch (IOException | UnsupportedTagException | InvalidDataException e1) {
+                    Toast.makeText(MusicList.this, R.string.unknown_error, Toast.LENGTH_SHORT)
+                            .show();
+                }
+            } else {
+                music.setUri(path);
+                int index = path.lastIndexOf("/");
+                music.setTitle(path.substring(index + 1));
+                startPlay(music);
+
+            }
         }
 
+    }
+
+    private void startPlay(Music music) {
+
+        editor.putBoolean("isPlayed", true);
+        editor.apply();
+
+        footBar.setVisibility(View.VISIBLE);
+        PlayOrPause.show(true);
+
+        startMusic(music);
+        footTitle.setText(music.getTitle());
+        footArtist.setText(music.getArtist());
+
+        if (slideUp.isVisible()) {
+            setAlbumCoverToMainImageView(MusicList.this, music,
+                    MusicUtils.getInstance().FROM_MAINIMAGE);
+        }
     }
 
     /**
@@ -629,6 +672,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         unregisterReceiver(musicFinishReceiver);
     }
 
+    private SecondarySwitchDrawerItem nightSwitch;
+
     private void initSlideDrawer() {
         PrimaryDrawerItem slideMusicList = new PrimaryDrawerItem()
                 .withIdentifier(1)
@@ -679,7 +724,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 .withSelectedTextColorRes(R.color.material_gray_dark)
                 .withName(getResources().getString(R.string.equalizer));
 
-        SecondarySwitchDrawerItem nightSwitch = new SecondarySwitchDrawerItem()
+        nightSwitch = new SecondarySwitchDrawerItem()
                 .withIdentifier(10)
                 .withSwitchEnabled(true)
                 .withChecked(isNight)
@@ -920,7 +965,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                 break;
             case R.id.slide_menu:
                 PopupMenu popupMenu = new PopupMenu(this, slideMenu);
-                popupMenu.inflate(R.menu.slide_menu);
+                popupMenu.inflate(R.menu.menu_slide);
 
                 ArrayList<Music> mList = new ArrayList<>();
                 mList.clear();
@@ -1715,7 +1760,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.meun, menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -2104,7 +2149,7 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
             actionMode = mode;
 
             MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.menu_sub, menu);
+            inflater.inflate(R.menu.menu_action_mode, menu);
             actionModeIsActive = true;
             return true;
         } else {
@@ -2723,6 +2768,26 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
                         updateDailog.create().show();
                         break;
+                    case Intent.ACTION_TIME_CHANGED:
+                    case Intent.ACTION_TIME_TICK:
+                        Calendar calendar = Calendar.getInstance();
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+                        if (!isNight && hour >= 22 || (0 <= hour && hour < 7)) {
+                            isNight = true;
+                            nightSwitch.withChecked(true);
+                            sendBroadcast(new Intent("restart yourself"));
+                            Log.e("TAG", "restart yourself to night mode");
+
+                        }
+                        if (isNight && hour >= 7 && hour < 22) {
+                            isNight = false;
+                            nightSwitch.withChecked(false);
+                            sendBroadcast(new Intent("restart yourself"));
+                            Log.e("TAG", "restart yourself to day mode");
+
+                        }
+                        break;
                 }
             }
         }
@@ -2820,93 +2885,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
      * 切换应用主题
      */
     private void reCreateView() {
-        if (isNight)
-            setTheme(R.style.MaterialDrawerThemeNight);
-        else if (changeMainWindow) {
-            changeMainWindow = sharedPreferences.getBoolean(
-                    "changeMainWindow", true);
-            MusicUtils.getInstance().themeName = sharedPreferences.getInt(
-                    "themeName", R.string.color_Sandalwood);
 
-            if (R.string.color_Blue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlue);
-            else if (R.string.color_Green == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGreen);
-            else if (R.string.color_Indigo == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeIndigo);
-            else if (R.string.color_Pink == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePink);
-            else if (R.string.color_Purple == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePurple);
-            else if (R.string.color_Red == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeRed);
-            else if (R.string.color_LightBlue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLightBlue);
-            else if (R.string.color_Teal == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeTeal);
-            else if (R.string.color_Lime == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLime);
-            else if (R.string.color_Orange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeOrange);
-            else if (R.string.color_DeepOrange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDeepOrange);
-            else if (R.string.color_Brown == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBrown);
-            else if (R.string.color_Grey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGrey);
-            else if (R.string.color_Carmine == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeCarmine);
-            else if (R.string.color_Amber == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeAmber);
-            else if (R.string.color_DarkBlue1 == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDarkBlue);
-            else if (R.string.color_Sandalwood == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeSandalwood);
-            else if (R.string.color_BambooGreen == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBambooGreen);
-            else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlueGrey);
-        } else {
-            if (R.string.color_Blue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlueNoChangeMainWindowColor);
-            else if (R.string.color_Green == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGreenNoChangeMainWindowColor);
-            else if (R.string.color_Indigo == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeIndigoNoChangeMainWindowColor);
-            else if (R.string.color_Pink == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePinkNoChangeMainWindowColor);
-            else if (R.string.color_Purple == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePurpleNoChangeMainWindowColor);
-            else if (R.string.color_Red == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeRedNoChangeMainWindowColor);
-            else if (R.string.color_LightBlue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLightBlueNoChangeMainWindowColor);
-            else if (R.string.color_Teal == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeTealNoChangeMainWindowColor);
-            else if (R.string.color_Lime == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLimeNoChangeMainWindowColor);
-            else if (R.string.color_Orange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeOrangeNoChangeMainWindowColor);
-            else if (R.string.color_DeepOrange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDeepOrangeNoChangeMainWindowColor);
-            else if (R.string.color_Brown == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBrownNoChangeMainWindowColor);
-            else if (R.string.color_Grey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGreyNoChangeMainWindowColor);
-            else if (R.string.color_Carmine == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeCarmineNoChangeMainWindowColor);
-            else if (R.string.color_Amber == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeAmberNoChangeMainWindowColor);
-            else if (R.string.color_DarkBlue1 == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDarkBlueNoChangeMainWindowColor);
-            else if (R.string.color_Sandalwood == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeSandalwoodNoChangeMainWindowColor);
-            else if (R.string.color_BambooGreen == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBambooGreenNoChangeMainWindowColor);
-            else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlueGreyNoChangeMainWindowColor);
-        }
-
+        setTheme(MusicList.this, sharedPreferences);
         try {
             Resources.Theme theme = getTheme();
             TypedValue appBgValue = new TypedValue();
@@ -3051,8 +3031,6 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                     slideDrawer.updateItem(item);
                 }
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -3098,6 +3076,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         intentfilter.addAction("show footbar");
         intentfilter.addAction("hide footbar");
         intentfilter.addAction("new version");
+        intentfilter.addAction(Intent.ACTION_TIME_TICK);
+        intentfilter.addAction(Intent.ACTION_TIME_CHANGED);
         return intentfilter;
     }
 
@@ -3151,37 +3131,19 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
     public static int getScreenWidth(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(dm);
+        if (wm != null) {
+            wm.getDefaultDisplay().getMetrics(dm);
+        }
         return dm.widthPixels;
     }
 
     public static int getScreenHeight(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(dm);
-        return dm.heightPixels;
-    }
-
-    public static int getRealHeight(Context context) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        int screenHeight = 0;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            DisplayMetrics dm = new DisplayMetrics();
-            display.getRealMetrics(dm);
-            screenHeight = dm.heightPixels;
-
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            try {
-                screenHeight = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
-            } catch (Exception e) {
-                DisplayMetrics dm = new DisplayMetrics();
-                display.getMetrics(dm);
-                screenHeight = dm.heightPixels;
-            }
+        if (wm != null) {
+            wm.getDefaultDisplay().getMetrics(dm);
         }
-        return screenHeight;
+        return dm.heightPixels;
     }
 
     /**
@@ -3224,6 +3186,8 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
 
         }
     }
+
+    private boolean isLongClick;
 
     @SuppressLint("ClickableViewAccessibility")
     private void findView() {
@@ -3271,6 +3235,19 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
         onPlayingListButton.setOnClickListener(this);
         fragmentManager = getFragmentManager();
 
+
+        mainImageView.setOnViewLongClickListener(new SquareImageView.OnLongClickListener() {
+            @Override
+            public void OnLongClick() {
+                if (lyricView.getVisibility() == View.GONE) {
+                    setMainPopupDialog(mainImageView.getContext());
+                } else if (lyricView.getVisibility() == View.VISIBLE) {
+                    setLyricPopupDialog(mainImageView.getContext());
+                }
+                isLongClick = true;
+            }
+        });
+
         mainImageView.setOnTouchListener((v, event) -> {
 
             slideUp.onTouch(slideView, event);
@@ -3278,24 +3255,21 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 xDown = event.getX();
                 yDown = event.getY();
-                pressTime = System.currentTimeMillis();
             }
             if (event.getAction() == MotionEvent.ACTION_UP) {// 松开处理
-                releaseTime = System.currentTimeMillis();
+                if (!isLongClick) {
+                    xUp = event.getX();
+                    yUp = event.getY();
 
-                xUp = event.getX();
-                yUp = event.getY();
+                    int swipe = 175;
+                    if (density == 3.0) {
+                        swipe = 175;
+                    } else if (density == 4.0) {
+                        swipe = 250;
+                    } else if (density == 2.0) {
+                        swipe = 150;
+                    }
 
-                int swipe = 175;
-                if (density == 3.0) {
-                    swipe = 175;
-                } else if (density == 4.0) {
-                    swipe = 250;
-                } else if (density == 2.0) {
-                    swipe = 150;
-                }
-
-                if (releaseTime - pressTime <= 400) {
 
                     if (MusicUtils.getInstance().enableSwipeGesture) {
                         if ((xUp - xDown) > swipe) {
@@ -3318,15 +3292,9 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         } else
                             setLyric(getApplicationContext());
                     }
-                } else {
-                    if (5 >= Math.abs(xDown - xUp) && 5 >= Math.abs(yDown - yUp)) {
-                        if (lyricView.getVisibility() == View.GONE) {
-                            setMainPopupDialog(this);
-                        } else if (lyricView.getVisibility() == View.VISIBLE) {
-                            setLyricPopupDialog(this);
-                        }
-                    }
                 }
+
+                isLongClick = false;
             }
             return true;
         });
@@ -3440,40 +3408,35 @@ public class MusicList extends BaseActivity implements Serializable, View.OnClic
                         lyricBuilder = new AlertDialog.Builder(PlayOrPause.getContext());
 
                     lyricBuilder.setTitle(R.string.update_lyric);
-                    lyricBuilder.setSingleChoiceItems(update, MusicUtils.getInstance().updateMusic,
-                            (dialogInterface1, i1) -> {
-                                MusicUtils.getInstance().updateMusic = i1;
-                                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-                                editor.putInt("updateMusic", MusicUtils.getInstance().updateMusic);
-                                editor.apply();
-                                switch (MusicUtils.getInstance().updateMusic) {
-                                    case 0:
-                                        if (lyricView != null)
-                                            MusicUtils.getInstance().updateLyricFromNetease(this,
-                                                    MusicService.music.getTitle(),
-                                                    MusicService.music.getArtist(),
-                                                    true);
-                                        else
-                                            MusicUtils.getInstance().updateLyricFromNetease(this,
-                                                    MusicService.music.getTitle(),
-                                                    MusicService.music.getArtist(),
-                                                    false);
-                                        break;
-                                    case 1:
-                                        if (lyricView != null)
-                                            MusicUtils.getInstance().updateLyricFromKugou(this,
-                                                    MusicService.music.getTitle(),
-                                                    MusicService.music.getArtist(),
-                                                    true);
-                                        else
-                                            MusicUtils.getInstance().updateLyricFromKugou(this,
-                                                    MusicService.music.getTitle(),
-                                                    MusicService.music.getArtist(),
-                                                    false);
-                                        break;
-                                }
-                                dialogInterface1.cancel();
-                            });
+                    lyricBuilder.setItems(update, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (which == 0) {
+                                if (lyricView != null)
+                                    MusicUtils.getInstance().updateLyricFromNetease(MusicList.this,
+                                            MusicService.music.getTitle(),
+                                            MusicService.music.getArtist(),
+                                            true);
+                                else
+                                    MusicUtils.getInstance().updateLyricFromNetease(MusicList.this,
+                                            MusicService.music.getTitle(),
+                                            MusicService.music.getArtist(),
+                                            false);
+                            } else if (which == 1) {
+                                if (lyricView != null)
+                                    MusicUtils.getInstance().updateLyricFromKugou(MusicList.this,
+                                            MusicService.music.getTitle(),
+                                            MusicService.music.getArtist(),
+                                            true);
+                                else
+                                    MusicUtils.getInstance().updateLyricFromKugou(MusicList.this,
+                                            MusicService.music.getTitle(),
+                                            MusicService.music.getArtist(),
+                                            false);
+                            }
+                            dialog.dismiss();
+                        }
+                    });
                     lyricBuilder.show();
                     break;
                 case 2:

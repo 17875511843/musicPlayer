@@ -116,7 +116,7 @@ public class AlbumDetailAdapter extends RecyclerView.Adapter<AlbumDetailAdapter.
 
         holder.item_menu.setOnClickListener(v -> {
             final PopupMenu popupMenu = new PopupMenu(mActivity, holder.item_menu);
-            popupMenu.inflate(R.menu.new_menu);
+            popupMenu.inflate(R.menu.menu_item_popup);
             popupMenu.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case R.id.menu_add:

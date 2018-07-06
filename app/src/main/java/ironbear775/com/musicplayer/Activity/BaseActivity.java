@@ -1,5 +1,6 @@
 package ironbear775.com.musicplayer.Activity;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -48,87 +49,8 @@ public class BaseActivity extends AppCompatActivity {
             sp.edit().putBoolean("isManual", false).apply();
         }
 
-        if (isNight)
-            setTheme(R.style.MaterialDrawerThemeNight);
-        else if (changeMainWindow){
-            if (R.string.color_Blue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlue);
-            else if (R.string.color_Green == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGreen);
-            else if (R.string.color_Indigo == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeIndigo);
-            else if (R.string.color_Pink == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePink);
-            else if (R.string.color_Purple == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePurple);
-            else if (R.string.color_Red == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeRed);
-            else if (R.string.color_LightBlue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLightBlue);
-            else if (R.string.color_Teal == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeTeal);
-            else if (R.string.color_Lime == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLime);
-            else if (R.string.color_Orange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeOrange);
-            else if (R.string.color_DeepOrange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDeepOrange);
-            else if (R.string.color_Brown == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBrown);
-            else if (R.string.color_Grey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGrey);
-            else if (R.string.color_Carmine == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeCarmine);
-            else if (R.string.color_Amber == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeAmber);
-            else if (R.string.color_DarkBlue1 == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDarkBlue);
-            else if (R.string.color_Sandalwood == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeSandalwood);
-            else if (R.string.color_BambooGreen == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBambooGreen);
-            else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlueGrey);
-        }else {
-            if (R.string.color_Blue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlueNoChangeMainWindowColor);
-            else if (R.string.color_Green == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGreenNoChangeMainWindowColor);
-            else if (R.string.color_Indigo == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeIndigoNoChangeMainWindowColor);
-            else if (R.string.color_Pink == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePinkNoChangeMainWindowColor);
-            else if (R.string.color_Purple == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemePurpleNoChangeMainWindowColor);
-            else if (R.string.color_Red == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeRedNoChangeMainWindowColor);
-            else if (R.string.color_LightBlue == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLightBlueNoChangeMainWindowColor);
-            else if (R.string.color_Teal == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeTealNoChangeMainWindowColor);
-            else if (R.string.color_Lime == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeLimeNoChangeMainWindowColor);
-            else if (R.string.color_Orange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeOrangeNoChangeMainWindowColor);
-            else if (R.string.color_DeepOrange == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDeepOrangeNoChangeMainWindowColor);
-            else if (R.string.color_Brown == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBrownNoChangeMainWindowColor);
-            else if (R.string.color_Grey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeGreyNoChangeMainWindowColor);
-            else if (R.string.color_Carmine == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeCarmineNoChangeMainWindowColor);
-            else if (R.string.color_Amber == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeAmberNoChangeMainWindowColor);
-            else if (R.string.color_DarkBlue1 == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeDarkBlueNoChangeMainWindowColor);
-            else if (R.string.color_Sandalwood == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeSandalwoodNoChangeMainWindowColor);
-            else if (R.string.color_BambooGreen == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBambooGreenNoChangeMainWindowColor);
-            else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
-                setTheme(R.style.DefaultAppThemeBlueGreyNoChangeMainWindowColor);
-        }
+        setTheme(this,sp);
+
         MobclickAgent.openActivityDurationTrack(false);
 
         if (application == null) {
@@ -165,5 +87,94 @@ public class BaseActivity extends AppCompatActivity {
     //销毁所有Activity方法
     public void removeALLActivity() {
         application.removeALLActivity();// 调用myApplication的销毁所有Activity方法
+    }
+
+    public void setTheme(Activity activity, SharedPreferences sharedPreferences){
+        if (isNight)
+            activity.setTheme(R.style.MaterialDrawerThemeNight);
+        else if (changeMainWindow) {
+            changeMainWindow = sharedPreferences.getBoolean(
+                    "changeMainWindow", true);
+            MusicUtils.getInstance().themeName = sharedPreferences.getInt(
+                    "themeName", R.string.color_Sandalwood);
+
+            if (R.string.color_Blue == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBlue);
+            else if (R.string.color_Green == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeGreen);
+            else if (R.string.color_Indigo == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeIndigo);
+            else if (R.string.color_Pink == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemePink);
+            else if (R.string.color_Purple == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemePurple);
+            else if (R.string.color_Red == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeRed);
+            else if (R.string.color_LightBlue == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeLightBlue);
+            else if (R.string.color_Teal == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeTeal);
+            else if (R.string.color_Lime == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeLime);
+            else if (R.string.color_Orange == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeOrange);
+            else if (R.string.color_DeepOrange == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeDeepOrange);
+            else if (R.string.color_Brown == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBrown);
+            else if (R.string.color_Grey == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeGrey);
+            else if (R.string.color_Carmine == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeCarmine);
+            else if (R.string.color_Amber == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeAmber);
+            else if (R.string.color_DarkBlue1 == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeDarkBlue);
+            else if (R.string.color_Sandalwood == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeSandalwood);
+            else if (R.string.color_BambooGreen == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBambooGreen);
+            else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBlueGrey);
+        } else {
+            if (R.string.color_Blue == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBlueNoChangeMainWindowColor);
+            else if (R.string.color_Green == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeGreenNoChangeMainWindowColor);
+            else if (R.string.color_Indigo == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeIndigoNoChangeMainWindowColor);
+            else if (R.string.color_Pink == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemePinkNoChangeMainWindowColor);
+            else if (R.string.color_Purple == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemePurpleNoChangeMainWindowColor);
+            else if (R.string.color_Red == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeRedNoChangeMainWindowColor);
+            else if (R.string.color_LightBlue == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeLightBlueNoChangeMainWindowColor);
+            else if (R.string.color_Teal == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeTealNoChangeMainWindowColor);
+            else if (R.string.color_Lime == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeLimeNoChangeMainWindowColor);
+            else if (R.string.color_Orange == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeOrangeNoChangeMainWindowColor);
+            else if (R.string.color_DeepOrange == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeDeepOrangeNoChangeMainWindowColor);
+            else if (R.string.color_Brown == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBrownNoChangeMainWindowColor);
+            else if (R.string.color_Grey == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeGreyNoChangeMainWindowColor);
+            else if (R.string.color_Carmine == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeCarmineNoChangeMainWindowColor);
+            else if (R.string.color_Amber == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeAmberNoChangeMainWindowColor);
+            else if (R.string.color_DarkBlue1 == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeDarkBlueNoChangeMainWindowColor);
+            else if (R.string.color_Sandalwood == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeSandalwoodNoChangeMainWindowColor);
+            else if (R.string.color_BambooGreen == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBambooGreenNoChangeMainWindowColor);
+            else if (R.string.color_BlueGrey == MusicUtils.getInstance().themeName)
+                activity.setTheme(R.style.DefaultAppThemeBlueGreyNoChangeMainWindowColor);
+        }
     }
 }

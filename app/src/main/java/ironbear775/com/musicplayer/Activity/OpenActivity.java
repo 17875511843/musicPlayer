@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
+
 import java.util.Objects;
 
 
@@ -15,6 +17,7 @@ import java.util.Objects;
 public class OpenActivity extends BaseActivity {
     private OpenFileReceiver receiver;
     private String path;
+    private static final String TAG = "OpenActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class OpenActivity extends BaseActivity {
     private void send() {
         Intent oIntent = new Intent("open file");
         oIntent.putExtra("path", path);
+        Log.e(TAG, "send: "+path);
         sendBroadcast(oIntent);
         finish();
     }

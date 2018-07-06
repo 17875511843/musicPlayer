@@ -1,16 +1,33 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:context=".Activity.MusicList">
     <item
         android:id="@+id/sleepTimer"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         android:title="@string/sleep_timer"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/donate"
+        android:orderInCategory="3"
+        android:title="@string/donate"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/contact_me"
+        android:orderInCategory="4"
+        android:title="@string/contact_me"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/rate"
+        android:orderInCategory="5"
+        android:title="@string/rate"
         app:showAsAction="never"/>
     <item
         android:id="@+id/search_song"
         android:icon="@drawable/ic_search_white_24dp"
         android:orderInCategory="90"
-        android:title="@string/searching_lyric"
+        android:title=""
         app:showAsAction="ifRoom" />
 </menu>
