@@ -22,7 +22,7 @@
             android:background="@color/material_gray_dark"
             android:orientation="vertical">
 
-            <ironbear775.com.musicplayer.Util.SquareImageView
+            <ironbear775.com.musicplayer.util.SquareImageView
                 android:id="@+id/album_iv_grid_image"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

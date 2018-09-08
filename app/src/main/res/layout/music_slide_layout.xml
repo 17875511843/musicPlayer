@@ -96,7 +96,7 @@
         android:layout_toEndOf="@+id/left_shadow"
         android:layout_toStartOf="@+id/right_shadow">
 
-        <ironbear775.com.musicplayer.Util.SquareImageView
+        <ironbear775.com.musicplayer.util.SquareImageView
             android:id="@+id/album_art"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -106,7 +106,7 @@
             android:clickable="false"
             android:scaleType="centerCrop" />
 
-        <ironbear775.com.musicplayer.Util.SquareImageView
+        <ironbear775.com.musicplayer.util.SquareImageView
             android:id="@+id/album_art_blur"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -117,7 +117,7 @@
             android:scaleType="centerCrop"
             android:visibility="gone" />
 
-        <ironbear775.com.musicplayer.Util.Lyric.LrcView
+        <ironbear775.com.musicplayer.util.Lyric.LrcView
             android:id="@+id/lyric_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"

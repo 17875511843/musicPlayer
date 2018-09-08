@@ -21,7 +21,7 @@
         android:maxLines="1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <ironbear775.com.musicplayer.Util.SquareImageView
+    <ironbear775.com.musicplayer.util.SquareImageView
         android:id="@+id/open_image"
         android:layout_width="match_parent"
         android:layout_height="0dp" />

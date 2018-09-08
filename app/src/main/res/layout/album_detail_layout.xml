@@ -19,7 +19,7 @@
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <ironbear775.com.musicplayer.Util.SquareImageView
+            <ironbear775.com.musicplayer.util.SquareImageView
 
                 android:id="@+id/album_detail_art"
                 android:layout_width="match_parent"

@@ -6,7 +6,7 @@
     android:background="?attr/appBg"
     android:orientation="vertical">
 
-    <ironbear775.com.musicplayer.Util.FootBarRelativeLayout
+    <ironbear775.com.musicplayer.util.FootBarRelativeLayout
         android:id="@+id/footBar"
         android:layout_width="match_parent"
         android:layout_height="65dp"
@@ -58,6 +58,6 @@
             android:layout_width="80dp"
             android:layout_height="0dp"
             android:layout_alignParentEnd="true" />
-    </ironbear775.com.musicplayer.Util.FootBarRelativeLayout>
+    </ironbear775.com.musicplayer.util.FootBarRelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

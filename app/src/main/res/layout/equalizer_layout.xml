@@ -57,7 +57,7 @@
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <ironbear775.com.musicplayer.Util.VerticalSeekBar
+            <ironbear775.com.musicplayer.util.VerticalSeekBar
                 android:layout_above="@+id/min1"
                 android:layout_below="@+id/max1"
                 android:id="@+id/equalizer1"
@@ -91,7 +91,7 @@
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <ironbear775.com.musicplayer.Util.VerticalSeekBar
+            <ironbear775.com.musicplayer.util.VerticalSeekBar
                 android:id="@+id/equalizer2"
                 android:layout_below="@+id/max2"
                 android:layout_above="@+id/min2"
@@ -124,7 +124,7 @@
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <ironbear775.com.musicplayer.Util.VerticalSeekBar
+            <ironbear775.com.musicplayer.util.VerticalSeekBar
                 android:id="@+id/equalizer3"
                 android:layout_below="@+id/max3"
                 android:layout_above="@+id/min3"
@@ -157,7 +157,7 @@
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <ironbear775.com.musicplayer.Util.VerticalSeekBar
+            <ironbear775.com.musicplayer.util.VerticalSeekBar
                 android:id="@+id/equalizer4"
                 android:layout_below="@+id/max4"
                 android:layout_above="@+id/min4"
@@ -190,7 +190,7 @@
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <ironbear775.com.musicplayer.Util.VerticalSeekBar
+            <ironbear775.com.musicplayer.util.VerticalSeekBar
                 android:id="@+id/equalizer5"
                 android:layout_below="@+id/max5"
                 android:layout_above="@+id/min5"
@@ -223,7 +223,7 @@
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <ironbear775.com.musicplayer.Util.VerticalSeekBar
+            <ironbear775.com.musicplayer.util.VerticalSeekBar
                 android:id="@+id/equalizer6"
                 android:layout_below="@+id/max6"
                 android:layout_above="@+id/min6"

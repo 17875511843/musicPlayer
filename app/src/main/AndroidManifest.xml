@@ -27,22 +27,22 @@
         <meta-data android:value="5af7b675a40fa375ab0000de" android:name="UMENG_APPKEY"/>
         <meta-data android:value="CoolApk" android:name="UMENG_CHANNEL"/>
 
-        <activity android:name=".Activity.MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <service android:name=".Service.MusicService">
+        <service android:name=".service.MusicService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <service android:name=".Service.SleepService" />
+        <service android:name=".service.SleepService" />
 
         <activity
-            android:name=".Activity.MusicList"
+            android:name=".activity.MusicList"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
 
@@ -52,41 +52,41 @@
                 android:value="2.1" />
 
         </activity>
-        <activity android:name=".Activity.SearchActivity">
+        <activity android:name=".activity.SearchActivity">
 
         </activity>
 
         <activity
-            android:name=".Activity.Setting"
+            android:name=".activity.Setting"
             android:launchMode="singleTask">
 
         </activity>
         <activity
-            android:name=".Activity.About"
+            android:name=".activity.About"
             android:launchMode="singleTask">
 
         </activity>
 
-        <receiver android:name=".Activity.MusicList$positionBroadcast">
+        <receiver android:name=".activity.MusicList$positionBroadcast">
             <intent-filter>
                 <action android:name="sendPosition" />
             </intent-filter>
         </receiver>
 
         <activity
-            android:name=".Activity.MyIntroActivity"
+            android:name=".activity.MyIntroActivity"
             android:theme="@style/IntroTheme">
 
         </activity>
 
         <activity
-            android:name=".Activity.TagEditActivity"
+            android:name=".activity.TagEditActivity"
             android:windowSoftInputMode="stateHidden">
 
         </activity>
 
         <activity
-            android:name=".Activity.OpenActivity"
+            android:name=".activity.OpenActivity"
             android:theme="@style/SleepTimerTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -98,7 +98,7 @@
         </activity>
 
         <receiver
-            android:name=".Service.MediaButtonReceiver"
+            android:name=".service.MediaButtonReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
@@ -125,7 +125,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Activity.Equalizer">
+        <activity android:name=".activity.Equalizer">
 
         </activity>
 
